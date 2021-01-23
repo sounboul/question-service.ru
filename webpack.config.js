@@ -21,7 +21,7 @@ Encore
 ;
 
 // использование CDN (опционально) - только для frontend
-if (false && Encore.isProduction()) {
+if (Encore.isProduction()) {
     Encore.setPublicPath('https://static.question-service.ru');
 }
 

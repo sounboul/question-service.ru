@@ -75,11 +75,6 @@ class UserService
             throw new ServiceException("Пользователь с таким E-mail адресом уже существует");
         }
 
-        $password = trim($password);
-        if (mb_strlen($password) < 8) {
-            throw new ServiceException("Пароль пользователя должен состоять минимум из 8 символов");
-        }
-
         // инициализация сущности
         $user = new User();
         $user->setUsername(ucfirst(explode('@', $email)[0]));
