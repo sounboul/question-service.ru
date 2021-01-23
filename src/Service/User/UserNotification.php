@@ -1,10 +1,8 @@
 <?php
 namespace App\Service\User;
 
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Address;
+use App\Message\EmailNotification;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
@@ -13,18 +11,18 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class UserNotification
 {
     /**
-     * @var MailerInterface Mailer
+     * @var MessageBusInterface $bus
      */
-    private MailerInterface $mailer;
+    private MessageBusInterface $bus;
 
     /**
      * Конструктор класса
      *
-     * @param MailerInterface $mailer Mailer
+     * @param MessageBusInterface $bus
      */
-    public function __construct(MailerInterface $mailer)
+    public function __construct(MessageBusInterface $bus)
     {
-        $this->mailer = $mailer;
+        $this->bus = $bus;
     }
 
     /**
@@ -36,30 +34,19 @@ class UserNotification
      * @param array $context Доп. параметры для шаблона
      *
      * @return void
-     *
-     * @throws TransportExceptionInterface
      */
     public function sendEmail(UserInterface $user, string $subject, string $template, array $context) : void
     {
-        $tpl = new TemplatedEmail();
-
-        // from
-        $tpl->from(new Address('notify@question-service.ru', 'Question Service'));
-
-        // to
-        $tpl->to(new Address($user->getEmail(), $user->getUsername()));
-
-        // subject
-        $tpl->subject($subject);
-
-        // template
-        $tpl->htmlTemplate("mail/".$template);
-
-        // context
-        $tpl->context(array_merge([
-            'username' => $user->getUsername(),
-        ], $context));
-
-        $this->mailer->send($tpl);
+        // поставка отправки сообщения в очередь
+        $this->bus->dispatch(new EmailNotification(
+            // to
+            [$user->getEmail(), $user->getUsername()],
+            // subject
+            $subject,
+            // template
+            $template,
+            // context
+            $context
+        ));
     }
 }
