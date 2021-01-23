@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}Question Service{% endblock %}</title>
+        {% block stylesheets %}
+            {{ encore_entry_link_tags('main', null, 'frontend') }}
+            {{ encore_entry_link_tags('styles', null, 'frontend') }}
+        {% endblock %}
+        {% block javascripts %}
+            {{ encore_entry_script_tags('app', null, 'frontend') }}
+        {% endblock %}
+    </head>
+    <body>
+    <header class="header">
+        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark" role="navigation">
+            <a class="navbar-brand" href="#" role="banner">Question Service</a>
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsDefault" aria-controls="navbarsDefault" aria-expanded="false" aria-label="Переключить навигацию">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarsDefault">
+                {% include "frontend/components/header-menu.html.twig" %}
+                {% include "frontend/components/header-search-form.html.twig" %}
+            </div>
+        </nav>
+    </header>
+
+    <main role="main">
+        {% block body %}{% endblock %}
+    </main>
+
+    <footer role="contentinfo" class="footer">
+        <div class="container">
+            <span class="text-muted">© Сетевое издание «Question Service», {{ 'now' | date('Y') }}, 16+</span>
+        </div>
+    </footer>
+    </body>
+</html>

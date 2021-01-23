@@ -1,0 +1,26 @@
+{
+  "entrypoints": {
+    "app": {
+      "js": [
+        "/assets/runtime.5b7a9943.js",
+        "/assets/app.300cc131.js"
+      ]
+    },
+    "main": {
+      "js": [
+        "/assets/runtime.5b7a9943.js"
+      ],
+      "css": [
+        "/assets/main.25f5250a.css"
+      ]
+    },
+    "styles": {
+      "js": [
+        "/assets/runtime.5b7a9943.js"
+      ],
+      "css": [
+        "/assets/styles.29719942.css"
+      ]
+    }
+  }
+}

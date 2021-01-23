@@ -1,0 +1,38 @@
+{% extends 'frontend/layouts/authbox.html.twig' %}
+
+{% block title %}Авторизация{% endblock %}
+{% block authbox %}
+    <h4 class="card-title text-center">Вход</h4>
+
+    <form method="post">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+        {% if error %}
+            <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="inputEmail">E-mail</label>
+            <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" required autofocus>
+        </div>
+
+        <div class="form-group">
+            <label for="inputPassword">Пароль</label>
+            <input type="password" name="password" id="inputPassword" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <div class="checkbox mb-3">
+                <label><input type="checkbox" name="_remember_me"> Запомнить меня</label>
+            </div>
+        </div>
+
+        <button class="btn btn-lg btn-primary" type="submit">Войти</button>
+
+        <div class="mt-4 text-center">
+            Еще не зарегистрированы? <a href="{{ url('frontend_registration') }}">Регистрация</a>
+            <br>
+            Забыли пароль? <a href="{{ url('frontend_forgot_password_request') }}">Восстановить пароль</a>
+        </div>
+    </form>
+{% endblock %}

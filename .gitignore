@@ -1,3 +1,4 @@
+/.httpauth
 
 ###> symfony/framework-bundle ###
 /.env.local
@@ -14,3 +15,9 @@
 .phpunit.result.cache
 /phpunit.xml
 ###< symfony/phpunit-bridge ###
+
+###> symfony/webpack-encore-bundle ###
+/node_modules/
+npm-debug.log
+yarn-error.log
+###< symfony/webpack-encore-bundle ###

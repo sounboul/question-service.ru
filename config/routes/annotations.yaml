@@ -1,6 +1,13 @@
-controllers:
-    resource: ../../src/Controller/
+frontend:
+    resource: ../../src/Controller/Frontend/
     type: annotation
+    name_prefix: 'frontend_'
+
+backend:
+    resource: ../../src/Controller/Backend/
+    type: annotation
+    prefix: /backend/
+    name_prefix: 'backend_'
 
 kernel:
     resource: ../../src/Kernel.php

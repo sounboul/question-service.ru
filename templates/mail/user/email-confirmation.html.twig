@@ -1,0 +1,8 @@
+{% set confirmUrl = url('frontend_email_verification', {'token': token}) %}
+<h1>Добрый день, {{ username }}!</h1>
+
+<p>
+    Для подтверждения E-mail адреса перейдите по ссылке:
+    <br>
+    <a href="{{ confirmUrl|raw }}">{{ confirmUrl|raw }}</a>
+</p>

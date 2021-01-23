@@ -1,0 +1,8 @@
+{% set confirmUrl = url('frontend_email_subscribed', {'token': token}) %}
+<h1>Добрый день, {{ username }}!</h1>
+
+<p>
+    Для подписки на нашу E-mail рассылку перейдите по ссылке:
+    <br>
+    <a href="{{ confirmUrl|raw }}">{{ confirmUrl|raw }}</a>
+</p>

@@ -1,0 +1,25 @@
+{# Главное меню в шапке сайта #}
+{% set currentRoute = app.request.get('_route') %}
+{% set menuItems = [
+    {
+        'label': 'Основная информация',
+        'route': 'frontend_profile_index',
+        'visible': true,
+    }, {
+        'label': 'Выход',
+        'route': 'frontend_logout',
+        'visible': true,
+    }
+] %}
+<div class="list-group">
+    {% for menuItem in menuItems %}
+        {% if menuItem.visible %}
+            <a
+                    href="{{ url(menuItem.route) }}"
+                    class="list-group-item list-group-item-action {% if menuItem.route == currentRoute %}active{% endif %}"
+            >
+                {{ menuItem.label|raw }}
+            </a>
+        {% endif %}
+    {% endfor %}
+</div>
