@@ -1,5 +1,20 @@
 {% set confirmUrl = url('frontend_email_verification', {'token': token}) %}
+{% set loginUrl = url('frontend_login') %}
 <h1>Добрый день, {{ username }}!</h1>
+
+<p>
+    Вы успешно зарегистрированы на нашем сайте!
+</p>
+
+{% if password %}
+<p>
+    <br>Для входа используйте следующие данные:
+    <br>
+    <br><b>Страница входа:</b> <a href="{{ loginUrl|raw }}">{{ loginUrl|raw }}</a>
+    <br><b>E-mail:</b> {{ email}}
+    <br><b>Пароль:</b> {{ password }}
+</p>
+{% endif %}
 
 <p>
     Для подтверждения E-mail адреса перейдите по ссылке:

@@ -96,7 +96,8 @@ class UserService
     }
 
     /**
-     * Быстрая регистрация пользователя на основе только E-mail адреса
+     * Быстрая регистрация пользователя на основе только E-mail адреса.
+     * Письмо с подтверждением приходит с указанием пароля.
      *
      * @param string $email E-mail адрес пользователя
      * @param bool $sendEmailConfirmation Отправить письмо для подтверждения E-mail адреса?
@@ -106,17 +107,26 @@ class UserService
      */
     public function fastRegistration(string $email, bool $sendEmailConfirmation = true) : UserInterface
     {
-        return $this->registration($email, PasswordGenerator::generate(), $sendEmailConfirmation);
+        $password = PasswordGenerator::generate();
+        $user =  $this->registration($email, $password, false);
+
+        // отправка письма для подтверждения E-mail адреса (с паролем)
+        if ($sendEmailConfirmation) {
+            $this->sendEmailConfirmation($user->getEmail(), $password);
+        }
+
+        return $user;
     }
 
     /**
      * Отправка письма с подтверждением E-mail адреса
      *
      * @param string $email E-mail адрес
+     * @param string|null $password Пароль пользователя
      * @return void
      * @throws ServiceException
      */
-    public function sendEmailConfirmation(string $email) : void
+    public function sendEmailConfirmation(string $email, string $password = null) : void
     {
         $user = $this->getUserByEmail($email);
         if ($user->getEmailVerified()) {
@@ -136,9 +146,9 @@ class UserService
         // отправка письма пользователю
         $this->userNotification->sendEmail(
             $user,
-            'Подтверждение E-mail адреса',
+            'Регистрация на сайте',
             'user/email-confirmation.html.twig',
-            compact('token')
+            compact('token', 'password')
         );
     }
 
