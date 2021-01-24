@@ -299,6 +299,22 @@ class UserService
     }
 
     /**
+     * Изменение пароля пользователю
+     *
+     * @param string $email E-mail адрес
+     * @param string $password Новый пароль
+     * @return void
+     * @throws ServiceException|EntityValidationException
+     */
+    public function changePassword(string $email, string $password) : void
+    {
+        $user = $this->getUserByEmail($email);
+        $user->setPlainPassword($password, $this->passwordEncoder);
+
+        $this->updateUser($user);
+    }
+
+    /**
      * @param string $token Token для восстановление пароля
      * @return User Получить пользователя по token восстановления пароля
      * @throws ServiceException В случае если пользователь не найден

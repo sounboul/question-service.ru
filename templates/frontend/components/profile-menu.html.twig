@@ -2,8 +2,12 @@
 {% set currentRoute = app.request.get('_route') %}
 {% set menuItems = [
     {
-        'label': 'Основная информация',
+        'label': 'Профиль',
         'route': 'frontend_profile_index',
+        'visible': true,
+    }, {
+        'label': 'Изменить пароль',
+        'route': 'frontend_profile_change_password',
         'visible': true,
     }, {
         'label': 'Выход',

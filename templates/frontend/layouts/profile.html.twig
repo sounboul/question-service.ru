@@ -6,6 +6,10 @@
         <div class="row">
             <div class="col-md-3">
                 <div class="card">
+                    <div class="card-header">
+                        Личный кабинет
+                    </div>
+
                     <div class="card-body">
                         {% block sidebar %}
                             {% include 'frontend/components/profile-menu.html.twig' %}
@@ -15,10 +19,13 @@
             </div>
 
             <div class="col-md-9">
+                <div class="card-header">
+                    {% block header %}{% endblock %}
+                </div>
+
                 <div class="card">
                     <div class="card-body">
                         {% include 'frontend/components/flash-messages.html.twig' %}
-
                         {% block content %}{% endblock %}
                     </div>
                 </div>
