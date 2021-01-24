@@ -5,9 +5,6 @@ use App\Entity\User\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
-use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * User Repository
@@ -17,7 +14,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @method User[]    findAll()
  * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
+class UserRepository extends ServiceEntityRepository
 {
     /**
      * @inheritdoc
@@ -28,96 +25,83 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
-     * Найти пользователя по e-mail адресу
-     *
      * @param string $email E-mail адрес
      * @param bool $isActive Активный пользователь?
-     * @return User|null
-     * @throws NonUniqueResultException
+     * @return User|null Найти пользователя по e-mail адресу
      */
     public function findOneByEmail(string $email, bool $isActive = true): ?User
     {
-        $query = $this->createQueryBuilder('u')
-            ->where('u.email = :email')
-            ->setParameter('email', $email);
+        try {
+            $query = $this->createQueryBuilder('u')
+                ->where('u.email = :email')
+                ->setParameter('email', $email);
 
-        if ($isActive) {
-            $query
-                ->andWhere('u.status = :status')
-                ->setParameter('status', User::STATUS_ACTIVE);
+            if ($isActive) {
+                $query
+                    ->andWhere('u.status = :status')
+                    ->setParameter('status', User::STATUS_ACTIVE);
+            }
+
+            return $query
+                ->getQuery()
+                ->getOneOrNullResult();
+        } catch (NonUniqueResultException $e) {
+            return null;
         }
-
-        return $query
-            ->getQuery()
-            ->getOneOrNullResult();
     }
 
     /**
-     * Найти пользователя по token подтверждения E-mail адреса
-     *
      * @param string $token Email Verified Token
-     * @return User|null Пользователь с указанным токеном
-     * @throws NonUniqueResultException
+     * @return User|null Найти пользователя по token подтверждения E-mail адреса
      */
     public function findOneByEmailVerifiedToken(string $token) : ?User
     {
-        return $this->createQueryBuilder('u')
-            ->where('u.emailVerifiedToken = :token')
-            ->setParameter('token', $token)
-            ->getQuery()
-            ->getOneOrNullResult();
+        try {
+            return $this->createQueryBuilder('u')
+                ->where('u.emailVerifiedToken = :token AND u.status = :status')
+                ->setParameter('token', $token)
+                ->setParameter('status', User::STATUS_ACTIVE)
+                ->getQuery()
+                ->getOneOrNullResult();
+        } catch (NonUniqueResultException $e) {
+            return null;
+        }
     }
 
     /**
-     * Найти пользователя по token для подписки на E-mail рассылку
-     *
      * @param string $token Email Subscribed Token
-     * @return User|null Пользователь с указанным токеном
-     * @throws NonUniqueResultException
+     * @return User|null Найти пользователя по token для подписки на E-mail рассылку
      */
     public function findOneByEmailSubscribedToken(string $token) : ?User
     {
-        return $this->createQueryBuilder('u')
-            ->where('u.emailSubscribedToken = :token')
-            ->setParameter('token', $token)
-            ->getQuery()
-            ->getOneOrNullResult();
+        try {
+            return $this->createQueryBuilder('u')
+                ->where('u.emailSubscribedToken = :token AND u.status = :status')
+                ->setParameter('token', $token)
+                ->setParameter('status', User::STATUS_ACTIVE)
+                ->getQuery()
+                ->getOneOrNullResult();
+        } catch (NonUniqueResultException $e) {
+            return null;
+        }
     }
 
     /**
-     * Найти пользователя по token для восстановления пароля
-     *
      * @param string $token Password Restore Token
-     * @return User|null Пользователь с указанным токеном
-     * @throws NonUniqueResultException
+     * @return User|null Найти пользователя по token для восстановления пароля
      */
     public function findOneByPasswordRestoreToken(string $token) : ?User
     {
-        return $this->createQueryBuilder('u')
-            ->where('u.passwordRestoreToken = :token')
-            ->setParameter('token', $token)
-            ->getQuery()
-            ->getOneOrNullResult();
-    }
-
-    /**
-     * Used to upgrade (rehash) the user's password automatically over time.
-     *
-     * @param UserInterface $user
-     * @param string $newEncodedPassword
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     */
-    public function upgradePassword(UserInterface $user, string $newEncodedPassword): void
-    {
-        if (!$user instanceof User) {
-            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', \get_class($user)));
+        try {
+            return $this->createQueryBuilder('u')
+                ->where('u.passwordRestoreToken = :token AND u.status = :status')
+                ->setParameter('token', $token)
+                ->setParameter('status', User::STATUS_ACTIVE)
+                ->getQuery()
+                ->getOneOrNullResult();
+        } catch (NonUniqueResultException $e) {
+            return null;
         }
-
-        $user->setPassword($newEncodedPassword);
-
-        $this->_em->persist($user);
-        $this->_em->flush();
     }
 
     // /**

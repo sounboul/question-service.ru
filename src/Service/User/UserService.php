@@ -2,8 +2,10 @@
 namespace App\Service\User;
 
 use App\Entity\User\User;
+use App\Exception\EntityValidationException;
 use App\Repository\User\UserRepository;
 use App\Exception\ServiceException;
+use App\Utils\User\PasswordGenerator;
 use App\Utils\User\TokenGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -65,7 +67,7 @@ class UserService
      * @param string $password Пароль в открытом виде
      * @param bool $sendEmailConfirmation Отправить письмо для подтверждения E-mail адреса?
      * @return UserInterface Информация о пользователе
-     * @throws ServiceException
+     * @throws ServiceException|EntityValidationException
      */
     public function registration(string $email, string $password, bool $sendEmailConfirmation = true) : UserInterface
     {
@@ -80,7 +82,7 @@ class UserService
         $user->setUsername(ucfirst(explode('@', $email)[0]));
         $user->setStatus($user::STATUS_ACTIVE);
         $user->setEmail($email);
-        $this->changeUserPassword($user, $password);
+        $user->setPlainPassword($password, $this->passwordEncoder);
 
         // сохранение сущности
         $this->updateUser($user);
@@ -104,7 +106,7 @@ class UserService
      */
     public function fastRegistration(string $email, bool $sendEmailConfirmation = true) : UserInterface
     {
-        return $this->registration($email, User::generateRandomPassword(), $sendEmailConfirmation);
+        return $this->registration($email, PasswordGenerator::generate(), $sendEmailConfirmation);
     }
 
     /**
@@ -274,13 +276,13 @@ class UserService
      *
      * @param string $token Password Restore Token
      * @param string $password Новый пароль в открытом виде
-     * @throws ServiceException
+     * @throws ServiceException|EntityValidationException
      */
     public function resetPassword(string $token, string $password) : void
     {
         $user = $this->getUserByPasswordRestoreToken($token);
 
-        $this->changeUserPassword($user, $password);
+        $user->setPlainPassword($password, $this->passwordEncoder);
         $user->setPasswordRestoreToken(null);
 
         $this->updateUser($user);
@@ -325,27 +327,6 @@ class UserService
         if (empty($user)) {
             throw new ServiceException("Не найден пользователь с указанным E-mail адресом");
         }
-
-        return $user;
-    }
-
-    /**
-     * Изменить пароль пользователю.
-     * Данный метод устанавливает пароль, но не сохраняет его.
-     *
-     * @param UserInterface $user User
-     * @param string $password Новый пароль
-     * @return UserInterface
-     * @throws ServiceException
-     */
-    public function changeUserPassword(UserInterface $user, string $password) : UserInterface
-    {
-        $password = trim($password);
-        if (mb_strlen($password) < 8) {
-            throw new ServiceException("Пароль пользователя должен состоять минимум из 8 символов");
-        }
-
-        $user->setPassword($this->passwordEncoder->encodePassword($user, $password));
 
         return $user;
     }

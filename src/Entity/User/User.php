@@ -2,10 +2,12 @@
 namespace App\Entity\User;
 
 use App\Entity\TimestampableEntity;
+use App\Exception\EntityValidationException;
 use App\Repository\User\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Index as Index;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\User\EquatableInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -108,12 +110,12 @@ class User implements UserInterface, EquatableInterface
     /**
      * @ORM\Column(type="json")
      */
-    private ?array $roles = [];
+    private array $roles = [];
 
     /**
      * @ORM\Column(type="string")
      */
-    private ?string $password;
+    private string $password;
 
     /**
      * @ORM\Column(type="string", length=100, unique=true, nullable=true)
@@ -129,9 +131,9 @@ class User implements UserInterface, EquatableInterface
     }
 
     /**
-     * @return string|null Получить имя пользователя
+     * @return string Получить имя пользователя
      */
-    public function getUsername(): ?string
+    public function getUsername(): string
     {
         return $this->username;
     }
@@ -150,9 +152,9 @@ class User implements UserInterface, EquatableInterface
     }
 
     /**
-     * @return string|null Получить статус пользователя
+     * @return string Получить статус пользователя
      */
-    public function getStatus(): ?string
+    public function getStatus(): string
     {
         return $this->status;
     }
@@ -162,18 +164,23 @@ class User implements UserInterface, EquatableInterface
      *
      * @param string $status Статус пользователя
      * @return self
+     * @throws EntityValidationException
      */
     public function setStatus(string $status): self
     {
+        if (!isset(self::$statusList[$status])) {
+            throw new EntityValidationException("Некорректный статус для пользователя: '{$status}'");
+        }
+
         $this->status = $status;
 
         return $this;
     }
 
     /**
-     * @return string|null Получить e-mail пользователя
+     * @return string Получить e-mail пользователя
      */
-    public function getEmail(): ?string
+    public function getEmail(): string
     {
         return $this->email;
     }
@@ -294,9 +301,16 @@ class User implements UserInterface, EquatableInterface
      *
      * @param array $roles Список ролей
      * @return self
+     * @throws EntityValidationException
      */
     public function setRoles(array $roles): self
     {
+        array_map(function (string $role) {
+            if (!isset(self::$roleList[$role])) {
+                throw new EntityValidationException("Некорректная роль для пользователя: '{$role}'");
+            }
+        }, $roles);
+
         $this->roles = $roles;
 
         return $this;
@@ -364,21 +378,21 @@ class User implements UserInterface, EquatableInterface
     }
 
     /**
-     * @param int $length Длинна пароля
-     * @return string Сгенерированный случайный пароль
-     * @throws \Exception
+     * Установить пароль пользователю
+     *
+     * @param string $password Пароль в открытом виде
+     * @param UserPasswordEncoderInterface $passwordEncoder Password Encoder
+     * @return void
+     * @throws EntityValidationException
      */
-    public static function generateRandomPassword(int $length = 10) : string
+    public function setPlainPassword(string $password, UserPasswordEncoderInterface $passwordEncoder) : void
     {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!-.[]?*()';
-        $password = '';
-        $characterListLength = mb_strlen($characters, '8bit') - 1;
-
-        foreach(range(1, $length) as $i){
-            $password .= $characters[random_int(0, $characterListLength)];
+        $password = trim($password);
+        if (mb_strlen($password) < 8) {
+            throw new EntityValidationException("Пароль пользователя должен состоять минимум из 8 символов");
         }
 
-        return $password;
+        $this->setPassword($passwordEncoder->encodePassword($this, $password));
     }
 
     /**

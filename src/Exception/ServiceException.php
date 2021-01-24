@@ -2,7 +2,7 @@
 namespace App\Exception;
 
 /**
- * Exception от сервиса
+ * Exception уровня сервиса.
  */
 class ServiceException extends AppException
 {

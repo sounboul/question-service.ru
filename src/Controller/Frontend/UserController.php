@@ -1,6 +1,7 @@
 <?php
 namespace App\Controller\Frontend;
 
+use App\Exception\AppException;
 use App\Exception\ServiceException;
 use App\Form\User\ChangePasswordFormType;
 use App\Form\User\RegistrationFormType;
@@ -110,7 +111,7 @@ final class UserController extends AppController
                 $this->addFlash('success', 'Вы успешно зарегистрированы на сайте!');
 
                 return $this->redirectToAuthbox();
-            } catch (ServiceException $e) {
+            } catch (AppException $e) {
                 $this->addFlash('error', $e->getMessage());
             } catch (\Exception $e) {
                 $this->addFlash('error', "Произошла ошибка при регистрации. Попробуйте позже.");
@@ -136,7 +137,7 @@ final class UserController extends AppController
             $this->userService->handleEmailConfirmation($request->get('token', ''));
 
             $this->addFlash('success', 'Ваш E-mail успешно подтвержден!');
-        } catch (ServiceException $e) {
+        } catch (AppException $e) {
             $this->addFlash('error', $e->getMessage());
         } catch (\Exception $e) {
             $this->addFlash('error', "Произошла ошибка при подтверждении E-mail адреса. Попробуйте позже.");
@@ -159,7 +160,7 @@ final class UserController extends AppController
             $this->userService->handleEmailSubscribed($request->get('token', ''));
 
             $this->addFlash('success', 'Вы успешно подписаны на нашу рассылку!');
-        } catch (ServiceException $e) {
+        } catch (AppException $e) {
             $this->addFlash('error', $e->getMessage());
         } catch (\Exception $e) {
             $this->addFlash('error', "Произошла ошибка при подтверждении подписки на нашу E-mail рассылку. Попробуйте позже.");
@@ -187,7 +188,7 @@ final class UserController extends AppController
                 $this->addFlash('success', 'Мы на почту отправили Вам сообщение с ссылкой на восстановление пароля. Если вы его не получили, то посмотрите папку "спам", либо попробуйте еще раз.');
 
                 return $this->redirectToAuthbox();
-            } catch (ServiceException $e) {
+            } catch (AppException $e) {
                 $this->addFlash('error', $e->getMessage());
             } catch (\Exception $e) {
                 $this->addFlash('error', "Произошла ошибка при запросе на восстановление пароля. Попробуйте позже.");
@@ -212,7 +213,7 @@ final class UserController extends AppController
         // проверка token
         try {
             $user = $this->userService->getUserByPasswordRestoreToken($request->get('token', ''));
-        } catch (ServiceException $e) {
+        } catch (AppException $e) {
             $this->addFlash('error', $e->getMessage());
             return $this->redirectToAuthbox();
         } catch (\Exception $e) {
@@ -230,7 +231,7 @@ final class UserController extends AppController
                 $this->addFlash('success', 'Пароль был успешно изменен!');
 
                 return $this->redirectToAuthbox();
-            } catch (ServiceException $e) {
+            } catch (AppException $e) {
                 $this->addFlash('error', $e->getMessage());
             } catch (\Exception $e) {
                 $this->addFlash('error', "Произошла ошибка при сбросе пароля пользователю. Попробуйте позже.");
