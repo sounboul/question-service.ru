@@ -8,6 +8,7 @@ use App\Exception\ServiceException;
 use App\Utils\User\PasswordGenerator;
 use App\Utils\User\TokenGenerator;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -37,18 +38,24 @@ class UserService
     private UserPasswordEncoderInterface $passwordEncoder;
 
     /**
+     * @var UserPhotoService User Photo Service
+     */
+    private UserPhotoService $userPhotoService;
+
+    /**
      * Конструктор сервиса
      *
      * @param UserRepository $userRepository User Repository
      * @param EntityManagerInterface $entityManager Entity Manager
      * @param UserNotification $userNotification User Notification
-     *
+     * @param UserPhotoService $userPhotoService User Photo Service
      * @param UserPasswordEncoderInterface $passwordEncoder Password Encoder
      */
     public function __construct(
         UserRepository $userRepository,
         EntityManagerInterface $entityManager,
         UserNotification $userNotification,
+        UserPhotoService $userPhotoService,
 
         UserPasswordEncoderInterface $passwordEncoder
     )
@@ -56,6 +63,7 @@ class UserService
         $this->userRepository = $userRepository;
         $this->entityManager = $entityManager;
         $this->userNotification = $userNotification;
+        $this->userPhotoService = $userPhotoService;
 
         $this->passwordEncoder = $passwordEncoder;
     }
@@ -66,10 +74,10 @@ class UserService
      * @param string $email E-mail адрес пользователя
      * @param string $password Пароль в открытом виде
      * @param bool $sendEmailConfirmation Отправить письмо для подтверждения E-mail адреса?
-     * @return UserInterface Информация о пользователе
+     * @return User Пользователь
      * @throws ServiceException|EntityValidationException
      */
-    public function registration(string $email, string $password, bool $sendEmailConfirmation = true) : UserInterface
+    public function registration(string $email, string $password, bool $sendEmailConfirmation = true) : User
     {
         $email = trim(mb_strtolower($email));
         $user = $this->userRepository->findOneByEmail($email, false);
@@ -101,14 +109,14 @@ class UserService
      *
      * @param string $email E-mail адрес пользователя
      * @param bool $sendEmailConfirmation Отправить письмо для подтверждения E-mail адреса?
-     * @return UserInterface Информация о пользователе
+     * @return User Пользователь
      * @throws ServiceException
      * @throws \Exception
      */
-    public function fastRegistration(string $email, bool $sendEmailConfirmation = true) : UserInterface
+    public function fastRegistration(string $email, bool $sendEmailConfirmation = true) : User
     {
         $password = PasswordGenerator::generate();
-        $user =  $this->registration($email, $password, false);
+        $user = $this->registration($email, $password, false);
 
         // отправка письма для подтверждения E-mail адреса (с паролем)
         if ($sendEmailConfirmation) {
@@ -123,10 +131,10 @@ class UserService
      *
      * @param string $email E-mail адрес
      * @param string|null $password Пароль пользователя
-     * @return void
+     * @return User Пользователь
      * @throws ServiceException
      */
-    public function sendEmailConfirmation(string $email, string $password = null) : void
+    public function sendEmailConfirmation(string $email, string $password = null): User
     {
         $user = $this->getUserByEmail($email);
         if ($user->getEmailVerified()) {
@@ -150,16 +158,18 @@ class UserService
             'user/email-confirmation.html.twig',
             compact('token', 'password')
         );
+
+        return $user;
     }
 
     /**
      * Процессинг подтверждения E-mail адреса
      *
      * @param string $token Token подтверждения
-     * @return void
+     * @return User Пользователь
      * @throws ServiceException
      */
-    public function handleEmailConfirmation(string $token) : void
+    public function handleEmailConfirmation(string $token): User
     {
         if (empty($token)) {
             throw new ServiceException("Не указан 'token' для подтверждения e-mail адреса");
@@ -179,17 +189,18 @@ class UserService
 
         $user->setEmailVerified(true);
         $user->setEmailVerifiedToken(null);
-        $this->updateUser($user);
+
+        return $this->updateUser($user);
     }
 
     /**
      * Отправка письма с подтверждением подписки на E-mail рассылку
      *
      * @param string $email E-mail адрес
-     * @return void
+     * @return User Пользователь
      * @throws ServiceException
      */
-    public function sendEmailSubscribed(string $email) : void
+    public function sendEmailSubscribed(string $email): User
     {
         $user = $this->getUserByEmail($email);
         if ($user->getEmailSubscribed()) {
@@ -213,16 +224,18 @@ class UserService
             'user/email-subscribed.html.twig',
             compact('token')
         );
+
+        return $user;
     }
 
     /**
      * Процессинг подтверждения подписки на E-mail рассылку
      *
      * @param string $token Token подтверждения
-     * @return void
+     * @return User Пользователь
      * @throws ServiceException
      */
-    public function handleEmailSubscribed(string $token) : void
+    public function handleEmailSubscribed(string $token): User
     {
         if (empty($token)) {
             throw new ServiceException("Не указан 'token' для подтверждения подписки на E-mail рассылку");
@@ -248,17 +261,17 @@ class UserService
         $user->setEmailSubscribed(true);
         $user->setEmailSubscribedToken(null);
 
-        $this->updateUser($user);
+        return $this->updateUser($user);
     }
 
     /**
      * Запрос на восстановление пароля пользователю
      *
      * @param string $email E-mail адрес
-     * @return void
+     * @return User Пользователь
      * @throws ServiceException
      */
-    public function forgotPasswordRequest(string $email) : void
+    public function forgotPasswordRequest(string $email): User
     {
         $user = $this->getUserByEmail($email);
 
@@ -279,6 +292,8 @@ class UserService
             'user/forgot-password-request.html.twig',
             compact('token')
         );
+
+        return $user;
     }
 
     /**
@@ -286,16 +301,17 @@ class UserService
      *
      * @param string $token Password Restore Token
      * @param string $password Новый пароль в открытом виде
+     * @return User Пользователь
      * @throws ServiceException|EntityValidationException
      */
-    public function resetPassword(string $token, string $password) : void
+    public function resetPassword(string $token, string $password): User
     {
         $user = $this->getUserByPasswordRestoreToken($token);
 
         $user->setPlainPassword($password, $this->passwordEncoder);
         $user->setPasswordRestoreToken(null);
 
-        $this->updateUser($user);
+        return $this->updateUser($user);
     }
 
     /**
@@ -303,15 +319,15 @@ class UserService
      *
      * @param string $email E-mail адрес
      * @param string $password Новый пароль
-     * @return void
+     * @return User Пользователь
      * @throws ServiceException|EntityValidationException
      */
-    public function changePassword(string $email, string $password) : void
+    public function changePassword(string $email, string $password): User
     {
         $user = $this->getUserByEmail($email);
         $user->setPlainPassword($password, $this->passwordEncoder);
 
-        $this->updateUser($user);
+        return $this->updateUser($user);
     }
 
     /**
@@ -319,7 +335,7 @@ class UserService
      * @return User Получить пользователя по token восстановления пароля
      * @throws ServiceException В случае если пользователь не найден
      */
-    public function getUserByPasswordRestoreToken(string $token) : User
+    public function getUserByPasswordRestoreToken(string $token): User
     {
         if (empty($token)) {
             throw new ServiceException("Не указан 'token' для восстановления пароля");
@@ -341,15 +357,39 @@ class UserService
     }
 
     /**
+     * Обновить профиль пользователя
+     *
+     * @param string $email E-mail пользователя
+     * @param string $username Имя пользователя
+     * @param string|null $about Информация о пользователе
+     * @param UploadedFile|null $photo Загруженый файл аватарки
+     * @return User Пользователь
+     * @throws ServiceException|EntityValidationException
+     */
+    public function updateProfile(string $email, string $username, string $about, ?UploadedFile $photo): User
+    {
+        $user = $this->getUserByEmail($email);
+
+        $user->setUsername($username);
+        $user->setAbout($about);
+
+        if (!empty($photo)) {
+            $user->setPhoto($this->userPhotoService->uploadPhoto($photo, $user));
+        }
+
+        return $this->updateUser($user);
+    }
+
+    /**
      * @param string $email E-mail адрес
      * @param bool $isActive Выборка только активного пользователя
-     * @return User Получить пользователя по его E-mail
+     * @return User Получить пользователя по его E-mail адресу
      * @throws ServiceException В случае если пользователь не найден
      */
-    public function getUserByEmail(string $email, bool $isActive = true) : User
+    public function getUserByEmail(string $email, bool $isActive = true): User
     {
         $email = trim(mb_strtolower($email));
-        $user = $this->userRepository->findOneByEmail($email);
+        $user = $this->userRepository->findOneByEmail($email, $isActive);
         if (empty($user)) {
             throw new ServiceException("Не найден пользователь с указанным E-mail адресом");
         }
@@ -360,10 +400,10 @@ class UserService
     /**
      * Процесс сохранения пользователя
      *
-     * @param User $user Пользователь
-     * @return void
+     * @param User $user Пользователь для сохранения
+     * @return User Сохраненный пользователь
      */
-    public function updateUser(User $user) : void
+    public function updateUser(User $user): User
     {
         // действия до сохранения пользователя
         $user->updatedTimestamps();
@@ -373,5 +413,7 @@ class UserService
         $this->entityManager->flush();
 
         // действия после сохранения пользователя
+
+        return $user;
     }
 }

@@ -24,3 +24,8 @@ html {
 .auth-wrapper {
     margin-top: 50px;
 }
+
+label.required:after {
+    content: " *";
+    color: red;
+}

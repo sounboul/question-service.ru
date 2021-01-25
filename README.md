@@ -4,6 +4,7 @@
 
 ## Минимальные требования
 ```text
+jpegoptim/optipng
 supervisor
 PostgreSQL 11 и выше
 npm 7.4 и выше

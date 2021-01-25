@@ -21,9 +21,9 @@ Encore
 ;
 
 // использование CDN (опционально) - только для frontend
-if (Encore.isProduction()) {
-    Encore.setPublicPath('https://static.question-service.ru');
-}
+//if (Encore.isProduction()) {
+//    Encore.setPublicPath('https://static.question-service.ru');
+//}
 
 const frontend = Encore.getWebpackConfig();
 frontend.name = 'frontend';

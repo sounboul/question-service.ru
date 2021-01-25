@@ -3,5 +3,20 @@
 {% block title %}Профиль - Личный кабинет{% endblock %}
 {% block header %}Профиль{% endblock %}
 {% block content %}
-    <p>Главная страница личного кабинета</p>
+    {{ form_start(profileForm) }}
+    {{ form_row(profileForm.username) }}
+    {{ form_row(profileForm.photo) }}
+
+    {% if app.user.photo %}
+        <div class="form-group">
+            <div class="form-text text-muted">
+                <a href="{{ uploadUrl }}{{ app.user.photo.thumbnailPath }}" target="_blank">Показать загруженный файл</a>
+            </div>
+        </div>
+    {% endif %}
+
+    {{ form_row(profileForm.about) }}
+
+    <button class="btn btn-primary">Сохранить</button>
+    {{ form_end(profileForm) }}
 {% endblock %}

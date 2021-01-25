@@ -15,8 +15,12 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * User Entity
  *
  * @ORM\Entity(repositoryClass=UserRepository::class)
- * @ORM\Table(name="`user`", indexes={@Index(name="status", columns={"status"})})
- * @ORM\HasLifecycleCallbacks
+ * @ORM\Table(
+ *     name="`user`",
+ *     indexes={
+ *          @Index(name="status", columns={"status"})
+ *     }
+ * )
  * @UniqueEntity(fields={"email"}, message="Пользователь с указанным E-mail адресом уже существует")
  */
 class User implements UserInterface, EquatableInterface
@@ -123,6 +127,17 @@ class User implements UserInterface, EquatableInterface
     private ?string $passwordRestoreToken;
 
     /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private string $about;
+
+    /**
+     * @ORM\OneToOne(targetEntity="App\Entity\User\UserPhoto")
+     * @ORM\JoinColumn(name="photo_id", referencedColumnName="id")
+     */
+    private ?UserPhoto $photo;
+
+    /**
      * @return int|null Получить идентификатор пользователя
      */
     public function getId(): ?int
@@ -146,7 +161,7 @@ class User implements UserInterface, EquatableInterface
      */
     public function setUsername(string $username): self
     {
-        $this->username = $username;
+        $this->username = trim(strip_tags($username));
 
         return $this;
     }
@@ -193,7 +208,7 @@ class User implements UserInterface, EquatableInterface
      */
     public function setEmail(string $email): self
     {
-        $this->email = $email;
+        $this->email = mb_strtolower($email);
 
         return $this;
     }
@@ -356,6 +371,48 @@ class User implements UserInterface, EquatableInterface
     public function setPasswordRestoreToken(?string $passwordRestoreToken): self
     {
         $this->passwordRestoreToken = $passwordRestoreToken;
+
+        return $this;
+    }
+
+    /**
+     * @return string Получить описание
+     */
+    public function getAbout(): string
+    {
+        return $this->about;
+    }
+
+    /**
+     * Установить описание
+     *
+     * @param string $about Описание
+     * @return self
+     */
+    public function setAbout(string $about): self
+    {
+        $this->about = trim(strip_tags($about));
+
+        return $this;
+    }
+
+    /**
+     * @return UserPhoto|null Получить фото
+     */
+    public function getPhoto(): ?UserPhoto
+    {
+        return $this->photo;
+    }
+
+    /**
+     * Установить фото
+     *
+     * @param UserPhoto|null $photo Фотография
+     * @return self
+     */
+    public function setPhoto(?UserPhoto $photo): self
+    {
+        $this->photo = $photo;
 
         return $this;
     }

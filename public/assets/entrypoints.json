@@ -3,7 +3,7 @@
     "app": {
       "js": [
         "/assets/runtime.5b7a9943.js",
-        "/assets/app.300cc131.js"
+        "/assets/app.911e9917.js"
       ]
     },
     "main": {
@@ -19,7 +19,7 @@
         "/assets/runtime.5b7a9943.js"
       ],
       "css": [
-        "/assets/styles.29719942.css"
+        "/assets/styles.e68b2ec2.css"
       ]
     }
   }

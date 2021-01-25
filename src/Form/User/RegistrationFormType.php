@@ -17,20 +17,14 @@ use Symfony\Component\Validator\Constraints\NotBlank;
  */
 class RegistrationFormType extends AbstractType
 {
+    /**
+     * @inheritdoc
+     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
             ->add('email', EmailType::class, [
                 'label' => 'E-mail',
-            ])
-            ->add('agreeTerms', CheckboxType::class, [
-                'label' => 'Я ознакомился с правилами сервиса и принимаю их',
-                'mapped' => false,
-                'constraints' => [
-                    new IsTrue([
-                        'message' => 'Вы должны согласиться с правилами нашего сервиса',
-                    ]),
-                ],
             ])
             ->add('plainPassword', PasswordType::class, [
                 'label' => 'Пароль',
@@ -46,13 +40,23 @@ class RegistrationFormType extends AbstractType
                     ]),
                 ],
             ])
+            ->add('agreeTerms', CheckboxType::class, [
+                'label' => 'Я ознакомился с правилами сервиса и принимаю их',
+                'mapped' => false,
+                'constraints' => [
+                    new IsTrue([
+                        'message' => 'Вы должны согласиться с правилами нашего сервиса',
+                    ]),
+                ],
+            ])
         ;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults([
-            'data_class' => User::class,
-        ]);
+        $resolver->setDefaults([]);
     }
 }

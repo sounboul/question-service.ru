@@ -3,6 +3,7 @@ namespace App\Controller\Frontend;
 
 use App\Exception\AppException;
 use App\Form\User\ChangePasswordFormType;
+use App\Form\User\ProfileFormType;
 use App\Service\User\UserService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -34,10 +35,35 @@ final class UserProfileController extends AppController
      * Профиль пользователя
      *
      * @Route("/", name="index")
+     * @param Request $request
+     * @return Response
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        return $this->render('profile/index.html.twig');
+        $form = $this->createForm(ProfileFormType::class, $this->getUser());
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            try {
+                $this->userService->updateProfile(
+                    $this->getUser()->getEmail(),
+                    $form->get('username')->getData(),
+                    $form->get('about')->getData(),
+                    $request->files->get('profile_form')['photo'] ?? null
+                );
+
+                $this->addFlash('success', 'Профиль был успешно сохранен!');
+
+                return $this->redirectToRoute('frontend_profile_index');
+            } catch (AppException $e) {
+                $this->addFlash('error', $e->getMessage());
+            } catch (\Exception $e) {
+                $this->addFlash('error', "Произошла ошибка при сохранении профиля. Попробуйте позже.");
+            }
+        }
+
+        return $this->render('profile/index.html.twig', [
+            'profileForm' => $form->createView(),
+        ]);
     }
 
     /**
