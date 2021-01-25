@@ -79,7 +79,6 @@ class ImageManagerService extends FileManagerService
         $optimize = $config['optimize'] ?? true;
 
         // формирование и сохранение thumbnail
-
         $thumbnail = $image->thumbnail(new Box($width, $height), $mode);
         $thumbnail->save($this->getTargetPath().$thumbnailPath."/".$thumbnailName, ['quality' => $quality]);
 

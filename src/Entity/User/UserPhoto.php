@@ -66,7 +66,7 @@ class UserPhoto
      * @ORM\ManyToOne(targetEntity="App\Entity\User\User", inversedBy="photo")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
      */
-    private $user;
+    private User $user;
 
     /**
      * @ORM\Column(type="string", length=50)

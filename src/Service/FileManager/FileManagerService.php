@@ -81,7 +81,7 @@ class FileManagerService implements FileManagerServiceInterface
      *
      * @param UploadedFile $file Uploaded File
      * @param string|null $subFolder Поддиректория
-     * @return File Сохраненный файл
+     * @return string Относительный путь до сохраненного файла
      */
     public function uploadFile(UploadedFile $file, ?string $subFolder = null): string
     {

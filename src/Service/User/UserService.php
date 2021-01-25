@@ -110,8 +110,7 @@ class UserService
      * @param string $email E-mail адрес пользователя
      * @param bool $sendEmailConfirmation Отправить письмо для подтверждения E-mail адреса?
      * @return User Пользователь
-     * @throws ServiceException
-     * @throws \Exception
+     * @throws ServiceException|EntityValidationException
      */
     public function fastRegistration(string $email, bool $sendEmailConfirmation = true) : User
     {

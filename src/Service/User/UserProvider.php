@@ -9,8 +9,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
 /**
- * User Provider.
- * Используется системой авторизации.
+ * User Provider. Используется системой авторизации.
  */
 class UserProvider implements UserProviderInterface
 {

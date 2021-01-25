@@ -11,14 +11,14 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class UserNotification
 {
     /**
-     * @var MessageBusInterface $bus
+     * @var MessageBusInterface Bus
      */
     private MessageBusInterface $bus;
 
     /**
      * Конструктор класса
      *
-     * @param MessageBusInterface $bus
+     * @param MessageBusInterface $bus Bus
      */
     public function __construct(MessageBusInterface $bus)
     {
@@ -35,7 +35,7 @@ class UserNotification
      *
      * @return void
      */
-    public function sendEmail(UserInterface $user, string $subject, string $template, array $context) : void
+    public function sendEmail(UserInterface $user, string $subject, string $template, array $context): void
     {
         // поставка отправки сообщения в очередь
         $this->bus->dispatch(new EmailNotification(
