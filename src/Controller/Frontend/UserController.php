@@ -11,8 +11,12 @@ use App\Service\User\UserService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Http\Authentication\AuthenticatorManager;
+use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
+use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
+use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 
 /**
  * Контроллер для работы с пользователями
@@ -74,14 +78,14 @@ final class UserController extends AppController
      * @Route("/registration/", name="registration")
      *
      * @param Request $request
-     * @param GuardAuthenticatorHandler $guardHandler
-     * @param LoginFormAuthenticator $formAuthenticator
+     * @param LoginFormAuthenticator $loginFormAuthenticator
+     * @param UserAuthenticatorInterface $userAuthenticator
      * @return Response
      */
     public function registration(
         Request $request,
-        GuardAuthenticatorHandler $guardHandler,
-        LoginFormAuthenticator $formAuthenticator
+        LoginFormAuthenticator $loginFormAuthenticator,
+        UserAuthenticatorInterface $userAuthenticator
     ): Response
     {
         if ($this->getUser()) {
@@ -98,15 +102,8 @@ final class UserController extends AppController
                     $form->get('plainPassword')->getData()
                 );
 
-                // авторизация (не работает -()
-                /*if (!empty($user)) {
-                    $guardHandler->authenticateUserAndHandleSuccess(
-                        $user,
-                        $request,
-                        $formAuthenticator,
-                        'main'
-                    );
-                }*/
+                // авторизация
+                $userAuthenticator->authenticateUser($user, $loginFormAuthenticator, $request);
 
                 $this->addFlash('success', 'Вы успешно зарегистрированы на сайте!');
 

@@ -3,7 +3,6 @@ namespace App\Service\User;
 
 use App\Entity\User\User;
 use App\Exception\ServiceException;
-use App\Repository\User\UserRepository;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;

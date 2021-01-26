@@ -63,7 +63,7 @@ class UserPhoto
     private ?int $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User\User", inversedBy="photo")
+     * @ORM\ManyToOne(targetEntity="App\Entity\User\User")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
      */
     private User $user;
