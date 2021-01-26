@@ -8,7 +8,6 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Index as Index;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\Security\Core\User\EquatableInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
@@ -23,7 +22,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * )
  * @UniqueEntity(fields={"email"}, message="Пользователь с указанным E-mail адресом уже существует")
  */
-class User implements UserInterface, EquatableInterface
+class User implements UserInterface
 {
     use TimestampableEntity;
 
@@ -450,24 +449,5 @@ class User implements UserInterface, EquatableInterface
         }
 
         $this->setPassword($passwordEncoder->encodePassword($this, $password));
-    }
-
-    /**
-     * Используется для проверки того, равны ли два объекта
-     * в контексте безопасности и повторной аутентификации.
-     *
-     * @param UserInterface $user
-     * @return bool
-     *
-     * @see EquatableInterface
-     */
-    public function isEqualTo(UserInterface $user): bool
-    {
-        // автоматический logout в случае изменения статуса
-        if ($this->getStatus() != $user->getStatus()) {
-            return false;
-        }
-
-        return true;
     }
 }

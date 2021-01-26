@@ -2,6 +2,7 @@
 namespace App\Service\User;
 
 use App\Entity\User\User;
+use App\Exception\ServiceException;
 use App\Repository\User\UserRepository;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
@@ -14,18 +15,18 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 class UserProvider implements UserProviderInterface
 {
     /**
-     * @var UserRepository User Repository
+     * @var UserService User Service
      */
-    private UserRepository $userRepository;
+    private UserService $userService;
 
     /**
      * Конструктор
      *
-     * @param UserRepository $userRepository
+     * @param UserService $userService
      */
-    public function __construct(UserRepository $userRepository)
+    public function __construct(UserService $userService)
     {
-        $this->userRepository = $userRepository;
+        $this->userService = $userService;
     }
 
     /**
@@ -33,11 +34,10 @@ class UserProvider implements UserProviderInterface
      */
     public function loadUserByUsername(string $username): UserInterface
     {
-        $user = $this->userRepository->findOneByEmail($username);
-        if (empty($user)) {
-            throw new UsernameNotFoundException(
-                sprintf('Username "%s" does not exist.', $username)
-            );
+        try {
+            $user = $this->userService->getUserByEmail($username);
+        } catch (ServiceException $e) {
+            throw new UsernameNotFoundException($e->getMessage());
         }
 
         return $user;

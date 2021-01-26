@@ -1,6 +1,9 @@
 <?php
 namespace App\Security;
 
+use App\Entity\User\User;
+use App\Exception\ServiceException;
+use App\Service\User\UserService;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,13 +31,20 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
     private UrlGeneratorInterface $urlGenerator;
 
     /**
+     * @var UserService User Service
+     */
+    private UserService $userService;
+
+    /**
      * Конструктор класса
      *
      * @param UrlGeneratorInterface $urlGenerator
+     * @param UserService $userService
      */
-    public function __construct(UrlGeneratorInterface $urlGenerator)
+    public function __construct(UrlGeneratorInterface $urlGenerator, UserService $userService)
     {
         $this->urlGenerator = $urlGenerator;
+        $this->userService = $userService;
     }
 
     /**
@@ -43,11 +53,17 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
     public function authenticate(Request $request): PassportInterface
     {
         $email = $request->request->get('email', '');
-
         $request->getSession()->set(Security::LAST_USERNAME, $email);
 
         return new Passport(
-            new UserBadge($email),
+            new UserBadge($email, function (string $email) {
+                try {
+                    return $this->userService->getUserByEmail($email);
+                } catch (ServiceException $e) {
+                    return null;
+                }
+            }),
+
             new PasswordCredentials($request->request->get('password', '')),
             [
                 new CsrfTokenBadge('authenticate', $request->get('_csrf_token')),
