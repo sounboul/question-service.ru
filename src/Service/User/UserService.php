@@ -365,7 +365,7 @@ class UserService
      * @return User Пользователь
      * @throws ServiceException|EntityValidationException
      */
-    public function updateProfile(string $email, string $username, string $about, ?UploadedFile $photo): User
+    public function updateProfile(string $email, string $username, ?string $about, ?UploadedFile $photo): User
     {
         $user = $this->getUserByEmail($email);
 

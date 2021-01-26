@@ -128,7 +128,7 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="text", nullable=true)
      */
-    private string $about;
+    private ?string $about;
 
     /**
      * @ORM\OneToOne(targetEntity="App\Entity\User\UserPhoto")
@@ -375,9 +375,9 @@ class User implements UserInterface
     }
 
     /**
-     * @return string Получить описание
+     * @return string|null Получить описание
      */
-    public function getAbout(): string
+    public function getAbout(): ?string
     {
         return $this->about;
     }
@@ -385,10 +385,10 @@ class User implements UserInterface
     /**
      * Установить описание
      *
-     * @param string $about Описание
+     * @param string|null $about Описание
      * @return self
      */
-    public function setAbout(string $about): self
+    public function setAbout(?string $about): self
     {
         $this->about = trim(strip_tags($about));
 

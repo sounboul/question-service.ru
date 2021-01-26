@@ -3,8 +3,6 @@ namespace App\Repository\User;
 
 use App\Entity\User\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -32,21 +30,10 @@ class UserRepository extends ServiceEntityRepository
      */
     public function findOneByEmail(string $email, bool $isActive = true): ?User
     {
-        try {
-            if ($isActive) {
-                $query = $this->getActiveQueryBuilder();
-            } else {
-                $query = $this->createQueryBuilder('u');
-            }
+        $criteria = $isActive ? ['status' => 'active'] : [];
+        $criteria['email'] = $email;
 
-            return $query
-                ->andWhere('u.email = :email')
-                ->setParameter('email', $email)
-                ->getQuery()
-                ->getOneOrNullResult();
-        } catch (NonUniqueResultException $e) {
-            return null;
-        }
+        return $this->findOneBy($criteria);
     }
 
     /**
@@ -55,15 +42,7 @@ class UserRepository extends ServiceEntityRepository
      */
     public function findOneByEmailVerifiedToken(string $token) : ?User
     {
-        try {
-            return $this->getActiveQueryBuilder()
-                ->andWhere('u.emailVerifiedToken = :token')
-                ->setParameter('token', $token)
-                ->getQuery()
-                ->getOneOrNullResult();
-        } catch (NonUniqueResultException $e) {
-            return null;
-        }
+        return $this->findOneBy(['status' => 'active', 'emailVerifiedToken' => $token]);
     }
 
     /**
@@ -72,15 +51,7 @@ class UserRepository extends ServiceEntityRepository
      */
     public function findOneByEmailSubscribedToken(string $token) : ?User
     {
-        try {
-            return $this->getActiveQueryBuilder()
-                ->andWhere('u.emailSubscribedToken = :token')
-                ->setParameter('token', $token)
-                ->getQuery()
-                ->getOneOrNullResult();
-        } catch (NonUniqueResultException $e) {
-            return null;
-        }
+        return $this->findOneBy(['status' => 'active', 'emailSubscribedToken' => $token]);
     }
 
     /**
@@ -89,55 +60,6 @@ class UserRepository extends ServiceEntityRepository
      */
     public function findOneByPasswordRestoreToken(string $token) : ?User
     {
-        try {
-            return $this->getActiveQueryBuilder()
-                ->andWhere('u.passwordRestoreToken = :token')
-                ->setParameter('token', $token)
-                ->getQuery()
-                ->getOneOrNullResult();
-        } catch (NonUniqueResultException $e) {
-            return null;
-        }
+        return $this->findOneBy(['status' => 'active', 'passwordRestoreToken' => $token]);
     }
-
-    /**
-     * Выборка включает фильтр по только активным пользова
-     *
-     * @return QueryBuilder Условия выборка сущности по-умолчанию
-     */
-    protected function getActiveQueryBuilder() : QueryBuilder
-    {
-        return $this->createQueryBuilder('u')
-            ->where('u.status = :status')
-            ->setParameter('status', User::STATUS_ACTIVE);
-    }
-
-    // /**
-    //  * @return User[] Returns an array of User objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('u.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?User
-    {
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }

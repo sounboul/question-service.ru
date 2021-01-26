@@ -76,7 +76,10 @@ class UserPhotoService
         $photo->setOriginalPath($originalFile);
         $photo->setThumbnailPath($thumbnails['thumbnail']);
 
-        return $this->updatePhoto($photo);
+        $this->updatePhoto($photo);
+        $this->userPhotoRepository->changeUserPhoto($user->getId(), $photo->getId());
+
+        return $photo;
     }
 
     /**
@@ -95,9 +98,6 @@ class UserPhotoService
         $this->entityManager->flush();
 
         // действия после сохранения фотографии
-
-        // подтверждение установки новой фотографии
-        $this->userPhotoRepository->confirmNewPhoto($photo->getUser()->getId(), $photo->getId());
 
         return $photo;
     }

@@ -45,9 +45,9 @@ final class UserProfileController extends AppController
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $this->userService->updateProfile(
-                    (string) $this->getUser()->getEmail(),
-                    (string) $form->get('username')->getData(),
-                    (string) $form->get('about')->getData(),
+                    $this->getUser()->getEmail(),
+                    $form->get('username')->getData(),
+                    $form->get('about')->getData(),
                     $request->files->get('profile_form')['photo'] ?? null
                 );
 

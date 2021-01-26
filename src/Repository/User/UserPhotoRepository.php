@@ -24,14 +24,14 @@ class UserPhotoRepository extends ServiceEntityRepository
     }
 
     /**
-     * Подтверждение установки новой фотографии.
+     * Меняет фотографию пользователю.
      * Всем старым фотографиям пользователя устанавливается статус deleted.
      *
      * @param int $userId Идентификатор пользователя
      * @param int $photoId Идентификатор новой фотографии
      * @return void
      */
-    public function confirmNewPhoto(int $userId, int $photoId): void
+    public function changeUserPhoto(int $userId, int $photoId): void
     {
         $this->_em->createQueryBuilder()
             ->update(UserPhoto::class, 'u')
