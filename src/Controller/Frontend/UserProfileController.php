@@ -79,7 +79,7 @@ final class UserProfileController extends AppController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $this->userService->changePassword($this->getUser()->getEmail(), $form->get('plainPassword')->getData());
+                $this->userService->changePassword($this->getUser()->getId(), $form->get('plainPassword')->getData());
 
                 $this->addFlash('success', 'Пароль был успешно изменен!');
 

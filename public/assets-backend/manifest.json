@@ -1,6 +1,11 @@
 {
-  "assets-backend/app.js": "/assets-backend/app.87a509b1.js",
-  "assets-backend/main.css": "/assets-backend/main.25f5250a.css",
+  "assets-backend/css/app.css": "/assets-backend/css/app.9ea6f26f.css",
+  "assets-backend/css/main.css": "/assets-backend/css/main.115d8d73.css",
+  "assets-backend/js/app.js": "/assets-backend/js/app.ca879acb.js",
   "assets-backend/runtime.js": "/assets-backend/runtime.0e25a965.js",
-  "assets-backend/styles.css": "/assets-backend/styles.e68b2ec2.css"
+  "assets-backend/fonts/fa-solid-900.woff2": "/assets-backend/fonts/fa-solid-900.3eb06c70.woff2",
+  "assets-backend/fonts/fa-solid-900.eot": "/assets-backend/fonts/fa-solid-900.6606667d.eot",
+  "assets-backend/fonts/fa-solid-900.ttf": "/assets-backend/fonts/fa-solid-900.915a0b79.ttf",
+  "assets-backend/fonts/fa-solid-900.woff": "/assets-backend/fonts/fa-solid-900.f4f93856.woff",
+  "assets-backend/images/fa-solid-900.svg": "/assets-backend/images/fa-solid-900.0454203f.svg"
 }

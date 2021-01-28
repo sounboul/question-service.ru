@@ -1,0 +1,42 @@
+{# Главное меню в шапке сайта #}
+{% set currentRoute = app.request.get('_route') %}
+{% set menuItems = [
+    {
+        'label': 'Главная',
+        'route': 'backend_index',
+        'visible': true,
+        'active': currentRoute == 'backend_index',
+    }, {
+        'label': 'Пользователи',
+        'route': 'backend_user_list',
+        'visible': true,
+        'active': 'backend_user_' in currentRoute,
+    }, {
+        'label': 'Категории',
+        'route': 'backend_questioncategory_list',
+        'visible': false,
+        'active': 'backend_questioncategory_' in currentRoute,
+    }, {
+        'label': 'Вопросы',
+        'route': 'backend_question_list',
+        'visible': false,
+        'active': 'backend_question_' in currentRoute,
+    }, {
+        'label': 'Ответы',
+        'route': 'backend_questionanswer_list',
+        'visible': false,
+        'active': 'backend_questionanswer_' in currentRoute,
+    }
+] %}
+<div class="list-group">
+    {% for menuItem in menuItems %}
+        {% if menuItem.visible %}
+            <a
+                    href="{{ url(menuItem.route) }}"
+                    class="list-group-item list-group-item-action {% if menuItem.active %}active{% endif %}"
+            >
+                {{ menuItem.label|raw }}
+            </a>
+        {% endif %}
+    {% endfor %}
+</div>

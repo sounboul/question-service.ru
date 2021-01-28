@@ -3,6 +3,7 @@ namespace App\Service\User;
 
 use App\Entity\User\User;
 use App\Exception\EntityValidationException;
+use App\Pagination\Paginator;
 use App\Repository\User\UserRepository;
 use App\Exception\ServiceException;
 use App\Utils\User\PasswordGenerator;
@@ -316,14 +317,14 @@ class UserService
     /**
      * Изменение пароля пользователю
      *
-     * @param string $email E-mail адрес
+     * @param int $id Идентификатор пользователя
      * @param string $password Новый пароль
      * @return User Пользователь
      * @throws ServiceException|EntityValidationException
      */
-    public function changePassword(string $email, string $password): User
+    public function changePassword(int $id, string $password): User
     {
-        $user = $this->getUserByEmail($email);
+        $user = $this->getUserById($id);
         $user->setPlainPassword($password, $this->passwordEncoder);
 
         return $this->updateUser($user);
@@ -380,6 +381,22 @@ class UserService
     }
 
     /**
+     * @param int $id Идентификатор
+     * @param bool $isActive Выборка только активного пользователя
+     * @return User Получить пользователя по его идентификатору
+     * @throws ServiceException В случае если пользователь не найден
+     */
+    public function getUserById(int $id, bool $isActive = true): User
+    {
+        $user = $this->userRepository->findOneById($id, $isActive);
+        if (empty($user)) {
+            throw new ServiceException("Не найден пользователь с указанным идентификатором");
+        }
+
+        return $user;
+    }
+
+    /**
      * @param string $email E-mail адрес
      * @param bool $isActive Выборка только активного пользователя
      * @return User Получить пользователя по его E-mail адресу
@@ -394,6 +411,107 @@ class UserService
         }
 
         return $user;
+    }
+
+    /**
+     * Листинг пользователей с фильтрацией
+     *
+     * @param array $filters Критерии фильтрации
+     * @param array $orderBy Критерии сортировки
+     * @param int $page Номер страницы
+     * @param int $pageSize Количество записей на страницу
+     * @return Paginator Результат выборка с постраничным выводом
+     * @throws ServiceException
+     */
+    public function listing(array $filters, array $orderBy = [], $page = 1, $pageSize = 30): Paginator
+    {
+        $listingFilters = [];
+
+        if (!empty($filters['id'])) {
+            $listingFilters['id'] = (int) $filters['id'];
+        }
+
+        if (!empty($filters['username'])) {
+            $listingFilters['username'] = (string) $filters['username'];
+        }
+
+        if (!empty($filters['status'])) {
+            $listingFilters['status'] = (string) $filters['status'];
+            if (!isset(User::$statusList[$listingFilters['status']])) {
+                throw new ServiceException("У пользователей нет статуса '{$listingFilters['status']}'");
+            }
+        }
+
+        if (!empty($filters['email'])) {
+            $listingFilters['email'] = (string) $filters['email'];
+        }
+
+        if (!empty($filters['role'])) {
+            $listingFilters['role'] = (string) $filters['role'];
+            if (!isset(User::$roleList[$listingFilters['role']])) {
+                throw new ServiceException("У пользователей нет роли '{$listingFilters['status']}'");
+            }
+        }
+
+        $query = $this->userRepository->listingFilter($listingFilters, $orderBy);
+        return (new Paginator($query, $pageSize))->paginate($page);
+    }
+
+    /**
+     * Удаление пользователя
+     *
+     * @param int $id Идентификатор пользователя
+     * @return User Удаленный пользователь
+     * @throws ServiceException|EntityValidationException
+     */
+    public function deleteUser(int $id): User
+    {
+        $user = $this->getUserById($id, false);
+        if ($user->isDeleted()) {
+            throw new ServiceException("Указанный пользователь уже был удален ранее.");
+        }
+
+        $user->setStatus(User::STATUS_DELETED);
+
+        return $this->updateUser($user);
+    }
+
+    /**
+     * Восстановление пользователя
+     *
+     * @param int $id Идентификатор пользователя
+     * @return User Восстановенный пользователь
+     * @throws ServiceException|EntityValidationException
+     */
+    public function restoreUser(int $id): User
+    {
+        $user = $this->getUserById($id, false);
+        if ($user->isActive()) {
+            throw new ServiceException("Указанный пользователь уже является активным.");
+        }
+
+        $user->setStatus(User::STATUS_ACTIVE);
+
+        return $this->updateUser($user);
+    }
+
+    /**
+     * Блокировка пользователя
+     *
+     * @param int $id Идентификатор пользователя
+     * @return User Заблокированный пользователь
+     * @throws ServiceException|EntityValidationException
+     */
+    public function blockedUser(int $id): User
+    {
+        $user = $this->getUserById($id);
+        if (!$user->isActive()) {
+            throw new ServiceException("Указанный пользователь не является активным.");
+        }
+
+        $user->setStatus(User::STATUS_BLOCKED);
+
+        return $this->updateUser($user);
     }
 
     /**

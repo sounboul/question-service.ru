@@ -1,0 +1,19 @@
+{% macro alert(type, text) %}
+    <div class="alert alert-{{ type }}">
+        {{ text }}
+    </div>
+{% endmacro %}
+
+{% macro statusLabel(key, value) %}
+    {% set statusLabels = {
+        'active': 'success',
+        'blocked': 'warning',
+        'deleted': 'danger',
+    } %}
+
+    <span class="badge badge-{{ statusLabels[key] ?? 'primary' }}">{{ value }}</span>
+{% endmacro %}
+
+{% macro badge(key, value) %}
+    <span class="badge badge-{{ key }}">{{ value }}</span>
+{% endmacro %}

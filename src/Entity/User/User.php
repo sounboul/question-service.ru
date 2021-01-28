@@ -132,7 +132,7 @@ class User implements UserInterface
 
     /**
      * @ORM\OneToOne(targetEntity="App\Entity\User\UserPhoto")
-     * @ORM\JoinColumn(name="photo_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="photo_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private ?UserPhoto $photo;
 
@@ -171,6 +171,14 @@ class User implements UserInterface
     public function getStatus(): string
     {
         return $this->status;
+    }
+
+    /**
+     * @return string Получить статус пользователя в виде текста
+     */
+    public function getStatusAsText(): string
+    {
+        return self::$statusList[$this->status] ?? $this->status;
     }
 
     /**
@@ -449,5 +457,29 @@ class User implements UserInterface
         }
 
         $this->setPassword($passwordEncoder->encodePassword($this, $password));
+    }
+
+    /**
+     * @return bool Пользователь активен?
+     */
+    public function isActive(): bool
+    {
+        return $this->status === self::STATUS_ACTIVE;
+    }
+
+    /**
+     * @return bool Пользователь удален?
+     */
+    public function isDeleted(): bool
+    {
+        return $this->status === self::STATUS_DELETED;
+    }
+
+    /**
+     * @return bool Пользователь заблокирован?
+     */
+    public function isBlocked(): bool
+    {
+        return $this->status === self::STATUS_BLOCKED;
     }
 }

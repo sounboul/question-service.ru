@@ -25,7 +25,7 @@ html {
     margin-top: 50px;
 }
 
-label.required:after {
-    content: " *";
+label.required:before {
+    content: "*";
     color: red;
 }

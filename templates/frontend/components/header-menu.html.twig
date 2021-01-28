@@ -1,6 +1,7 @@
 {# Главное меню в шапке сайта #}
 {% set currentRoute = app.request.get('_route') %}
 {% set isGuest = not is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+{% set isAdmin = is_granted('ROLE_ADMIN') %}
 {% set menuItems = [
     {
         'label': 'Главная',
@@ -22,6 +23,11 @@
         'route': 'frontend_profile_index',
         'visible': not isGuest,
         'active': 'frontend_profile_' in currentRoute
+    }, {
+        'label': 'Панель управления',
+        'route': 'backend_index',
+        'visible': isAdmin,
+        'active': 'backend_' in currentRoute
     }, {
         'label': 'Выход',
         'route': 'frontend_logout',

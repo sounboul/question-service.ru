@@ -1,0 +1,20 @@
+{% extends 'backend/layouts/controlbox.html.twig' %}
+{% import "backend/components/tools.html.twig" as tools %}
+
+{% block title %}Регистрация пользователя - Пользователи - Панель управления{% endblock %}
+{% block header %}Регистрация пользователя{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{{ path('backend_index') }}">Главная</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('backend_user_list') }}">Пользователи</a></li>
+    <li class="breadcrumb-item">Регистрация пользователя</li>
+{% endblock %}
+
+{% block content %}
+    {{ form_start(registrationForm) }}
+    {{ form_row(registrationForm.email) }}
+
+    <button class="btn btn-lg btn-primary" type="submit">Регистрация</button>
+
+    {{ form_end(registrationForm) }}
+{% endblock %}

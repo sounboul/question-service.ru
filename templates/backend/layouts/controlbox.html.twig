@@ -1,0 +1,37 @@
+{# Layout для задач функционала панели управления администратора #}
+{% extends 'backend/layouts/main.html.twig' %}
+
+{% block body %}
+    <div class="container" style="margin-top: 30px;">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header">
+                        <b>Панель управления</b>
+                    </div>
+
+                    <div class="card-body">
+                        {% block sidebar %}
+                            {% include 'backend/components/controlbox-menu.html.twig' %}
+                        {% endblock %}
+                    </div>
+                </div>
+
+                {% block filters %}{% endblock %}
+            </div>
+
+            <div class="col-md-9">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        {% block breadcrumbs %}{% endblock %}
+                    </ol>
+                </nav>
+
+                <h2>{% block header %}{% endblock %}</h2>
+
+                {% include 'backend/components/flash-messages.html.twig' %}
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -48,8 +48,8 @@ class UserPhoto
         // thumbnail
         [
             'key' => 'thumbnail',
-            'width' => 200,
-            'height' => 200,
+            'width' => 400,
+            'height' => 400,
             'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND,
             'optimize' => true,
         ],

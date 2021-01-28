@@ -24,14 +24,23 @@ class UserPhotoRepository extends ServiceEntityRepository
     }
 
     /**
-     * Меняет фотографию пользователю.
+     * @param int $id Идентификатор
+     * @return UserPhoto|null Найти фотографию по идентификатору
+     */
+    public function findOneById(int $id): ?UserPhoto
+    {
+        return $this->findOneBy(['id' => $id]);
+    }
+
+    /**
+     * Переключает фотографию пользователю.
      * Всем старым фотографиям пользователя устанавливается статус deleted.
      *
      * @param int $userId Идентификатор пользователя
      * @param int $photoId Идентификатор новой фотографии
      * @return void
      */
-    public function changeUserPhoto(int $userId, int $photoId): void
+    public function switchUserPhoto(int $userId, int $photoId): void
     {
         $this->_em->createQueryBuilder()
             ->update(UserPhoto::class, 'u')

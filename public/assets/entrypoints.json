@@ -1,25 +1,25 @@
 {
   "entrypoints": {
-    "app": {
+    "js/app": {
       "js": [
         "/assets/runtime.5b7a9943.js",
-        "/assets/app.c65372a3.js"
+        "/assets/js/app.7215ea1c.js"
       ]
     },
-    "main": {
+    "css/main": {
       "js": [
         "/assets/runtime.5b7a9943.js"
       ],
       "css": [
-        "/assets/main.25f5250a.css"
+        "/assets/css/main.25f5250a.css"
       ]
     },
-    "styles": {
+    "css/app": {
       "js": [
         "/assets/runtime.5b7a9943.js"
       ],
       "css": [
-        "/assets/styles.e68b2ec2.css"
+        "/assets/css/app.2c2f8b87.css"
       ]
     }
   }

@@ -25,7 +25,12 @@ html {
     margin-top: 50px;
 }
 
-label.required:after {
-    content: " *";
+label.required:before {
+    content: "*";
     color: red;
+}
+
+.control-buttons {
+    margin-top: 20px;
+    margin-bottom: 20px;
 }

@@ -1,7 +1,12 @@
-{% extends 'backend/layouts/main.html.twig' %}
+{% extends 'backend/layouts/controlbox.html.twig' %}
 
-{% block title %}Backend Dashboard{% endblock %}
+{% block title %}Панель управления{% endblock %}
+{% block header %}Панель управления{% endblock %}
 
-{% block body %}
-<p>Hello world!</p>
+{% block breadcrumbs %}
+    <li class="breadcrumb-item">Главная</li>
+{% endblock %}
+
+{% block content %}
+    <p>Hello world!</p>
 {% endblock %}

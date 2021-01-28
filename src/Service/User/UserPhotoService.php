@@ -77,7 +77,42 @@ class UserPhotoService
         $photo->setThumbnailPath($thumbnails['thumbnail']);
 
         $this->updatePhoto($photo);
-        $this->userPhotoRepository->changeUserPhoto($user->getId(), $photo->getId());
+        $this->switchUserPhoto($user, $photo->getId());
+
+        return $photo;
+    }
+
+    /**
+     * Изменить активную фотографию пользователя
+     *
+     * @param User $user Пользователь
+     * @param int $photoId Идентификатор активной фотографии
+     * @return UserPhoto Фотография
+     * @throws ServiceException
+     */
+    public function switchUserPhoto(User $user, int $photoId): UserPhoto
+    {
+        $photo = $this->getPhotoById($photoId);
+        if ($user->getId() !== $photo->getUser()->getId()) {
+            throw new ServiceException("Указанная фотография принадлежит другому пользователю.");
+        }
+
+        $this->userPhotoRepository->switchUserPhoto($user->getId(), $photoId);
+
+        return $photo;
+    }
+
+    /**
+     * @param int $id Идентификатор
+     * @return UserPhoto Получить фотографию по её идентификатору
+     * @throws ServiceException В случае если фотография не найдена
+     */
+    public function getPhotoById(int $id): UserPhoto
+    {
+        $photo = $this->userPhotoRepository->findOneById($id);
+        if (empty($photo)) {
+            throw new ServiceException("Не найдена фотография с указанным идентификатором");
+        }
 
         return $photo;
     }

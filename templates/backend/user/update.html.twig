@@ -1,0 +1,30 @@
+{% extends 'backend/layouts/controlbox.html.twig' %}
+{% import "backend/components/tools.html.twig" as tools %}
+
+{% block title %}Редактирование пользователя '{{ user.username }}' - Пользователи - Панель управления{% endblock %}
+{% block header %}Редактирование пользователя '{{ user.username }}'{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{{ path('backend_index') }}">Главная</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('backend_user_list') }}">Пользователи</a></li>
+    <li class="breadcrumb-item">Редактирование пользователя '{{ user.username }}'</li>
+{% endblock %}
+
+{% block content %}
+    {{ form_start(profileForm) }}
+    {{ form_row(profileForm.username) }}
+    {{ form_row(profileForm.photo) }}
+
+    {% if app.user.photo %}
+        <div class="form-group">
+            <div class="form-text text-muted">
+                <a href="{{ uploadUrl }}{{ app.user.photo.thumbnailPath }}" target="_blank">Показать загруженный файл</a>
+            </div>
+        </div>
+    {% endif %}
+
+    {{ form_row(profileForm.about) }}
+
+    <button class="btn btn-primary">Сохранить</button>
+    {{ form_end(profileForm) }}
+{% endblock %}

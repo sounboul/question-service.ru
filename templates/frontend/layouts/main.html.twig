@@ -6,11 +6,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{% block title %}Question Service{% endblock %}</title>
         {% block stylesheets %}
-            {{ encore_entry_link_tags('main', null, 'frontend') }}
-            {{ encore_entry_link_tags('styles', null, 'frontend') }}
+            {{ encore_entry_link_tags('css/main', null, 'frontend') }}
+            {{ encore_entry_link_tags('css/app', null, 'frontend') }}
         {% endblock %}
         {% block javascripts %}
-            {{ encore_entry_script_tags('app', null, 'frontend') }}
+            {{ encore_entry_script_tags('js/app', null, 'frontend') }}
         {% endblock %}
     </head>
     <body>

@@ -1,12 +1,42 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        {% block stylesheets %}{% endblock %}
-        {% block javascripts %}{% endblock %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
-    </body>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Question Service Backend{% endblock %}</title>
+    {% block stylesheets %}
+        {{ encore_entry_link_tags('css/main', null, 'backend') }}
+        {{ encore_entry_link_tags('css/app', null, 'backend') }}
+    {% endblock %}
+    {% block javascripts %}
+        {{ encore_entry_script_tags('js/app', null, 'backend') }}
+    {% endblock %}
+</head>
+<body>
+<header class="header">
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark" role="navigation">
+        <a class="navbar-brand" href="/" role="banner">Question Service</a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsDefault" aria-controls="navbarsDefault" aria-expanded="false" aria-label="Переключить навигацию">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarsDefault">
+            {% include "frontend/components/header-menu.html.twig" %}
+            {% include "frontend/components/header-search-form.html.twig" %}
+        </div>
+    </nav>
+</header>
+
+<main role="main">
+    {% block body %}{% endblock %}
+</main>
+
+<footer role="contentinfo" class="footer">
+    <div class="container">
+        <span class="text-muted">© Сетевое издание «Question Service», {{ 'now' | date('Y') }}, 16+</span>
+    </div>
+</footer>
+</body>
 </html>

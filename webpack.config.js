@@ -6,13 +6,9 @@ Encore
     .enableSingleRuntimeChunk()
     .setOutputPath('public/assets/')
     .setPublicPath('/assets')
-    .addEntry('app', './assets/assets/js/app.js')
-    .addStyleEntry('main', './assets/assets/css/main.scss')
-    .addStyleEntry('styles', './assets/assets/css/styles.css')
-    .copyFiles({
-        from: './assets/assets/images',
-        to: 'images/[path][name].[ext]',
-    })
+    .addEntry('js/app', './assets/assets/js/app.js')
+    .addStyleEntry('css/main', './assets/assets/css/main.scss')
+    .addStyleEntry('css/app', './assets/assets/css/app.css')
     .autoProvidejQuery()
     .enableSassLoader()
     .enableSourceMaps(false)
@@ -36,13 +32,9 @@ Encore
     .enableSingleRuntimeChunk()
     .setOutputPath('public/assets-backend/')
     .setPublicPath('/assets-backend')
-    .addEntry('app', './assets/assets-backend/js/app.js')
-    .addStyleEntry('main', './assets/assets-backend/css/main.scss')
-    .addStyleEntry('styles', './assets/assets-backend/css/styles.css')
-    .copyFiles({
-        from: './assets/assets-backend/images',
-        to: 'images/[path][name].[ext]',
-    })
+    .addEntry('js/app', './assets/assets-backend/js/app.js')
+    .addStyleEntry('css/main', './assets/assets-backend/css/main.scss')
+    .addStyleEntry('css/app', './assets/assets-backend/css/app.css')
     .autoProvidejQuery()
     .enableSassLoader()
     .enableSourceMaps(false)
