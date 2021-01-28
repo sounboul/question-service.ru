@@ -74,14 +74,14 @@ class CategoryService
      */
     public function updateCategory(Category $category): Category
     {
-        // действия до сохранению категории
+        // обновление timestamp
         $category->updatedTimestamps();
+        // формирование href
+        $category->setHref("/category/".$category->getSlug()."/");
 
-        // сохранение категории
+        // сохранение в БД
         $this->entityManager->persist($category);
         $this->entityManager->flush();
-
-        // действия после сохранения категории
 
         return $category;
     }

@@ -1,9 +1,11 @@
 <?php
 namespace App\DataFixtures;
 
+use App\Entity\Question\Answer;
 use App\Entity\Question\Category;
+use App\Entity\Question\Question;
 use App\Entity\User\User;
-use App\Service\Question\CategoryService;
+use App\Service\Question\QuestionService;
 use App\Service\User\UserService;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -21,9 +23,9 @@ class AppFixtures extends BaseFixture
     private UserService $userService;
 
     /**
-     * @var CategoryService Question Categoru Service
+     * @var QuestionService Question Service
      */
-    private CategoryService $categoryService;
+    private QuestionService $questionService;
 
     /**
      * @var UserPasswordEncoderInterface Password Encoder
@@ -36,22 +38,32 @@ class AppFixtures extends BaseFixture
     private SluggerInterface $slugger;
 
     /**
+     * @var array Список пользователей
+     */
+    private array $users = [];
+
+    /**
+     * @var array Список категорий
+     */
+    private array $categories = [];
+
+    /**
      * Конструктор класса
      *
      * @param UserService $userService
-     * @param CategoryService $categoryService
+     * @param QuestionService $questionService
      * @param UserPasswordEncoderInterface $passwordEncoder Password Encoder
      * @param SluggerInterface $slugger Slugger
      */
     public function __construct(
         UserService $userService,
-        CategoryService $categoryService,
+        QuestionService $questionService,
         UserPasswordEncoderInterface $passwordEncoder,
         SluggerInterface $slugger
     )
     {
         $this->userService = $userService;
-        $this->categoryService = $categoryService;
+        $this->questionService = $questionService;
         $this->passwordEncoder = $passwordEncoder;
         $this->slugger = $slugger;
     }
@@ -89,7 +101,7 @@ class AppFixtures extends BaseFixture
             $user->setPlainPassword('1234567890', $this->passwordEncoder);
             $user->setAbout("Всем привет!");
 
-            $this->userService->updateUser($user);
+            $this->users[] = $this->userService->updateUser($user);
         }
 
         // и несколько сотен обычных пользователей
@@ -101,7 +113,7 @@ class AppFixtures extends BaseFixture
             $user->setPlainPassword($this->faker->password(8), $this->passwordEncoder);
             $user->setAbout($this->faker->realText());
 
-            $this->userService->updateUser($user);
+            $this->users[] = $this->userService->updateUser($user);
         }
     }
 
@@ -116,10 +128,9 @@ class AppFixtures extends BaseFixture
             $category->setStatus(Category::STATUS_ACTIVE);
             $category->setTitle($this->faker->name);
             $category->setSlug($this->slugger->slug($category->getTitle()));
-            $category->setHref("/category/".$category->getSlug()."/");
             $category->setTotalQuestions(0);
 
-            $this->categoryService->updateCategory($category);
+            $this->categories[] = $this->questionService->updateCategory($category);
         }
     }
 
@@ -128,6 +139,32 @@ class AppFixtures extends BaseFixture
      */
     private function loadQuestionFixtures()
     {
+        for ($i = 0; $i < 500; $i++) {
+            // создание вопросы
+            $question = new Question();
+            $question->setStatus(Question::STATUS_ACTIVE);
+            $question->setUser($this->users[array_rand($this->users)]);
+            $question->setCategory($this->categories[array_rand($this->categories)]);
+            $question->setTitle($this->faker->text(100));
+            $question->setText($i % 2 == 0 ? $this->faker->paragraph() : '');
+            $question->setSlug($this->slugger->slug($question->getTitle()));
+            $question->setHref('');
+            $question->setCreatedByIp($this->faker->ipv4);
 
+            $this->questionService->updateQuestion($question);
+
+            // создание ответов к вопросу
+            $count = rand(0, 20);
+            for ($n = 0; $n < $count; $n++) {
+                $answer = new Answer();
+                $answer->setStatus(Answer::STATUS_ACTIVE);
+                $answer->setUser($this->users[array_rand($this->users)]);
+                $answer->setQuestion($question);
+                $answer->setText($this->faker->paragraph);
+                $answer->setCreatedByIp($this->faker->ipv4);
+
+                $this->questionService->updateAnswer($answer);
+            }
+        }
     }
 }
