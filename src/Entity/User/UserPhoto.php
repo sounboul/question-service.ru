@@ -15,7 +15,7 @@ use Imagine\Image\ManipulatorInterface;
  * @ORM\Table(
  *     name="`user_photo`",
  *     indexes={
- *          @Index(name="status", columns={"status"})
+ *          @Index(name="user_photo_status", columns={"status"})
  *     }
  * )
  */

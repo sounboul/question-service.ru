@@ -16,6 +16,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Entity/User'
                 prefix: 'App\Entity\User'
                 alias: App\User
+            App\Question:
+                is_bundle: false
+                type: annotation
+                dir: '%kernel.project_dir%/src/Entity/Question'
+                prefix: 'App\Entity\Question'
+                alias: App\Question
         dql:
             string_functions:
                 # @see https://github.com/ScientaNL/DoctrineJsonFunctions#postgresql-93-json-operators

@@ -17,7 +17,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @ORM\Table(
  *     name="`user`",
  *     indexes={
- *          @Index(name="status", columns={"status"})
+ *          @Index(name="user_status", columns={"status"})
  *     }
  * )
  * @UniqueEntity(fields={"email"}, message="Пользователь с указанным E-mail адресом уже существует")
