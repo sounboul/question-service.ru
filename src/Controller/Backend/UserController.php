@@ -5,7 +5,9 @@ use App\Exception\AppException;
 use App\Exception\ServiceException;
 use App\Form\Backend\UserSearchFormType;
 use App\Form\User\Backend\RegistrationFormType;
+use App\Form\User\Backend\UserUpdateFormType;
 use App\Form\User\ProfileFormType;
+use App\Service\User\UserPhotoService;
 use App\Service\User\UserService;
 use App\Utils\User\PasswordGenerator;
 use Symfony\Component\Routing\Annotation\Route;
@@ -26,13 +28,23 @@ final class UserController extends AppController
     private UserService $userService;
 
     /**
+     * @var UserPhotoService User Photo Service
+     */
+    private UserPhotoService $userPhotoService;
+
+    /**
      * Конструктор
      *
      * @param UserService $userService
+     * @param UserPhotoService $userPhotoService
      */
-    public function __construct(UserService $userService)
+    public function __construct(
+        UserService $userService,
+        UserPhotoService $userPhotoService
+    )
     {
         $this->userService = $userService;
+        $this->userPhotoService = $userPhotoService;
     }
 
     /**
@@ -131,16 +143,22 @@ final class UserController extends AppController
     {
         $user = $this->userService->getUserById($id);
 
-        $form = $this->createForm(ProfileFormType::class, $user);
+        $form = $this->createForm(UserUpdateFormType::class, $user);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $this->userService->updateProfile(
-                    $user->getEmail(),
-                    $form->get('username')->getData(),
-                    $form->get('about')->getData(),
-                    $request->files->get('profile_form')['photo'] ?? null
-                );
+                $user = $this->userService->getUserById($this->getUser()->getId());
+
+                $user->setEmail($form->get('email')->getData());
+                $user->setUsername($form->get('username')->getData());
+                $user->setAbout($form->get('about')->getData());
+
+                $photo = $request->files->get('profile_form')['photo'] ?? null;
+                if (!empty($photo)) {
+                    $user->setPhoto($this->userPhotoService->uploadPhoto($photo, $user));
+                }
+
+                $this->userService->updateUser($user);
 
                 $this->addFlash('success', 'Профиль был успешно сохранен!');
 

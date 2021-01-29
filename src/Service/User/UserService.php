@@ -357,30 +357,6 @@ class UserService
     }
 
     /**
-     * Обновить профиль пользователя
-     *
-     * @param string $email E-mail пользователя
-     * @param string $username Имя пользователя
-     * @param string|null $about Информация о пользователе
-     * @param UploadedFile|null $photo Загруженый файл аватарки
-     * @return User Пользователь
-     * @throws ServiceException|EntityValidationException
-     */
-    public function updateProfile(string $email, string $username, ?string $about, ?UploadedFile $photo): User
-    {
-        $user = $this->getUserByEmail($email);
-
-        $user->setUsername($username);
-        $user->setAbout($about);
-
-        if (!empty($photo)) {
-            $user->setPhoto($this->userPhotoService->uploadPhoto($photo, $user));
-        }
-
-        return $this->updateUser($user);
-    }
-
-    /**
      * @param int $id Идентификатор
      * @param bool $isActive Выборка только активного пользователя
      * @return User Получить пользователя по его идентификатору
