@@ -1,6 +1,7 @@
 <?php
 namespace App\Entity;
 
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -9,21 +10,21 @@ use Doctrine\ORM\Mapping as ORM;
 trait TimestampableEntity
 {
     /**
-     * @var \DateTime|null Created At
+     * @var DateTime|null Created At
      *
      * @ORM\Column(type="datetime", nullable=true)
      */
     protected $createdAt;
 
     /**
-     * @var \DateTime|null Updated At
+     * @var DateTime|null Updated At
      *
      * @ORM\Column(type="datetime", nullable=true)
      */
     protected $updatedAt;
 
     /**
-     * @return \DateTime|null Получить дату и время создания сущности
+     * @return DateTime|null Получить дату и время создания сущности
      */
     public function getCreatedAt()
     {
@@ -33,10 +34,10 @@ trait TimestampableEntity
     /**
      * Установить дату и время создания сущности
      *
-     * @param \DateTime|null $createdAt
+     * @param DateTime|null $createdAt
      * @return self
      */
-    public function setCreatedAt($createdAt) : self
+    public function setCreatedAt(?DateTime $createdAt) : self
     {
         $this->createdAt = $createdAt;
 
@@ -46,7 +47,7 @@ trait TimestampableEntity
     /**
      * Получить дату и время изменения сущности
      *
-     * @return \DateTime|null
+     * @return DateTime|null
      */
     public function getUpdatedAt()
     {
@@ -56,10 +57,10 @@ trait TimestampableEntity
     /**
      * Установить дату и время изменения сущности
      *
-     * @param \DateTime|null $updatedAt
+     * @param DateTime|null $updatedAt
      * @return self
      */
-    public function setUpdatedAt($updatedAt) : self
+    public function setUpdatedAt(?DateTime $updatedAt) : self
     {
         $this->updatedAt = $updatedAt;
 
@@ -68,13 +69,16 @@ trait TimestampableEntity
 
     /**
      * Установить дату и время создания и обновления сущности
+     *
+     * @ORM\PrePersist
+     * @ORM\PreUpdate
      */
     public function updatedTimestamps() : void
     {
-        $this->setUpdatedAt(new \DateTime('now'));
+        $this->setUpdatedAt(new DateTime('now'));
 
         if ($this->getCreatedAt() == null) {
-            $this->setCreatedAt(new \DateTime('now'));
+            $this->setCreatedAt(new DateTime('now'));
         }
     }
 }

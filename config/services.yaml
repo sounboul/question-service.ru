@@ -47,3 +47,22 @@ services:
         arguments:
             $targetPath: "%app.uploadPath%"
             $folderPath: "/images"
+
+    # Entity Listeners
+    # @see https://www.doctrine-project.org/projects/doctrine-orm/en/2.7/reference/events.html
+    App\EventListener\User\UserListener:
+        tags:
+            - { name: doctrine.orm.entity_listener, event: preUpdate, entity: App\Entity\User\User, lazy: true }
+    App\EventListener\Question\CategoryListener:
+        tags:
+            - { name: doctrine.orm.entity_listener, event: postPersist, entity: App\Entity\Question\Category, lazy: true }
+            - { name: doctrine.orm.entity_listener, event: preUpdate, entity: App\Entity\Question\Category, lazy: true }
+    App\EventListener\Question\QuestionListener:
+        tags:
+            - { name: doctrine.orm.entity_listener, event: postPersist, entity: App\Entity\Question\Question, lazy: true }
+            - { name: doctrine.orm.entity_listener, event: preUpdate, entity: App\Entity\Question\Question, lazy: true }
+            - { name: doctrine.orm.entity_listener, event: postUpdate, entity: App\Entity\Question\Question, lazy: true }
+    App\EventListener\Question\AnswerListener:
+        tags:
+            - { name: doctrine.orm.entity_listener, event: postPersist, entity: App\Entity\Question\Answer, lazy: true }
+            - { name: doctrine.orm.entity_listener, event: postUpdate, entity: App\Entity\Question\Answer, lazy: true }

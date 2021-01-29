@@ -19,6 +19,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *          @Index(name="question_answer_status", columns={"status"})
  *     }
  * )
+ * @ORM\HasLifecycleCallbacks
  */
 class Answer
 {

@@ -67,6 +67,22 @@ class CategoryService
     }
 
     /**
+     * Обновить количесто вопросов у категории
+     *
+     * @param int $id Идентификатор категории
+     * @param int $count Количество вопросов
+     * @return Category Категория
+     * @throws ServiceException
+     */
+    public function updateTotalQuestionsCount(int $id, int $count): Category
+    {
+        $category = $this->getCategoryById($id);
+        $category->setTotalQuestions($count);
+
+        return $this->updateCategory($category);
+    }
+
+    /**
      * Процесс сохранения категории
      *
      * @param Category $category Category
@@ -74,12 +90,6 @@ class CategoryService
      */
     public function updateCategory(Category $category): Category
     {
-        // обновление timestamp
-        $category->updatedTimestamps();
-        // формирование href
-        $category->setHref("/category/".$category->getSlug()."/");
-
-        // сохранение в БД
         $this->entityManager->persist($category);
         $this->entityManager->flush();
 

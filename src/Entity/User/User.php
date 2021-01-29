@@ -20,6 +20,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *          @Index(name="user_status", columns={"status"})
  *     }
  * )
+ * @ORM\HasLifecycleCallbacks
  * @UniqueEntity(fields={"email"}, message="Пользователь с указанным E-mail адресом уже существует")
  */
 class User implements UserInterface

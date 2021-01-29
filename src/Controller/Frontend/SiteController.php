@@ -12,7 +12,7 @@ final class SiteController extends AppController
     /**
      * Главная страница приложения
      *
-     * @Route("/", name="homepage")
+     * @Route("/home/", name="homepage")
      */
     public function index(): Response
     {

@@ -18,6 +18,7 @@ use Imagine\Image\ManipulatorInterface;
  *          @Index(name="user_photo_status", columns={"status"})
  *     }
  * )
+ * @ORM\HasLifecycleCallbacks
  */
 class UserPhoto
 {

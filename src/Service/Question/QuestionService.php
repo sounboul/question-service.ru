@@ -1,8 +1,6 @@
 <?php
 namespace App\Service\Question;
 
-use App\Entity\Question\Answer;
-use App\Entity\Question\Category;
 use App\Entity\Question\Question;
 use App\Exception\ServiceException;
 use App\Repository\Question\QuestionRepository;
@@ -13,16 +11,6 @@ use Doctrine\ORM\EntityManagerInterface;
  */
 class QuestionService
 {
-    /**
-     * @var CategoryService Category Service
-     */
-    private CategoryService $categoryService;
-
-    /**
-     * @var AnswerService Answer Service
-     */
-    private AnswerService $answerService;
-
     /**
      * @var QuestionRepository Question Repository
      */
@@ -36,20 +24,14 @@ class QuestionService
     /**
      * Конструктор сервиса
      *
-     * @param CategoryService $categoryService
-     * @param AnswerService $answerService
      * @param QuestionRepository $questionRepository
      * @param EntityManagerInterface $entityManager
      */
     public function __construct(
-        CategoryService $categoryService,
-        AnswerService $answerService,
         QuestionRepository $questionRepository,
         EntityManagerInterface $entityManager
     )
     {
-        $this->categoryService = $categoryService;
-        $this->answerService = $answerService;
         $this->questionRepository = $questionRepository;
         $this->entityManager = $entityManager;
     }
@@ -70,22 +52,28 @@ class QuestionService
     }
 
     /**
-     * Процесс сохранения категории
-     *
-     * @param Category $category Category
-     * @return Category Сохраненная категория
+     * @param int $categoryId Идентификатор категории
+     * @return int Количество вопросов в указанной категории
      */
-    public function updateCategory(Category $category): Category
+    public function countQuestionsByCategoryId(int $categoryId): int
     {
-        // обновление количества вопросов в категории
-        if (!empty($category->getCreatedAt())) {
-            $category->setTotalQuestions(
-                $this->questionRepository->countQuestionsByCategoryId($category->getId())
-            );
-        }
+        return $this->questionRepository->countQuestionsByCategoryId($categoryId);
+    }
 
-        // сохранение категории
-        return $this->categoryService->updateCategory($category);
+    /**
+     * Обновить количесто ответов у вопроса
+     *
+     * @param int $id Идентификатор вопроса
+     * @param int $count Количество ответов
+     * @return Question Вопрос
+     * @throws ServiceException
+     */
+    public function updateTotalAnswersCount(int $id, int $count): Question
+    {
+        $question = $this->getQuestionById($id);
+        $question->setTotalAnswers($count);
+
+        return $this->updateQuestion($question);
     }
 
     /**
@@ -96,45 +84,9 @@ class QuestionService
      */
     public function updateQuestion(Question $question): Question
     {
-        // обновлние totalAnswers у вопроса
-        if (!empty($question->getCreatedAt())) {
-            $question->setTotalAnswers($this->answerService->countAnswersByQuestionId($question->getId()));
-        }
-
-        // обновление timestamp
-        $question->updatedTimestamps();
-
-        // сохранение в БД
         $this->entityManager->persist($question);
         $this->entityManager->flush();
-
-        // формирование href
-        $question->setHref("/answer/".$question->getId()."_".$question->getSlug()."/");
-
-        // повторное сохранение в БД
-        $this->entityManager->persist($question);
-        $this->entityManager->flush();
-
-        // обновление категории
-        $this->updateCategory($question->getCategory());
 
         return $question;
-    }
-
-    /**
-     * Процесс сохранения ответа
-     *
-     * @param Answer $answer Answer
-     * @return Answer Сохраненный ответ
-     */
-    public function updateAnswer(Answer $answer): Answer
-    {
-        // обновление ответа
-        $answer = $this->answerService->updateAnswer($answer);
-
-        // обновление вопроса
-        $this->updateQuestion($answer->getQuestion());
-
-        return $answer;
     }
 }

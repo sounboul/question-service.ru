@@ -68,10 +68,6 @@ class AnswerService
      */
     public function updateAnswer(Answer $answer): Answer
     {
-        // обновление timestamp
-        $answer->updatedTimestamps();
-
-        // сохранение в БД
         $this->entityManager->persist($answer);
         $this->entityManager->flush();
 

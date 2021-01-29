@@ -4,7 +4,6 @@ namespace App\Entity\Question;
 use App\Entity\TimestampableEntity;
 use App\Exception\EntityValidationException;
 use App\Repository\Question\CategoryRepository;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Index as Index;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -20,6 +19,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *     }
  * )
  * @UniqueEntity(fields={"slug"}, message="Категория с указанным slug уже существует")
+ * @ORM\HasLifecycleCallbacks
  */
 class Category
 {

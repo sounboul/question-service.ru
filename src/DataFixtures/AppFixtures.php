@@ -5,7 +5,9 @@ use App\Entity\Question\Answer;
 use App\Entity\Question\Category;
 use App\Entity\Question\Question;
 use App\Entity\User\User;
+use App\Service\Question\CategoryService;
 use App\Service\Question\QuestionService;
+use App\Service\Question\AnswerService;
 use App\Service\User\UserService;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -23,9 +25,19 @@ class AppFixtures extends BaseFixture
     private UserService $userService;
 
     /**
+     * @var CategoryService Category Service
+     */
+    private CategoryService $categoryService;
+
+    /**
      * @var QuestionService Question Service
      */
     private QuestionService $questionService;
+
+    /**
+     * @var AnswerService Answer Service
+     */
+    private AnswerService $answerService;
 
     /**
      * @var UserPasswordEncoderInterface Password Encoder
@@ -52,18 +64,24 @@ class AppFixtures extends BaseFixture
      *
      * @param UserService $userService
      * @param QuestionService $questionService
+     * @param CategoryService $categoryService
+     * @param AnswerService $answerService
      * @param UserPasswordEncoderInterface $passwordEncoder Password Encoder
      * @param SluggerInterface $slugger Slugger
      */
     public function __construct(
         UserService $userService,
         QuestionService $questionService,
+        CategoryService $categoryService,
+        AnswerService $answerService,
         UserPasswordEncoderInterface $passwordEncoder,
         SluggerInterface $slugger
     )
     {
         $this->userService = $userService;
         $this->questionService = $questionService;
+        $this->categoryService = $categoryService;
+        $this->answerService = $answerService;
         $this->passwordEncoder = $passwordEncoder;
         $this->slugger = $slugger;
     }
@@ -105,7 +123,7 @@ class AppFixtures extends BaseFixture
         }
 
         // и несколько сотен обычных пользователей
-        for ($i = 0; $i < 300; $i++) {
+        for ($i = 0; $i < 500; $i++) {
             $user = new User();
             $user->setUsername($this->faker->name);
             $user->setStatus(User::STATUS_ACTIVE);
@@ -128,9 +146,10 @@ class AppFixtures extends BaseFixture
             $category->setStatus(Category::STATUS_ACTIVE);
             $category->setTitle($this->faker->name);
             $category->setSlug($this->slugger->slug($category->getTitle()));
+            $category->setHref('');
             $category->setTotalQuestions(0);
 
-            $this->categories[] = $this->questionService->updateCategory($category);
+            $this->categories[] = $this->categoryService->updateCategory($category);
         }
     }
 
@@ -139,7 +158,7 @@ class AppFixtures extends BaseFixture
      */
     private function loadQuestionFixtures()
     {
-        for ($i = 0; $i < 500; $i++) {
+        for ($i = 0; $i < 5000; $i++) {
             // создание вопросы
             $question = new Question();
             $question->setStatus(Question::STATUS_ACTIVE);
@@ -163,7 +182,7 @@ class AppFixtures extends BaseFixture
                 $answer->setText($this->faker->paragraph);
                 $answer->setCreatedByIp($this->faker->ipv4);
 
-                $this->questionService->updateAnswer($answer);
+                $this->answerService->updateAnswer($answer);
             }
         }
     }

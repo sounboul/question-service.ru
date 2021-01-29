@@ -125,14 +125,8 @@ class UserPhotoService
      */
     public function updatePhoto(UserPhoto $photo): UserPhoto
     {
-        // действия до сохранения фотографии
-        $photo->updatedTimestamps();
-
-        // сохранение фотографии
         $this->entityManager->persist($photo);
         $this->entityManager->flush();
-
-        // действия после сохранения фотографии
 
         return $photo;
     }

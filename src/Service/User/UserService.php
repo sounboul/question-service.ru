@@ -515,6 +515,26 @@ class UserService
     }
 
     /**
+     * Пользователь изменил E-mail адрес
+     *
+     * @param int $id Идентификатор пользователя
+     * @return void
+     * @throws \App\Exception\ServiceException
+     */
+    public function userEmailChanged(int $id): void
+    {
+        $user = $this->getUserById($id);
+        if ($user->getEmailSubscribed()) {
+            $user->setEmailSubscribed(false);
+            $user->setEmailVerified(false);
+            $this->sendEmailSubscribed($user->getEmail());
+        } else {
+            $user->setEmailVerified(false);
+            $this->sendEmailConfirmation($user->getEmail());
+        }
+    }
+
+    /**
      * Процесс сохранения пользователя
      *
      * @param User $user Пользователь для сохранения
@@ -522,14 +542,8 @@ class UserService
      */
     public function updateUser(User $user): User
     {
-        // действия до сохранения пользователя
-        $user->updatedTimestamps();
-
-        // сохранение пользователя
         $this->entityManager->persist($user);
         $this->entityManager->flush();
-
-        // действия после сохранения пользователя
 
         return $user;
     }
