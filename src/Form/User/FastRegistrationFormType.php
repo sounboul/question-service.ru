@@ -1,15 +1,16 @@
 <?php
-namespace App\Form\User\Backend;
+namespace App\Form\User;
 
+use App\Dto\User\FastRegistrationForm;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
- * Форма для регистрации пользователя
+ * Форма для быстрой регистрации пользователя
  */
-class RegistrationFormType extends AbstractType
+class FastRegistrationFormType extends AbstractType
 {
     /**
      * @inheritdoc
@@ -28,6 +29,8 @@ class RegistrationFormType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults([]);
+        $resolver->setDefaults([
+            'data_class' => FastRegistrationForm::class,
+        ]);
     }
 }

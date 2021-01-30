@@ -1,6 +1,7 @@
 <?php
 namespace App\Controller\Frontend;
 
+use App\Dto\User\ProfileForm;
 use App\Exception\AppException;
 use App\Form\User\ChangePasswordFormType;
 use App\Form\User\ProfileFormType;
@@ -23,23 +24,15 @@ final class UserProfileController extends AppController
     private UserService $userService;
 
     /**
-     * @var UserPhotoService User Photo Service
-     */
-    private UserPhotoService $userPhotoService;
-
-    /**
      * Конструктор
      *
      * @param UserService $userService
-     * @param UserPhotoService $userPhotoService
      */
     public function __construct(
-        UserService $userService,
-        UserPhotoService $userPhotoService
+        UserService $userService
     )
     {
         $this->userService = $userService;
-        $this->userPhotoService = $userPhotoService;
     }
 
     /**
@@ -51,20 +44,17 @@ final class UserProfileController extends AppController
      */
     public function index(Request $request): Response
     {
-        $form = $this->createForm(ProfileFormType::class, $this->getUser());
+        $user = $this->getUser();
+
+        $formData = new ProfileForm();
+        $formData->username = $user->getUsername();
+        $formData->about = $user->getAbout();
+
+        $form = $this->createForm(ProfileFormType::class, $formData);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $user = $this->userService->getUserById($this->getUser()->getId());
-                $user->setUsername($form->get('username')->getData());
-                $user->setAbout($form->get('about')->getData());
-
-                $photo = $request->files->get('profile_form')['photo'] ?? null;
-                if (!empty($photo)) {
-                    $user->setPhoto($this->userPhotoService->uploadPhoto($photo, $user));
-                }
-
-                $this->userService->updateUser($user);
+                $this->userService->updateProfile($user->getId(), $form->getData());
 
                 $this->addFlash('success', 'Профиль был успешно сохранен!');
 

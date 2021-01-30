@@ -12,6 +12,11 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use App\Dto\User\RegistrationForm;
+use App\Dto\User\FastRegistrationForm;
+use App\Dto\User\UserForm;
+use App\Dto\User\ProfileForm;
+use App\Dto\User\UserSearchForm;
 
 /**
  * Сервис для работы с пользователями
@@ -72,29 +77,30 @@ class UserService
     /**
      * Регистрация пользователя. Классический вариант.
      *
-     * @param string $email E-mail адрес пользователя
-     * @param string $password Пароль в открытом виде
+     * @param RegistrationForm $form Форма регистрации
      * @param bool $sendEmailConfirmation Отправить письмо для подтверждения E-mail адреса?
-     * @return User Пользователь
+     * @return User Зарегистрированный пользователь
      * @throws ServiceException|EntityValidationException
      */
-    public function registration(string $email, string $password, bool $sendEmailConfirmation = true) : User
+    public function create(RegistrationForm $form, bool $sendEmailConfirmation = true): User
     {
-        $email = trim(mb_strtolower($email));
+        if (empty($form->agreeTerms)) {
+            throw new ServiceException("Необходимо подтвердить согласие с правилами сайта");
+        }
+
+        $email = trim(mb_strtolower($form->email));
         $user = $this->userRepository->findOneByEmail($email, false);
         if (!empty($user)) {
             throw new ServiceException("Пользователь с таким E-mail адресом уже существует");
         }
 
-        // инициализация сущности
         $user = new User();
         $user->setUsername(ucfirst(explode('@', $email)[0]));
         $user->setStatus($user::STATUS_ACTIVE);
         $user->setEmail($email);
-        $user->setPlainPassword($password, $this->passwordEncoder);
+        $user->setPlainPassword($form->password, $this->passwordEncoder);
 
-        // сохранение сущности
-        $this->updateUser($user);
+        $this->save($user);
 
         // отправка письма для подтверждения E-mail адреса
         if ($sendEmailConfirmation) {
@@ -108,19 +114,23 @@ class UserService
      * Быстрая регистрация пользователя на основе только E-mail адреса.
      * Письмо с подтверждением приходит с указанием пароля.
      *
-     * @param string $email E-mail адрес пользователя
+     * @param FastRegistrationForm $form Форма регистрации
      * @param bool $sendEmailConfirmation Отправить письмо для подтверждения E-mail адреса?
-     * @return User Пользователь
+     * @return User Зарегистрированный пользователь
      * @throws ServiceException|EntityValidationException
      */
-    public function fastRegistration(string $email, bool $sendEmailConfirmation = true) : User
+    public function fastCreate(FastRegistrationForm $form, bool $sendEmailConfirmation = true): User
     {
-        $password = PasswordGenerator::generate();
-        $user = $this->registration($email, $password, false);
+        $dto = new RegistrationForm();
+        $dto->email = $form->email;
+        $dto->password = PasswordGenerator::generate();
+        $dto->agreeTerms = true;
+
+        $user = $this->create($dto, false);
 
         // отправка письма для подтверждения E-mail адреса (с паролем)
         if ($sendEmailConfirmation) {
-            $this->sendEmailConfirmation($user->getEmail(), $password);
+            $this->sendEmailConfirmation($user->getEmail(), $dto->password);
         }
 
         return $user;
@@ -149,7 +159,7 @@ class UserService
 
         // сохраняем token пользователю
         $user->setEmailVerifiedToken($token);
-        $this->updateUser($user);
+        $this->save($user);
 
         // отправка письма пользователю
         $this->userNotification->sendEmail(
@@ -190,7 +200,7 @@ class UserService
         $user->setEmailVerified(true);
         $user->setEmailVerifiedToken(null);
 
-        return $this->updateUser($user);
+        return $this->save($user);
     }
 
     /**
@@ -215,7 +225,7 @@ class UserService
 
         // сохраняем token пользователю
         $user->setEmailSubscribedToken($token);
-        $this->updateUser($user);
+        $this->save($user);
 
         // отправка письма пользователю
         $this->userNotification->sendEmail(
@@ -257,11 +267,10 @@ class UserService
         $user->setEmailVerified(true);
         $user->setEmailVerifiedToken(null);
 
-        // @TODO Формирование токена для отписки на рассылки
         $user->setEmailSubscribed(true);
         $user->setEmailSubscribedToken(null);
 
-        return $this->updateUser($user);
+        return $this->save($user);
     }
 
     /**
@@ -283,7 +292,7 @@ class UserService
 
         // сохраняем token пользователю
         $user->setPasswordRestoreToken($token);
-        $this->updateUser($user);
+        $this->save($user);
 
         // отправка письма пользователю
         $this->userNotification->sendEmail(
@@ -311,7 +320,7 @@ class UserService
         $user->setPlainPassword($password, $this->passwordEncoder);
         $user->setPasswordRestoreToken(null);
 
-        return $this->updateUser($user);
+        return $this->save($user);
     }
 
     /**
@@ -327,7 +336,7 @@ class UserService
         $user = $this->getUserById($id);
         $user->setPlainPassword($password, $this->passwordEncoder);
 
-        return $this->updateUser($user);
+        return $this->save($user);
     }
 
     /**
@@ -357,7 +366,7 @@ class UserService
     }
 
     /**
-     * @param int $id Идентификатор
+     * @param int $id Идентификатор пользователя
      * @param bool $isActive Выборка только активного пользователя
      * @return User Получить пользователя по его идентификатору
      * @throws ServiceException В случае если пользователь не найден
@@ -366,7 +375,7 @@ class UserService
     {
         $user = $this->userRepository->findOneById($id, $isActive);
         if (empty($user)) {
-            throw new ServiceException("Не найден пользователь с указанным идентификатором");
+            throw new ServiceException("Не найден пользователь с ID '$id'");
         }
 
         return $user;
@@ -383,7 +392,7 @@ class UserService
         $email = trim(mb_strtolower($email));
         $user = $this->userRepository->findOneByEmail($email, $isActive);
         if (empty($user)) {
-            throw new ServiceException("Не найден пользователь с указанным E-mail адресом");
+            throw new ServiceException("Не найден пользователь с e-mail '$email'");
         }
 
         return $user;
@@ -392,44 +401,27 @@ class UserService
     /**
      * Листинг пользователей с фильтрацией
      *
-     * @param array $filters Критерии фильтрации
-     * @param array $orderBy Критерии сортировки
+     * @param UserSearchForm $form Форма поиска
      * @param int $page Номер страницы
      * @param int $pageSize Количество записей на страницу
      * @return Paginator Результат выборка с постраничным выводом
      * @throws ServiceException
      */
-    public function listing(array $filters, array $orderBy = [], $page = 1, $pageSize = 30): Paginator
+    public function listing(UserSearchForm $form, $page = 1, $pageSize = 30): Paginator
     {
-        $listingFilters = [];
-
-        if (!empty($filters['id'])) {
-            $listingFilters['id'] = (int) $filters['id'];
-        }
-
-        if (!empty($filters['username'])) {
-            $listingFilters['username'] = (string) $filters['username'];
-        }
-
-        if (!empty($filters['status'])) {
-            $listingFilters['status'] = (string) $filters['status'];
-            if (!isset(User::$statusList[$listingFilters['status']])) {
-                throw new ServiceException("У пользователей нет статуса '{$listingFilters['status']}'");
+        if (!empty($form->status)) {
+            if (!isset(User::$statusList[$form->status])) {
+                throw new ServiceException("У пользователей нет статуса '$form->status'");
             }
         }
 
-        if (!empty($filters['email'])) {
-            $listingFilters['email'] = (string) $filters['email'];
-        }
-
-        if (!empty($filters['role'])) {
-            $listingFilters['role'] = (string) $filters['role'];
-            if (!isset(User::$roleList[$listingFilters['role']])) {
-                throw new ServiceException("У пользователей нет роли '{$listingFilters['status']}'");
+        if (!empty($form->role)) {
+            if (!isset(User::$roleList[$form->role])) {
+                throw new ServiceException("У пользователей нет роли '$form->role'");
             }
         }
 
-        $query = $this->userRepository->listingFilter($listingFilters, $orderBy);
+        $query = $this->userRepository->listingFilter($form);
         return (new Paginator($query, $pageSize))->paginate($page);
     }
 
@@ -440,7 +432,7 @@ class UserService
      * @return User Удаленный пользователь
      * @throws ServiceException|EntityValidationException
      */
-    public function deleteUser(int $id): User
+    public function delete(int $id): User
     {
         $user = $this->getUserById($id, false);
         if ($user->isDeleted()) {
@@ -449,7 +441,7 @@ class UserService
 
         $user->setStatus(User::STATUS_DELETED);
 
-        return $this->updateUser($user);
+        return $this->save($user);
     }
 
     /**
@@ -459,7 +451,7 @@ class UserService
      * @return User Восстановенный пользователь
      * @throws ServiceException|EntityValidationException
      */
-    public function restoreUser(int $id): User
+    public function restore(int $id): User
     {
         $user = $this->getUserById($id, false);
         if ($user->isActive()) {
@@ -468,7 +460,7 @@ class UserService
 
         $user->setStatus(User::STATUS_ACTIVE);
 
-        return $this->updateUser($user);
+        return $this->save($user);
     }
 
     /**
@@ -478,7 +470,7 @@ class UserService
      * @return User Заблокированный пользователь
      * @throws ServiceException|EntityValidationException
      */
-    public function blockedUser(int $id): User
+    public function blocked(int $id): User
     {
         $user = $this->getUserById($id);
         if (!$user->isActive()) {
@@ -487,7 +479,7 @@ class UserService
 
         $user->setStatus(User::STATUS_BLOCKED);
 
-        return $this->updateUser($user);
+        return $this->save($user);
     }
 
     /**
@@ -511,12 +503,67 @@ class UserService
     }
 
     /**
+     * Обновить пользователя
+     *
+     * @param int $id Идентификатор пользователя
+     * @param UserForm $form Форма
+     * @return User Обновленный пользователь
+     * @throws ServiceException|EntityValidationException
+     */
+    public function updateUser(int $id, UserForm $form): User
+    {
+        $user = $this->getUserById($id);
+
+        $email = mb_strtolower($form->email);
+        if ($user->getEmail() !== $email) {
+            $checkEmail = $this->getUserByEmail($email, false);
+            if (!empty($checkEmail)) {
+                throw new ServiceException("E-mail адрес '$email' уже используется другим пользователем");
+            }
+        }
+
+        $user->setEmail($email);
+        $user->setUsername($form->username);
+        $user->setAbout($form->about);
+
+        if (!empty($form->photo)) {
+            $user->setPhoto($this->userPhotoService->uploadPhoto($form->photo, $user));
+        }
+
+        $user->setRoles($form->roles);
+
+        return $this->save($user);
+    }
+
+    /**
+     * Обновить профиль пользователя
+     *
+     * @param int $id Идентификатор пользователя
+     * @param ProfileForm $form Форма
+     * @return User Обновленный пользователь
+     * @throws ServiceException|EntityValidationException
+     */
+    public function updateProfile(int $id, ProfileForm $form): User
+    {
+        $user = $this->getUserById($id);
+
+        $user->setUsername($form->username);
+        $user->setAbout($form->about);
+
+        if (!empty($form->photo)) {
+            $user->setPhoto($this->userPhotoService->uploadPhoto($form->photo, $user));
+        }
+
+        return $this->save($user);
+    }
+
+    /**
      * Процесс сохранения пользователя
      *
      * @param User $user Пользователь для сохранения
      * @return User Сохраненный пользователь
      */
-    public function updateUser(User $user): User
+    private function save(User $user): User
     {
         $this->entityManager->persist($user);
         $this->entityManager->flush();

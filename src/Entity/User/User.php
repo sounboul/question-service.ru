@@ -320,6 +320,14 @@ class User implements UserInterface
     }
 
     /**
+     * @return array Список возможных ролей
+     */
+    public static function getRolesList(): array
+    {
+        return array_flip(self::$roleList);
+    }
+
+    /**
      * Установить роли пользователя
      *
      * @param array $roles Список ролей

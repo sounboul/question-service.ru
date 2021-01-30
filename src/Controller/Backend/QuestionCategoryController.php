@@ -8,6 +8,7 @@ use App\Form\Question\CategorySeachFormType;
 use App\Service\Question\CategoryService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Dto\Question\CategoryForm;
 
@@ -111,11 +112,15 @@ class QuestionCategoryController extends AppController
      *
      * @param int $id Идентификатор категории
      * @return Response
-     * @throws ServiceException
      */
     public function view(int $id): Response
     {
-        $category = $this->categoryService->getById($id);
+        try {
+            $category = $this->categoryService->getById($id);
+        } catch (ServiceException $e) {
+            throw new NotFoundHttpException($e->getMessage());
+        }
+
         return $this->render('question-category/view.html.twig', [
             'category' => $category,
         ]);
@@ -133,7 +138,11 @@ class QuestionCategoryController extends AppController
      */
     public function update(Request $request, int $id): Response
     {
-        $category = $this->categoryService->getById($id);
+        try {
+            $category = $this->categoryService->getById($id);
+        } catch (ServiceException $e) {
+            throw new NotFoundHttpException($e->getMessage());
+        }
 
         $formData = new CategoryForm();
         $formData->title = $category->getTitle();

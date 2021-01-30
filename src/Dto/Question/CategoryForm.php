@@ -12,7 +12,10 @@ class CategoryForm
      * @var string Название категории
      *
      * @Assert\NotBlank()
-     * @Assert\Length(min=3, max=100)
+     * @Assert\Length(
+     *     min=3,
+     *     max=100
+     * )
      */
     public string $title;
 
@@ -20,8 +23,13 @@ class CategoryForm
      * @var string Slug категории
      *
      * @Assert\NotBlank()
-     * @Assert\Length(min=3, max=100)
-     * @Assert\Regex(pattern="/^[-_\w]+$/")
+     * @Assert\Length(
+     *     min=3,
+     *     max=100
+     * )
+     * @Assert\Regex(
+     *     pattern="/^[-_\w]+$/"
+     * )
      */
     public string $slug;
 }

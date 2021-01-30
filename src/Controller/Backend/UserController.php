@@ -1,14 +1,15 @@
 <?php
 namespace App\Controller\Backend;
 
+use App\Dto\User\UserForm;
 use App\Exception\AppException;
 use App\Exception\ServiceException;
-use App\Form\Backend\UserSearchFormType;
-use App\Form\User\Backend\RegistrationFormType;
-use App\Form\User\Backend\UserUpdateFormType;
-use App\Service\User\UserPhotoService;
+use App\Form\User\UserSearchFormType;
+use App\Form\User\FastRegistrationFormType;
+use App\Form\User\UserFormType;
 use App\Service\User\UserService;
 use App\Utils\User\PasswordGenerator;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,23 +32,15 @@ final class UserController extends AppController
     private UserService $userService;
 
     /**
-     * @var UserPhotoService User Photo Service
-     */
-    private UserPhotoService $userPhotoService;
-
-    /**
      * Конструктор
      *
      * @param UserService $userService
-     * @param UserPhotoService $userPhotoService
      */
     public function __construct(
-        UserService $userService,
-        UserPhotoService $userPhotoService
+        UserService $userService
     )
     {
         $this->userService = $userService;
-        $this->userPhotoService = $userPhotoService;
     }
 
     /**
@@ -60,11 +53,11 @@ final class UserController extends AppController
      */
     public function registration(Request $request): Response
     {
-        $form = $this->createForm(RegistrationFormType::class);
+        $form = $this->createForm(FastRegistrationFormType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $user = $this->userService->fastRegistration($form->get('email')->getData());
+                $user = $this->userService->fastCreate($form->getData());
 
                 $this->addFlash('success', 'Пользователь успешно зарегистрирован. Пароль отправлен на почту вместе с письмом о подтверждении e-mail адреса.');
 
@@ -94,14 +87,14 @@ final class UserController extends AppController
         $form = $this->createNamedForm('', UserSearchFormType::class);
         $form->submit(array_diff_key($request->query->all(), array_flip(['page'])));
         if ($form->isSubmitted() && $form->isValid()) {
-            $filters = $form->getData();
+            $filters = (array) $form->getData();
         } else {
             $filters = [];
         }
 
         try {
             $page = (int) $request->get('page', 1);
-            $paginator = $this->userService->listing($filters, [], $page);
+            $paginator = $this->userService->listing($form->getData(), $page);
         } catch (AppException $e) {
             $this->addFlash('error', $e->getMessage());
             $paginator = null;
@@ -119,14 +112,17 @@ final class UserController extends AppController
      *
      * @Route("/view/{id<[1-9]\d*>}/", name="view")
      *
-     * @param Request $request
      * @param int $id Идентификатор пользователя
      * @return Response
-     * @throws ServiceException
      */
-    public function view(Request $request, int $id): Response
+    public function view(int $id): Response
     {
-        $user = $this->userService->getUserById($id, false);
+        try {
+            $user = $this->userService->getUserById($id, false);
+        } catch (ServiceException $e) {
+            throw new NotFoundHttpException($e->getMessage());
+        }
+
         return $this->render('user/view.html.twig', [
             'user' => $user,
         ]);
@@ -140,36 +136,34 @@ final class UserController extends AppController
      * @param Request $request
      * @param int $id Идентификатор пользователя
      * @return Response
-     * @throws ServiceException
      */
     public function update(Request $request, int $id): Response
     {
-        $user = $this->userService->getUserById($id);
+        try {
+            $user = $this->userService->getUserById($id);
+        } catch (ServiceException $e) {
+            throw new NotFoundHttpException($e->getMessage());
+        }
 
-        $form = $this->createForm(UserUpdateFormType::class, $user);
+        $formData = new UserForm();
+        $formData->email = $user->getEmail();
+        $formData->username = $user->getUsername();
+        $formData->about = $user->getAbout();
+        $formData->roles = $user->getRoles();
+
+        $form = $this->createForm(UserFormType::class, $formData);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $user = $this->userService->getUserById($this->getUser()->getId());
+                $this->userService->updateUser($id, $form->getData());
 
-                $user->setEmail($form->get('email')->getData());
-                $user->setUsername($form->get('username')->getData());
-                $user->setAbout($form->get('about')->getData());
-
-                $photo = $request->files->get('profile_form')['photo'] ?? null;
-                if (!empty($photo)) {
-                    $user->setPhoto($this->userPhotoService->uploadPhoto($photo, $user));
-                }
-
-                $this->userService->updateUser($user);
-
-                $this->addFlash('success', 'Профиль был успешно сохранен!');
+                $this->addFlash('success', 'Пользователь был успешно сохранен!');
 
                 return $this->redirectToRoute('backend_user_view', ['id' => $id]);
             } catch (AppException $e) {
                 $this->addFlash('error', $e->getMessage());
             } catch (\Exception $e) {
-                $this->addFlash('error', "Произошла ошибка при сохранении профиля пользователя. Попробуйте позже.");
+                $this->addFlash('error', "Произошла ошибка при сохранении пользователя. Попробуйте позже.");
             }
         }
 
@@ -193,7 +187,7 @@ final class UserController extends AppController
         $this->checkCsrfToken($request);
 
         try {
-            $this->userService->deleteUser($id);
+            $this->userService->delete($id);
 
             $this->addFlash('success', 'Пользователь успешно удален!');
         } catch (AppException $e) {
@@ -219,7 +213,7 @@ final class UserController extends AppController
         $this->checkCsrfToken($request);
 
         try {
-            $this->userService->restoreUser($id);
+            $this->userService->restore($id);
 
             $this->addFlash('success', 'Пользователь успешно восстановлен!');
         } catch (AppException $e) {
@@ -245,7 +239,7 @@ final class UserController extends AppController
         $this->checkCsrfToken($request);
 
         try {
-            $this->userService->blockedUser($id);
+            $this->userService->blocked($id);
 
             $this->addFlash('success', 'Пользователь успешно заблокирован!');
         } catch (AppException $e) {

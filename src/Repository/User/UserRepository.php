@@ -5,6 +5,7 @@ use App\Entity\User\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Dto\User\UserSearchForm;
 
 /**
  * User Repository
@@ -80,46 +81,45 @@ class UserRepository extends ServiceEntityRepository
     /**
      * Листинг пользователей с фильтрацией
      *
-     * @param array $filters Критерии фильтрации пользователей
-     * @param array $orderBy Критерии сортировки
+     * @param UserSearchForm $form Форма поиска
      * @return QueryBuilder Список пользователей
      */
-    public function listingFilter(array $filters, array $orderBy = []): QueryBuilder
+    public function listingFilter(UserSearchForm $form): QueryBuilder
     {
         $query = $this->createQueryBuilder('u');
 
         // filters
-        if (!empty($filters['id'])) {
+        if (!empty($form->id)) {
             $query->andWhere('u.id = :id')
-                ->setParameter('id', (int) $filters['id']);
+                ->setParameter('id', $form->id);
         }
 
-        if (!empty($filters['username'])) {
+        if (!empty($form->username)) {
             $query->andWhere('u.username like :username')
-                ->setParameter('username', '%'.$filters['username'].'%');
+                ->setParameter('username', '%'.$form->username.'%');
         }
 
-        if (!empty($filters['status'])) {
+        if (!empty($form->status)) {
             $query->andWhere('u.status = :status')
-                ->setParameter('status', $filters['status']);
+                ->setParameter('status', $form->status);
         }
 
-        if (!empty($filters['email'])) {
+        if (!empty($form->email)) {
             $query->andWhere('u.email like :email')
-                ->setParameter('email', '%'.$filters['email'].'%');
+                ->setParameter('email', '%'.$form->email.'%');
         }
 
-        if (!empty($filters['role'])) {
+        if (!empty($form->role)) {
             // роль пользователь есть у всех
-            /*if ($filters['role'] !== User::ROLE_USER) {
+            /*if ($form->role !== User::ROLE_USER) {
                 $query->andWhere("JSONB_CONTAINS(u.roles, :role)")
-                    ->setParameter('role', $filters['role']);
+                    ->setParameter('role', $form->role);
             }*/
         }
 
         // order by
-        if (!empty($orderBy)) {
-            foreach ($orderBy as $key => $value) {
+        if (!empty($form->getOrderBy())) {
+            foreach ($form->getOrderBy() as $key => $value) {
                 $query->addOrderBy($key, $value);
             }
         }

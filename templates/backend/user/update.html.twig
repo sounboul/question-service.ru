@@ -14,6 +14,7 @@
     {{ form_start(profileForm) }}
     {{ form_row(profileForm.email) }}
     {{ form_row(profileForm.username) }}
+    {{ form_row(profileForm.roles) }}
     {{ form_row(profileForm.photo) }}
 
     {% if app.user.photo %}

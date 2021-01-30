@@ -68,7 +68,7 @@ class QuestionService
      * @return Question Вопрос
      * @throws ServiceException
      */
-    public function updateTotalAnswersCount(int $id, int $count): Question
+    public function updateTotalAnswers(int $id, int $count): Question
     {
         $question = $this->getQuestionById($id);
         $question->setTotalAnswers($count);

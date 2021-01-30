@@ -2,6 +2,9 @@
 namespace App\DataFixtures;
 
 use App\Dto\Question\CategoryForm;
+use App\Dto\User\ProfileForm;
+use App\Dto\User\RegistrationForm;
+use App\Dto\User\UserForm;
 use App\Entity\Question\Answer;
 use App\Entity\Question\Category;
 use App\Entity\Question\Question;
@@ -112,27 +115,40 @@ class AppFixtures extends BaseFixture
         // несколько администраторов
         $staffUsers = ['ivan@webspec.ru', 'ivan@fulledu.ru', 'ivan@hookah.ru'];
         foreach ($staffUsers as $email) {
-            $user = new User();
-            $user->setUsername(ucfirst(explode('@', $email)[0]));
-            $user->setStatus(User::STATUS_ACTIVE);
-            $user->setEmail($email);
-            $user->setRoles([USER::ROLE_ADMIN]);
-            $user->setPlainPassword('1234567890', $this->passwordEncoder);
-            $user->setAbout("Всем привет!");
+            // регистрация
+            $formData = new RegistrationForm();
+            $formData->email = $email;
+            $formData->password = '1234567890';
+            $formData->agreeTerms = true;
 
-            $this->users[] = $this->userService->updateUser($user);
+            $user = $this->userService->create($formData, false);
+
+            // заполнение профиля
+            $formData = new UserForm();
+            $formData->email = $user->getEmail();
+            $formData->username = $user->getUsername();
+            $formData->about = 'Всем привет!';
+            $formData->roles = ["ROLE_ADMIN"];
+
+            $this->users[] = $this->userService->updateUser($user->getId(), $formData);
         }
 
         // и несколько сотен обычных пользователей
         for ($i = 0; $i < 300; $i++) {
-            $user = new User();
-            $user->setUsername($this->faker->name);
-            $user->setStatus(User::STATUS_ACTIVE);
-            $user->setEmail($this->faker->email);
-            $user->setPlainPassword($this->faker->password(8), $this->passwordEncoder);
-            $user->setAbout($this->faker->realText());
+            // регистрация
+            $formData = new RegistrationForm();
+            $formData->email = $this->faker->email;
+            $formData->password = $this->faker->password(8);
+            $formData->agreeTerms = true;
 
-            $this->users[] = $this->userService->updateUser($user);
+            $user = $this->userService->create($formData, false);
+
+            // заполнение профиля
+            $formData = new ProfileForm();
+            $formData->username = $this->faker->name;
+            $formData->about = $this->faker->realText();
+
+            $this->users[] = $this->userService->updateProfile($user->getId(), $formData);
         }
     }
 

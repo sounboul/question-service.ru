@@ -1,16 +1,13 @@
 <?php
 namespace App\Form\User;
 
-use App\Entity\User\User;
+use App\Dto\User\RegistrationForm;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\IsTrue;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 /**
  * Форма для регистрации пользователя
@@ -26,28 +23,11 @@ class RegistrationFormType extends AbstractType
             ->add('email', EmailType::class, [
                 'label' => 'E-mail',
             ])
-            ->add('plainPassword', PasswordType::class, [
+            ->add('password', PasswordType::class, [
                 'label' => 'Пароль',
-                'mapped' => false,
-                'constraints' => [
-                    new NotBlank([
-                        'message' => "Необходимо заполнить поле 'Пароль'",
-                    ]),
-                    new Length([
-                        'min' => 8,
-                        'minMessage' => 'Пароль должен содержать минимум {{ limit }} символов',
-                        'max' => 100,
-                    ]),
-                ],
             ])
             ->add('agreeTerms', CheckboxType::class, [
                 'label' => 'Я ознакомился с правилами сервиса и принимаю их',
-                'mapped' => false,
-                'constraints' => [
-                    new IsTrue([
-                        'message' => 'Вы должны согласиться с правилами нашего сервиса',
-                    ]),
-                ],
             ])
         ;
     }
@@ -57,6 +37,8 @@ class RegistrationFormType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults([]);
+        $resolver->setDefaults([
+            'data_class' => RegistrationForm::class,
+        ]);
     }
 }

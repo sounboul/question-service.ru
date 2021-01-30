@@ -73,6 +73,6 @@ class AnswerListener
     private function recountAnswersInQuestion(int $questionId)
     {
         $count = $this->answerService->countAnswersByQuestionId($questionId);
-        $this->questionService->updateTotalAnswersCount($questionId, $count);
+        $this->questionService->updateTotalAnswers($questionId, $count);
     }
 }

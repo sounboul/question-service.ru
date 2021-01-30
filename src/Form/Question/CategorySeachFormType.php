@@ -11,7 +11,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
- * Форма поиска категорий
+ * Форма поиска по категориям
  */
 class CategorySeachFormType extends AbstractType
 {

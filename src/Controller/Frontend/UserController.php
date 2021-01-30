@@ -92,10 +92,7 @@ final class UserController extends AppController
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 // регистрация
-                $user = $this->userService->registration(
-                    $form->get('email')->getData(),
-                    $form->get('plainPassword')->getData()
-                );
+                $user = $this->userService->create($form->getData());
 
                 // авторизация
                 $userAuthenticator->authenticateUser($user, $loginFormAuthenticator, $request);

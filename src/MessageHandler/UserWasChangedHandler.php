@@ -4,7 +4,6 @@ namespace App\MessageHandler;
 use App\Exception\AppException;
 use App\Message\UserWasChanged;
 use App\Service\User\UserService;
-use App\Service\User\UserPhotoService;
 use App\Exception\ServiceException;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 

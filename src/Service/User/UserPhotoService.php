@@ -76,7 +76,7 @@ class UserPhotoService
         $photo->setOriginalPath($originalFile);
         $photo->setThumbnailPath($thumbnails['thumbnail']);
 
-        $this->updatePhoto($photo);
+        $photo = $this->save($photo);
         $this->switchUserPhoto($user, $photo->getId());
 
         return $photo;
@@ -92,7 +92,7 @@ class UserPhotoService
      */
     public function switchUserPhoto(User $user, int $photoId): UserPhoto
     {
-        $photo = $this->getPhotoById($photoId);
+        $photo = $this->getById($photoId);
         if ($user->getId() !== $photo->getUser()->getId()) {
             throw new ServiceException("Указанная фотография принадлежит другому пользователю.");
         }
@@ -103,11 +103,11 @@ class UserPhotoService
     }
 
     /**
-     * @param int $id Идентификатор
-     * @return UserPhoto Получить фотографию по её идентификатору
+     * @param int $id Идентификатор фотографии
+     * @return UserPhoto Фотография
      * @throws ServiceException В случае если фотография не найдена
      */
-    public function getPhotoById(int $id): UserPhoto
+    public function getById(int $id): UserPhoto
     {
         $photo = $this->userPhotoRepository->findOneById($id);
         if (empty($photo)) {
@@ -123,7 +123,7 @@ class UserPhotoService
      * @param UserPhoto $photo Фотография для сохранения
      * @return UserPhoto Сохраненная фотография
      */
-    public function updatePhoto(UserPhoto $photo): UserPhoto
+    private function save(UserPhoto $photo): UserPhoto
     {
         $this->entityManager->persist($photo);
         $this->entityManager->flush();

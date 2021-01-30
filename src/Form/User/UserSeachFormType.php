@@ -1,6 +1,7 @@
 <?php
-namespace App\Form\Backend;
+namespace App\Form\User;
 
+use App\Dto\User\UserSearchForm;
 use App\Entity\User\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -52,6 +53,8 @@ class UserSearchFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
+            'data_class' => UserSearchForm::class,
+
             // enable/disable CSRF protection for this form
             'csrf_protection' => false,
         ]);

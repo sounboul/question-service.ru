@@ -75,10 +75,14 @@ final class CategoryService
      *
      * @param CategoryForm $form
      * @return Category Созданная категория
-     * @throws EntityValidationException
+     * @throws EntityValidationException|ServiceException
      */
     public function create(CategoryForm $form): Category
     {
+        if (!empty($this->getBySlug($form->slug))) {
+            throw new ServiceException("Slug '$form->slug' уже используется другой категорией");
+        }
+
         $category = new Category();
         $category->setStatus(Category::STATUS_ACTIVE);
         $category->setTitle($form->title);
@@ -99,6 +103,12 @@ final class CategoryService
     public function update(int $id, CategoryForm $form): Category
     {
         $category = $this->getById($id);
+        if ($category->getSlug() !== $form->slug) {
+            if (!empty($this->getBySlug($form->slug))) {
+                throw new ServiceException("Slug '$form->slug' уже используется другой категорией");
+            }
+        }
+
         $category->setTitle($form->title);
         $category->setSlug($form->slug);
 
