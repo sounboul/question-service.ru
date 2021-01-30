@@ -175,7 +175,7 @@ class User implements UserInterface
     }
 
     /**
-     * @return string Получить статус пользователя в виде текста
+     * @return string Получить статус в виде текста
      */
     public function getStatusAsText(): string
     {

@@ -1,0 +1,15 @@
+{% extends 'backend/layouts/controlbox.html.twig' %}
+{% import "backend/components/tools.html.twig" as tools %}
+
+{% block title %}Редактирование категории '{{ category.title }}' - Категории - Панель управления{% endblock %}
+{% block header %}Редактирование категории '{{ category.title }}'{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{{ path('backend_index') }}">Главная</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('backend_question_category_list') }}">Категории</a></li>
+    <li class="breadcrumb-item">Редактирование категории '{{ category.title }}'</li>
+{% endblock %}
+
+{% block content %}
+    {% include "backend/question-category/_form.html.twig" %}
+{% endblock %}

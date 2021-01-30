@@ -1,0 +1,15 @@
+{% extends 'backend/layouts/controlbox.html.twig' %}
+{% import "backend/components/tools.html.twig" as tools %}
+
+{% block title %}Создать категорию - Категории - Панель управления{% endblock %}
+{% block header %}Создать категорию{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{{ path('backend_index') }}">Главная</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('backend_question_category_list') }}">Категории</a></li>
+    <li class="breadcrumb-item">Создать категорию</li>
+{% endblock %}
+
+{% block content %}
+    {% include "backend/question-category/_form.html.twig" %}
+{% endblock %}

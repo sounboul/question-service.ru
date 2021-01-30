@@ -6,14 +6,12 @@ use App\Exception\ServiceException;
 use App\Form\Backend\UserSearchFormType;
 use App\Form\User\Backend\RegistrationFormType;
 use App\Form\User\Backend\UserUpdateFormType;
-use App\Form\User\ProfileFormType;
 use App\Service\User\UserPhotoService;
 use App\Service\User\UserService;
 use App\Utils\User\PasswordGenerator;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 /**
  * Контроллер управления пользователями
@@ -22,6 +20,11 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
  */
 final class UserController extends AppController
 {
+    /**
+     * @inheritdoc
+     */
+    protected string $csrfTokenName = 'users';
+
     /**
      * @var UserService
      */
@@ -187,7 +190,7 @@ final class UserController extends AppController
      */
     public function delete(Request $request, int $id): Response
     {
-        $this->checkCsrfToken('users', $request);
+        $this->checkCsrfToken($request);
 
         try {
             $this->userService->deleteUser($id);
@@ -213,7 +216,7 @@ final class UserController extends AppController
      */
     public function restore(Request $request, int $id): Response
     {
-        $this->checkCsrfToken('users', $request);
+        $this->checkCsrfToken($request);
 
         try {
             $this->userService->restoreUser($id);
@@ -239,7 +242,7 @@ final class UserController extends AppController
      */
     public function blocked(Request $request, int $id): Response
     {
-        $this->checkCsrfToken('users', $request);
+        $this->checkCsrfToken($request);
 
         try {
             $this->userService->blockedUser($id);
@@ -265,7 +268,7 @@ final class UserController extends AppController
      */
     public function changePassword(Request $request, int $id): Response
     {
-        $this->checkCsrfToken('users', $request);
+        $this->checkCsrfToken($request);
 
         try {
             $password = PasswordGenerator::generate();

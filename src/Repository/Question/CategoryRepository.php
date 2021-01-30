@@ -3,7 +3,9 @@ namespace App\Repository\Question;
 
 use App\Entity\Question\Category;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Dto\Question\CategorySearchForm;
 
 /**
  * Question Category Repository
@@ -39,5 +41,41 @@ class CategoryRepository extends ServiceEntityRepository
     public function findOneBySlug(string $slug): ?Category
     {
         return $this->findOneBy(['slug' => $slug]);
+    }
+
+    /**
+     * Листинг категорий с фильтрацией
+     *
+     * @param CategorySearchForm $form Форма поиска
+     * @return QueryBuilder Список категорий
+     */
+    public function listingFilter(CategorySearchForm $form): QueryBuilder
+    {
+        $query = $this->createQueryBuilder('u');
+
+        // filters
+        if (!empty($form->id)) {
+            $query->andWhere('u.id = :id')
+                ->setParameter('id', $form->id);
+        }
+
+        if (!empty($form->status)) {
+            $query->andWhere('u.status = :status')
+                ->setParameter('status', $form->status);
+        }
+
+        if (!empty($form->title)) {
+            $query->andWhere('u.title like :title')
+                ->setParameter('title', '%'.$form->title.'%');
+        }
+
+        // order by
+        if (!empty($form->getOrderBy())) {
+            foreach ($form->getOrderBy() as $key => $value) {
+                $query->addOrderBy($key, $value);
+            }
+        }
+
+        return $query;
     }
 }

@@ -1,48 +1,50 @@
 {% extends 'backend/layouts/controlbox.html.twig' %}
 {% import "backend/components/tools.html.twig" as tools %}
 
-{% block title %}Пользователи - Панель управления{% endblock %}
-{% block header %}Пользователи{% endblock %}
+{% block title %}Категории - Панель управления{% endblock %}
+{% block header %}Категории{% endblock %}
 
 {% block breadcrumbs %}
     <li class="breadcrumb-item"><a href="{{ path('backend_index') }}">Главная</a></li>
-    <li class="breadcrumb-item">Пользователи</li>
+    <li class="breadcrumb-item">Категории</li>
 {% endblock %}
 
 {% block content %}
     <div class="control-buttons">
-        <a class="btn btn-primary" href="{{ path('backend_user_registration') }}" title="Регистрация пользователя">
-            <i class="fas fa-plus"></i> Регистрация пользователя
+        <a class="btn btn-primary" href="{{ path('backend_question_category_create') }}" title="Создать категорию">
+            <i class="fas fa-plus"></i> Создать категорию
         </a>
     </div>
 
-    {% set users = paginator.results %}
-    {% if users|length > 0 %}
+    {% set items = paginator.results %}
+    {% if items|length > 0 %}
         <table class="table table-striped table-bordered">
             <thead>
             <tr>
                 <th scope="col">ID</th>
-                <th scope="col">Имя пользователя</th>
-                <th scope="col">E-mail</th>
+                <th scope="col">Название</th>
+                <th scope="col">Slug</th>
+                <th scope="col">Вопросов</th>
                 <th scope="col">Статус</th>
                 <th scope="col">#</th>
             </tr>
             </thead>
 
             <tbody>
-            {% for user in users %}
+            {% for item in items %}
                 <tr>
-                    <th scope="row">{{ user.id }}</th>
-                    <td>{{ user.username }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>{{ tools.statusLabel(user.status, user.statusAsText) }}</td>
+                    <th scope="row">{{ item.id }}</th>
+                    <td>{{ item.title }}</td>
+                    <td>{{ item.slug }}</td>
+                    <td>{{ item.totalQuestions }}</td>
+                    <td>{{ tools.statusLabel(item.status, item.statusAsText) }}</td>
                     <td>
-                        <a class="btn btn-success btn-sm" href="{{ path('backend_user_view', {'id': user.id}) }}" title="Просмотр">
+                        <a class="btn btn-success btn-sm" href="{{ path('backend_question_category_view', {'id': item.id}) }}" title="Просмотр">
                             <i class="fas fa-eye"></i>
                         </a>
 
-                        {% if user.isActive %}
-                            <a class="btn btn-primary btn-sm" href="{{ path('backend_user_update', {'id': user.id}) }}" title="Редактировать">
+                        {% if item.isActive %}
+                            <a class="btn btn-primary btn-sm" href="{{ path('backend_question_category_update', {'id': item.id}) }}" title="Редактировать">
                                 <i class="fas fa-edit"></i>
                             </a>
                         {% endif %}
@@ -67,10 +69,8 @@
         <div class="card-body">
             {{ form_start(filterForm) }}
             {{ form_row(filterForm.id) }}
-            {{ form_row(filterForm.username) }}
             {{ form_row(filterForm.status) }}
-            {{ form_row(filterForm.email) }}
-            {{ form_row(filterForm.role) }}
+            {{ form_row(filterForm.title) }}
 
             <button class="btn btn-primary">Найти</button>
             {{ form_end(filterForm) }}

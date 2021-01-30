@@ -1,6 +1,7 @@
 <?php
 namespace App\DataFixtures;
 
+use App\Dto\Question\CategoryForm;
 use App\Entity\Question\Answer;
 use App\Entity\Question\Category;
 use App\Entity\Question\Question;
@@ -123,7 +124,7 @@ class AppFixtures extends BaseFixture
         }
 
         // и несколько сотен обычных пользователей
-        for ($i = 0; $i < 500; $i++) {
+        for ($i = 0; $i < 300; $i++) {
             $user = new User();
             $user->setUsername($this->faker->name);
             $user->setStatus(User::STATUS_ACTIVE);
@@ -137,19 +138,18 @@ class AppFixtures extends BaseFixture
 
     /**
      * Загрузка Question Categories Fixtures
+     *
+     * @throws \App\Exception\EntityValidationException
      */
     private function loadQuestionCategoriesFixtures()
     {
         // 20 категорий будет достаточно
         for ($i = 0; $i < 20; $i++) {
-            $category = new Category();
-            $category->setStatus(Category::STATUS_ACTIVE);
-            $category->setTitle($this->faker->name);
-            $category->setSlug($this->slugger->slug($category->getTitle()));
-            $category->setHref('');
-            $category->setTotalQuestions(0);
+            $category = new CategoryForm();
+            $category->title = $this->faker->name;
+            $category->slug = $this->slugger->slug($category->title);
 
-            $this->categories[] = $this->categoryService->updateCategory($category);
+            $this->categories[] = $this->categoryService->create($category);
         }
     }
 
@@ -158,7 +158,7 @@ class AppFixtures extends BaseFixture
      */
     private function loadQuestionFixtures()
     {
-        for ($i = 0; $i < 5000; $i++) {
+        for ($i = 0; $i < 500; $i++) {
             // создание вопросы
             $question = new Question();
             $question->setStatus(Question::STATUS_ACTIVE);

@@ -31,15 +31,16 @@ final class QuestionController extends AppController
     /**
      * Листинг вопросов с фильтрацией по категориям
      *
-     * @Route("/", defaults={"page": "1"}, methods="GET", name="index")
+     * @Route("/index", defaults={"page": "1"}, methods="GET", name="index")
      * @Route("/page/{page<[1-9]\d*>}", methods="GET", name="index_paginated")
-     * @Route("/{category_slug}/", defaults={"page": "1"}, methods="GET", name="index_category")
-     * @Route("/{category_slug}/page/{page<[1-9]\d*>}/", methods="GET", name="index_category_paginated")
+     * @Route("/l/{category_slug}/", defaults={"page": "1"}, methods="GET", name="index_category")
+     * @Route("/l/{category_slug}/page/{page<[1-9]\d*>}/", methods="GET", name="index_category_paginated")
      *
      * @param Request $request
+     * @param string $category_slug Slug категории
      * @return Response
      */
-    public function index(Request $request): Response
+    public function index(Request $request, string $category_slug): Response
     {
         // @TODO
     }
@@ -51,9 +52,12 @@ final class QuestionController extends AppController
      * @Route("/q/{id<[1-9]\d*>}_{slug}/{page<[1-9]\d*>}/", methods="GET", name="view_paginated")
      *
      * @param Request $request
+     * @param int $id Идентификатор вопроса
+     * @param string $slug Slug вопроса
+     * @param int $page Номер страницы
      * @return Response
      */
-    public function changePassword(Request $request, int $id, string $slug, int $page): Response
+    public function view(Request $request, int $id, string $slug, int $page): Response
     {
         // @TODO
     }

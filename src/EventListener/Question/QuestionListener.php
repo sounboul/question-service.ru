@@ -76,7 +76,7 @@ class QuestionListener
     {
         // Если был изменен slug, то обновим href
         if ($eventArgs->hasChangedField('slug')) {
-            $eventArgs->setNewValue('href', $this->generateHrefQuestion($question->getId(), $eventArgs->getNewValue('slug')));
+            $question->setHref($this->generateHrefQuestion($question->getId(), $eventArgs->getNewValue('slug')));
         }
     }
 
@@ -104,7 +104,7 @@ class QuestionListener
     private function recountQuestionsInCategory(int $categoryId)
     {
         $count = $this->questionService->countQuestionsByCategoryId($categoryId);
-        $this->categoryService->updateTotalQuestionsCount($categoryId, $count);
+        $this->categoryService->updateTotalQuestions($categoryId, $count);
     }
 
     /**

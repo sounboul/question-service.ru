@@ -54,7 +54,7 @@ class CategoryListener
     {
         // Если был изменен slug, то обновим href
         if ($eventArgs->hasChangedField('slug')) {
-            $eventArgs->setNewValue('href', $this->generateHrefCategory($eventArgs->getNewValue('slug')));
+            $category->setHref($this->generateHrefCategory($eventArgs->getNewValue('slug')));
         }
     }
 

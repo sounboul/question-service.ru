@@ -13,6 +13,11 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 abstract class AppController extends AbstractController
 {
     /**
+     * @var string CSRF Token name
+     */
+    protected string $csrfTokenName = 'default';
+
+    /**
      * @inheritdoc
      */
     protected function renderView(string $view, array $parameters = []): string
@@ -37,13 +42,12 @@ abstract class AppController extends AbstractController
     /**
      * Проверка CSRF токена
      *
-     * @param string $token Название токена
      * @param Request $request Request
      * @return void
      */
-    protected function checkCsrfToken(string $token, Request $request)
+    protected function checkCsrfToken(Request $request)
     {
-        if (!$this->isCsrfTokenValid($token, $request->request->get('_csrf_token'))) {
+        if (!$this->isCsrfTokenValid($this->csrfTokenName, $request->request->get('_csrf_token'))) {
             throw new AccessDeniedException("CSRF check failed");
         }
     }

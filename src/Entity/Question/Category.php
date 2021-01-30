@@ -92,6 +92,14 @@ class Category
     }
 
     /**
+     * @return string Получить статус в виде текста
+     */
+    public function getStatusAsText(): string
+    {
+        return self::$statusList[$this->status] ?? $this->status;
+    }
+
+    /**
      * Установить статус категории
      *
      * @param string $status Статус категории
@@ -198,5 +206,21 @@ class Category
         $this->totalQuestions = $count;
 
         return $this;
+    }
+
+    /**
+     * @return bool Категория активна?
+     */
+    public function isActive(): bool
+    {
+        return $this->status === self::STATUS_ACTIVE;
+    }
+
+    /**
+     * @return bool Категория удалена?
+     */
+    public function isDeleted(): bool
+    {
+        return $this->status === self::STATUS_DELETED;
     }
 }
