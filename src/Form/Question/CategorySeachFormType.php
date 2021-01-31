@@ -22,6 +22,11 @@ class CategorySeachFormType extends AbstractType
     {
         $builder
             ->setMethod('GET')
+            ->add('orderBy', ChoiceType::class, [
+                'label' => 'Сортировка',
+                'choices' => array_flip(CategorySearchForm::getAvailableOrderBy()),
+                'empty_data' => 'c.id_DESC',
+            ])
             ->add('id', NumberType::class, [
                 'label' => 'ID',
                 'required' => false,

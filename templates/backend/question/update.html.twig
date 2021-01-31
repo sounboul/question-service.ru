@@ -1,0 +1,22 @@
+{% extends 'backend/layouts/controlbox.html.twig' %}
+{% import "backend/components/tools.html.twig" as tools %}
+
+{% block title %}Редактирование вопроса '{{ question.title }}' - Вопросы - Панель управления{% endblock %}
+{% block header %}Редактирование вопроса '{{ question.title }}'{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{{ path('backend_index') }}">Главная</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('backend_question_list') }}">Вопросы</a></li>
+    <li class="breadcrumb-item">Редактирование вопроса '{{ question.title }}'</li>
+{% endblock %}
+
+{% block content %}
+    {{ form_start(form) }}
+    {{ form_row(form.categoryId) }}
+    {{ form_row(form.title) }}
+    {{ form_row(form.text) }}
+    {{ form_row(form.slug) }}
+
+    <button class="btn btn-primary">Сохранить</button>
+    {{ form_end(form) }}
+{% endblock %}

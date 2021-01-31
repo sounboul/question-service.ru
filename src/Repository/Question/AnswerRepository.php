@@ -38,9 +38,9 @@ class AnswerRepository extends ServiceEntityRepository
      */
     public function countAnswersByQuestionId(int $questionId): int
     {
-        return $this->createQueryBuilder('u')
-            ->select('count(u.id)')
-            ->where("u.status = :status AND u.question = :questionId")
+        return $this->createQueryBuilder('a')
+            ->select('count(a.id)')
+            ->where("a.status = :status AND a.question = :questionId")
             ->setParameter('status', Answer::STATUS_ACTIVE)
             ->setParameter('questionId', $questionId)
             ->getQuery()

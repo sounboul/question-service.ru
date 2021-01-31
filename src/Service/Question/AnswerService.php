@@ -37,15 +37,15 @@ class AnswerService
     }
 
     /**
-     * @param int $id Идентификатор
+     * @param int $id Идентификатор ответа
      * @return Answer Получить ответ по его идентификатору
      * @throws ServiceException В случае если ответ не найден
      */
-    public function getAnswerById(int $id): Answer
+    public function getById(int $id): Answer
     {
         $answer = $this->answerRepository->findOneById($id);
         if (empty($answer)) {
-            throw new ServiceException("Не найден ответ с указанным идентификатором");
+            throw new ServiceException("Не найден ответ с ID '{$id}'");
         }
 
         return $answer;
@@ -66,7 +66,7 @@ class AnswerService
      * @param Answer $answer Answer
      * @return Answer Сохраненный ответ
      */
-    public function updateAnswer(Answer $answer): Answer
+    private function save(Answer $answer): Answer
     {
         $this->entityManager->persist($answer);
         $this->entityManager->flush();

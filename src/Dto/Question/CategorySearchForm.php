@@ -15,6 +15,10 @@ class CategorySearchForm
 
     /**
      * @var string Статус категории
+     *
+     * @Assert\Choice(
+     *     callback={"App\Entity\Question\Category", "getStatusList"}
+     * )
      */
     public string $status;
 
@@ -24,15 +28,21 @@ class CategorySearchForm
     public string $title;
 
     /**
-     * @var array Сортировка результатов поиска
+     * @var string Сортировка
      */
-    private array $orderBy = [];
+    public string $orderBy;
 
     /**
-     * @return array Сортировка результатов поиска
+     * @return array Доступные варианты сортировки
      */
-    public function getOrderBy(): array
+    public static function getAvailableOrderBy(): array
     {
-        return $this->orderBy;
+        return [
+            'c.id_DESC' => 'ID, DESC',
+            'c.id_ASC' => 'ID, ASC',
+
+            'c.totalQuestions_DESC' => 'Количество вопросов, DESC',
+            'c.totalQuestions_ASC' => 'Количество вопросов, ASC',
+        ];
     }
 }

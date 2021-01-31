@@ -66,11 +66,16 @@
 
         <div class="card-body">
             {{ form_start(filterForm) }}
+            {{ form_row(filterForm.orderBy) }}
+
             {{ form_row(filterForm.id) }}
             {{ form_row(filterForm.username) }}
             {{ form_row(filterForm.status) }}
             {{ form_row(filterForm.email) }}
+            {{ form_row(filterForm.emailVerified) }}
+            {{ form_row(filterForm.emailSubscribed) }}
             {{ form_row(filterForm.role) }}
+            {{ form_row(filterForm.withPhoto) }}
 
             <button class="btn btn-primary">Найти</button>
             {{ form_end(filterForm) }}

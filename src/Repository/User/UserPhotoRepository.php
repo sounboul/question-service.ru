@@ -43,9 +43,9 @@ class UserPhotoRepository extends ServiceEntityRepository
     public function switchUserPhoto(int $userId, int $photoId): void
     {
         $this->_em->createQueryBuilder()
-            ->update(UserPhoto::class, 'u')
-            ->set('u.status', ':status')
-            ->where('u.user = :user AND u.id != :photoId')
+            ->update(UserPhoto::class, 'up')
+            ->set('up.status', ':status')
+            ->where('up.user = :user AND up.id != :photoId')
             ->setParameter('status', 'deleted')
             ->setParameter('user', $userId)
             ->setParameter('photoId', $photoId)

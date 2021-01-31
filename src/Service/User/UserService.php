@@ -9,7 +9,6 @@ use App\Exception\ServiceException;
 use App\Utils\User\PasswordGenerator;
 use App\Utils\User\TokenGenerator;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use App\Dto\User\RegistrationForm;
@@ -405,22 +404,10 @@ class UserService
      * @param int $page Номер страницы
      * @param int $pageSize Количество записей на страницу
      * @return Paginator Результат выборка с постраничным выводом
-     * @throws ServiceException
+     * @throws \Exception
      */
     public function listing(UserSearchForm $form, $page = 1, $pageSize = 30): Paginator
     {
-        if (!empty($form->status)) {
-            if (!isset(User::$statusList[$form->status])) {
-                throw new ServiceException("У пользователей нет статуса '$form->status'");
-            }
-        }
-
-        if (!empty($form->role)) {
-            if (!isset(User::$roleList[$form->role])) {
-                throw new ServiceException("У пользователей нет роли '$form->role'");
-            }
-        }
-
         $query = $this->userRepository->listingFilter($form);
         return (new Paginator($query, $pageSize))->paginate($page);
     }
@@ -524,7 +511,7 @@ class UserService
 
         $user->setEmail($email);
         $user->setUsername($form->username);
-        $user->setAbout($form->about);
+        $user->setAbout((string) $form->about);
 
         if (!empty($form->photo)) {
             $user->setPhoto($this->userPhotoService->uploadPhoto($form->photo, $user));
@@ -548,7 +535,7 @@ class UserService
         $user = $this->getUserById($id);
 
         $user->setUsername($form->username);
-        $user->setAbout($form->about);
+        $user->setAbout((string) $form->about);
 
         if (!empty($form->photo)) {
             $user->setPhoto($this->userPhotoService->uploadPhoto($form->photo, $user));

@@ -100,6 +100,14 @@ class Category
     }
 
     /**
+     * @return array Список возможных статусов
+     */
+    public static function getStatusList(): array
+    {
+        return array_flip(self::$statusList);
+    }
+
+    /**
      * Установить статус категории
      *
      * @param string $status Статус категории

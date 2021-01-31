@@ -1,48 +1,59 @@
 <?php
 namespace App\Controller\Backend;
 
+use App\Dto\Question\QuestionUpdateForm;
 use App\Exception\AppException;
 use App\Exception\ServiceException;
-use App\Form\Question\CategoryFormType;
-use App\Form\Question\CategorySeachFormType;
-use App\Service\Question\CategoryService;
+use App\Dto\Question\QuestionCreateForm;
+use App\Form\Question\QuestionCreateFormType;
+use App\Form\Question\QuestionSearchFormType;
+use App\Form\Question\QuestionUpdateFormType;
+use App\Service\Question\QuestionService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Dto\Question\CategoryForm;
+use App\Service\Question\CategoryService;
 
 /**
- * Контроллер управления категориями вопросов
+ * Контроллер управления вопросами
  *
- * @Route("/question-category", name="questioncategory_")
+ * @Route("/question", name="question_")
  */
-class QuestionCategoryController extends AppController
+class QuestionController extends AppController
 {
     /**
      * @inheritdoc
      */
-    protected string $csrfTokenName = 'question-category';
+    protected string $csrfTokenName = 'question';
 
     /**
-     * @var CategoryService Question Category Service
+     * @var QuestionService Question Service
+     */
+    private QuestionService $questionService;
+
+    /**
+     * @var CategoryService Category Service
      */
     private CategoryService $categoryService;
 
     /**
      * Конструктор
      *
-     * @param CategoryService $categoryService
+     * @param QuestionService $questionService Question Service
+     * @param CategoryService $categoryService Category Service
      */
     public function __construct(
+        QuestionService $questionService,
         CategoryService $categoryService
     )
     {
+        $this->questionService = $questionService;
         $this->categoryService = $categoryService;
     }
 
     /**
-     * Создание категории
+     * Создание вопроса
      *
      * @Route("/create/", name="create")
      *
@@ -51,15 +62,20 @@ class QuestionCategoryController extends AppController
      */
     public function create(Request $request): Response
     {
-        $form = $this->createForm(CategoryFormType::class);
+        $form = $this->createForm(QuestionCreateFormType::class, null, ['categoryService' => $this->categoryService]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $category = $this->categoryService->create($form->getData());
+                /* @var QuestionCreateForm $formData */
+                $formData = $form->getData();
+                $formData->userId = $this->getUser()->getId();
+                $formData->createdByIp = $request->getClientIp();
 
-                $this->addFlash('success', 'Категория успешно создана.');
+                $question = $this->questionService->create($formData);
 
-                return $this->redirectToRoute('backend_questioncategory_view', ['id' => $category->getId()]);
+                $this->addFlash('success', 'Вопрос успешно создан');
+
+                return $this->redirectToRoute('backend_question_view', ['id' => $question->getId()]);
             } catch (AppException $e) {
                 $this->addFlash('error', $e->getMessage());
             } catch (\Exception $e) {
@@ -67,13 +83,13 @@ class QuestionCategoryController extends AppController
             }
         }
 
-        return $this->render('question-category/create.html.twig', [
+        return $this->render('question/create.html.twig', [
             'form' => $form->createView(),
         ]);
     }
 
     /**
-     * Листинг категорий
+     * Листинг вопросов
      *
      * @Route("/list/", name="list")
      *
@@ -83,7 +99,7 @@ class QuestionCategoryController extends AppController
      */
     public function list(Request $request): Response
     {
-        $form = $this->createNamedForm('', CategorySeachFormType::class);
+        $form = $this->createNamedForm('', QuestionSearchFormType::class, null, ['categoryService' => $this->categoryService]);
         $form->submit(array_diff_key($request->query->all(), array_flip(['page'])));
         if ($form->isSubmitted() && $form->isValid()) {
             $filters = (array) $form->getData();
@@ -93,13 +109,13 @@ class QuestionCategoryController extends AppController
 
         try {
             $page = (int) $request->get('page', 1);
-            $paginator = $this->categoryService->listing($form->getData(), $page);
+            $paginator = $this->questionService->listing($form->getData(), $page);
         } catch (AppException $e) {
             $this->addFlash('error', $e->getMessage());
             $paginator = null;
         }
 
-        return $this->render('question-category/list.html.twig', [
+        return $this->render('question/list.html.twig', [
             'filterForm' => $form->createView(),
             'filters' => $filters,
             'paginator' => $paginator,
@@ -107,56 +123,58 @@ class QuestionCategoryController extends AppController
     }
 
     /**
-     * Просмотр категории
+     * Просмотр вопроса
      *
      * @Route("/view/{id<[1-9]\d*>}/", name="view")
      *
-     * @param int $id Идентификатор категории
+     * @param int $id Идентификатор вопроса
      * @return Response
      */
     public function view(int $id): Response
     {
         try {
-            $category = $this->categoryService->getById($id);
+            $question = $this->questionService->getById($id);
         } catch (ServiceException $e) {
             throw new NotFoundHttpException($e->getMessage());
         }
 
-        return $this->render('question-category/view.html.twig', [
-            'category' => $category,
+        return $this->render('question/view.html.twig', [
+            'question' => $question,
         ]);
     }
 
     /**
-     * Редактирование категории
+     * Редактирование вопроса
      *
      * @Route("/update/{id<[1-9]\d*>}/", name="update")
      *
      * @param Request $request
-     * @param int $id Идентификатор категории
+     * @param int $id Идентификатор вопроса
      * @return Response
      */
     public function update(Request $request, int $id): Response
     {
         try {
-            $category = $this->categoryService->getById($id);
+            $question = $this->questionService->getById($id);
         } catch (ServiceException $e) {
             throw new NotFoundHttpException($e->getMessage());
         }
 
-        $formData = new CategoryForm();
-        $formData->title = $category->getTitle();
-        $formData->slug = $category->getSlug();
+        $formData = new QuestionUpdateForm();
+        $formData->categoryId = $question->getCategory()->getId();
+        $formData->title = $question->getTitle();
+        $formData->text = $question->getText();
+        $formData->slug = $question->getSlug();
 
-        $form = $this->createForm(CategoryFormType::class, $formData);
+        $form = $this->createForm(QuestionUpdateFormType::class, $formData, ['categoryService' => $this->categoryService]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $category = $this->categoryService->update($id, $form->getData());
+                $question = $this->questionService->update($id, $form->getData());
 
-                $this->addFlash('success', 'Категория успешно обновлена.');
+                $this->addFlash('success', 'Вопрос успешно обновлён!');
 
-                return $this->redirectToRoute('backend_questioncategory_view', ['id' => $category->getId()]);
+                return $this->redirectToRoute('backend_question_view', ['id' => $question->getId()]);
             } catch (AppException $e) {
                 $this->addFlash('error', $e->getMessage());
             } catch (\Exception $e) {
@@ -164,19 +182,19 @@ class QuestionCategoryController extends AppController
             }
         }
 
-        return $this->render('question-category/update.html.twig', [
+        return $this->render('question/update.html.twig', [
             'form' => $form->createView(),
-            'category' => $category,
+            'question' => $question,
         ]);
     }
 
     /**
-     * Удаление категории
+     * Удаление вопроса
      *
      * @Route("/delete/{id<[1-9]\d*>}/", methods="POST", name="delete")
      *
      * @param Request $request
-     * @param int $id Идентификатор категории
+     * @param int $id Идентификатор вопроса
      * @return Response
      */
     public function delete(Request $request, int $id): Response
@@ -184,25 +202,25 @@ class QuestionCategoryController extends AppController
         $this->checkCsrfToken($request);
 
         try {
-            $this->categoryService->delete($id);
+            $this->questionService->delete($id);
 
-            $this->addFlash('success', 'Категория успешно удалена!');
+            $this->addFlash('success', 'Вопрос успешно удален!');
         } catch (AppException $e) {
             $this->addFlash('error', $e->getMessage());
         } catch (\Exception $e) {
             $this->addFlash('error', "Произошла ошибка при удалении. Попробуйте позже.");
         }
 
-        return $this->redirectToRoute('backend_questioncategory_view', ['id' => $id]);
+        return $this->redirectToRoute('backend_question_view', ['id' => $id]);
     }
 
     /**
-     * Восстановление категории
+     * Восстановление вопроса
      *
      * @Route("/restore/{id<[1-9]\d*>}/", methods="POST", name="restore")
      *
      * @param Request $request
-     * @param int $id Идентификатор категории
+     * @param int $id Идентификатор вопроса
      * @return Response
      */
     public function restore(Request $request, int $id): Response
@@ -210,15 +228,15 @@ class QuestionCategoryController extends AppController
         $this->checkCsrfToken($request);
 
         try {
-            $this->categoryService->restore($id);
+            $this->questionService->restore($id);
 
-            $this->addFlash('success', 'Категория успешно восстановлена!');
+            $this->addFlash('success', 'Вопрос успешно восстановлен!');
         } catch (AppException $e) {
             $this->addFlash('error', $e->getMessage());
         } catch (\Exception $e) {
             $this->addFlash('error', "Произошла ошибка при восстановлении. Попробуйте позже.");
         }
 
-        return $this->redirectToRoute('backend_questioncategory_view', ['id' => $id]);
+        return $this->redirectToRoute('backend_question_view', ['id' => $id]);
     }
 }

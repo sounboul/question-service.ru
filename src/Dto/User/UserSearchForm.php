@@ -20,6 +20,10 @@ class UserSearchForm
 
     /**
      * @var string Статус
+     *
+     * @Assert\Choice(
+     *     callback={"App\Entity\User\User", "getStatusList"}
+     * )
      */
     public string $status;
 
@@ -29,20 +33,42 @@ class UserSearchForm
     public string $email;
 
     /**
+     * @var bool E-mail подтвержден
+     */
+    public ?bool $emailVerified = null;
+
+    /**
+     * @var bool E-mail подписан на рассылку
+     */
+    public ?bool $emailSubscribed = null;
+
+    /**
      * @var string Роль
+     *
+     * @Assert\Choice(
+     *     callback={"App\Entity\User\User", "getRolesList"}
+     * )
      */
     public string $role;
 
     /**
-     * @var array Сортировка результатов поиска
+     * @var bool С фотографией
      */
-    private array $orderBy = [];
+    public ?bool $withPhoto = null;
 
     /**
-     * @return array Сортировка результатов поиска
+     * @var string Сортировка
      */
-    public function getOrderBy(): array
+    public string $orderBy;
+
+    /**
+     * @return array Доступные варианты сортировки
+     */
+    public static function getAvailableOrderBy(): array
     {
-        return $this->orderBy;
+        return [
+            'u.id_DESC' => 'ID, DESC',
+            'u.id_ASC' => 'ID, ASC',
+        ];
     }
 }

@@ -94,6 +94,22 @@ class Answer
     }
 
     /**
+     * @return string Получить статус в виде текста
+     */
+    public function getStatusAsText(): string
+    {
+        return self::$statusList[$this->status] ?? $this->status;
+    }
+
+    /**
+     * @return array Список возможных статусов
+     */
+    public static function getStatusList(): array
+    {
+        return array_flip(self::$statusList);
+    }
+
+    /**
      * Установить статус ответа
      *
      * @param string $status Статус ответа
@@ -193,5 +209,21 @@ class Answer
         $this->createdByIp = $ip;
 
         return $this;
+    }
+
+    /**
+     * @return bool Ответ активен?
+     */
+    public function isActive(): bool
+    {
+        return $this->status === self::STATUS_ACTIVE;
+    }
+
+    /**
+     * @return bool Ответ удален?
+     */
+    public function isDeleted(): bool
+    {
+        return $this->status === self::STATUS_DELETED;
     }
 }

@@ -6,7 +6,7 @@
 
 {% block breadcrumbs %}
     <li class="breadcrumb-item"><a href="{{ path('backend_index') }}">Главная</a></li>
-    <li class="breadcrumb-item"><a href="{{ path('backend_question_category_list') }}">Категории</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('backend_questioncategory_list') }}">Категории</a></li>
     <li class="breadcrumb-item">Категория '{{ category.title }}'</li>
 {% endblock %}
 
@@ -18,18 +18,18 @@
     <div class="control-buttons">
         {% set csrf_token = csrf_token('question-category') %}
         {% if category.isActive %}
-            <a class="btn btn-primary" href="{{ path('backend_question_category_update', {'id': category.id}) }}" title="Редактировать">
+            <a class="btn btn-primary" href="{{ path('backend_questioncategory_update', {'id': category.id}) }}" title="Редактировать">
                 <i class="fas fa-edit"></i> Редактировать
             </a>
         {% endif %}
 
         {% if category.isDeleted %}
-            <form name="question_category_restore" method="POST" action="{{ path('backend_question_category_restore', {'id': category.id}) }}" style="display: inline-block;">
+            <form name="question_category_restore" method="POST" action="{{ path('backend_questioncategory_restore', {'id': category.id}) }}" style="display: inline-block;">
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
                 <button type="submit" class="btn btn-warning" onclick="return confirm('Вы действительно хотите восстановить категорию?');"><i class="fas fa-trash-restore"></i> Восстановить</button>
             </form>
         {% else %}
-            <form name="question_category_delete" method="POST" action="{{ path('backend_question_category_delete', {'id': category.id}) }}" style="display: inline-block;">
+            <form name="question_category_delete" method="POST" action="{{ path('backend_questioncategory_delete', {'id': category.id}) }}" style="display: inline-block;">
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
                 <button type="submit" class="btn btn-danger" onclick="return confirm('Вы действительно хотите удалить категорию?');"><i class="fas fa-trash"></i> Удалить</button>
             </form>

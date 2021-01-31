@@ -2,6 +2,7 @@
 namespace App\Repository\User;
 
 use App\Entity\User\User;
+use App\Exception\AppException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -83,6 +84,7 @@ class UserRepository extends ServiceEntityRepository
      *
      * @param UserSearchForm $form Форма поиска
      * @return QueryBuilder Список пользователей
+     * @throws AppException
      */
     public function listingFilter(UserSearchForm $form): QueryBuilder
     {
@@ -109,17 +111,38 @@ class UserRepository extends ServiceEntityRepository
                 ->setParameter('email', '%'.$form->email.'%');
         }
 
-        if (!empty($form->role)) {
+        if ($form->emailVerified !== null) {
+            $query->andWhere('u.emailVerified = :emailVerified')
+                ->setParameter('emailVerified', (int) $form->emailVerified);
+        }
+
+        if ($form->emailSubscribed !== null) {
+            $query->andWhere('u.emailSubscribed = :emailSubscribed')
+                ->setParameter('emailSubscribed', (int) $form->emailSubscribed);
+        }
+
+        if (!empty($form->role) && $form->role !== User::ROLE_USER) {
             // роль пользователь есть у всех
-            /*if ($form->role !== User::ROLE_USER) {
-                $query->andWhere("JSONB_CONTAINS(u.roles, :role)")
-                    ->setParameter('role', $form->role);
-            }*/
+            //$query->andWhere("JSONB_CONTAINS(u.roles, :role)")
+            //    ->setParameter('role', $form->role);
+        }
+
+        if ($form->withPhoto !== null) {
+            $query->andWhere($form->withPhoto ? 'u.photo != 0' : 'u.photo = 0');
         }
 
         // order by
-        if (!empty($form->getOrderBy())) {
-            foreach ($form->getOrderBy() as $key => $value) {
+        $availableOrdersBy = [
+            'u.id_DESC' => ['u.id' => 'DESC'],
+            'u.id_ASC' => ['u.id' => 'ASC'],
+        ];
+
+        if (!empty($form->orderBy)) {
+            if (!isset($availableOrdersBy[$form->orderBy])) {
+                throw new AppException("Направление сортировки '{$form->orderBy}' не поддерживается");
+            }
+
+            foreach ($availableOrdersBy[$form->orderBy] as $key => $value) {
                 $query->addOrderBy($key, $value);
             }
         }

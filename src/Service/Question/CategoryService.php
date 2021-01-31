@@ -71,6 +71,23 @@ final class CategoryService
     }
 
     /**
+     * @return array Список категория для dropDown списка
+     */
+    public function getListForDropdown(): array
+    {
+        $items = [];
+
+        $categories = $this->categoryRepository->getActiveCategories();
+        if (!empty($categories)) {
+            foreach ($categories as $category) {
+                $items[$category->getId()] = $category->getTitle();
+            }
+        }
+
+        return $items;
+    }
+
+    /**
      * Создание категории
      *
      * @param CategoryForm $form
@@ -138,16 +155,10 @@ final class CategoryService
      * @param int $page Номер страницы
      * @param int $pageSize Количество записей на страницу
      * @return Paginator Результат выборка с постраничным выводом
-     * @throws ServiceException
+     * @throws \App\Exception\AppException
      */
     public function listing(CategorySearchForm $form, $page = 1, $pageSize = 30): Paginator
     {
-        if (!empty($form->status)) {
-            if (!isset(Category::$statusList[$form->status])) {
-                throw new ServiceException("У категорий нет статуса '$form->status'");
-            }
-        }
-
         $query = $this->categoryRepository->listingFilter($form);
         return (new Paginator($query, $pageSize))->paginate($page);
     }

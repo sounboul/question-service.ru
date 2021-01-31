@@ -114,6 +114,22 @@ class Question
     }
 
     /**
+     * @return string Получить статус в виде текста
+     */
+    public function getStatusAsText(): string
+    {
+        return self::$statusList[$this->status] ?? $this->status;
+    }
+
+    /**
+     * @return array Список возможных статусов
+     */
+    public static function getStatusList(): array
+    {
+        return array_flip(self::$statusList);
+    }
+
+    /**
      * Установить статус вопроса
      *
      * @param string $status Статус вопроса
@@ -308,5 +324,21 @@ class Question
         $this->totalAnswers = $count;
 
         return $this;
+    }
+
+    /**
+     * @return bool Вопрос активен?
+     */
+    public function isActive(): bool
+    {
+        return $this->status === self::STATUS_ACTIVE;
+    }
+
+    /**
+     * @return bool Вопрос удален?
+     */
+    public function isDeleted(): bool
+    {
+        return $this->status === self::STATUS_DELETED;
     }
 }

@@ -2,6 +2,7 @@
 namespace App\Repository\Question;
 
 use App\Entity\Question\Category;
+use App\Exception\AppException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -44,34 +45,55 @@ class CategoryRepository extends ServiceEntityRepository
     }
 
     /**
+     * @return Category[] Список активных категорий
+     */
+    public function getActiveCategories(): array
+    {
+        return $this->findBy(['status' => Category::STATUS_ACTIVE], ['title' => 'ASC']);
+    }
+
+    /**
      * Листинг категорий с фильтрацией
      *
      * @param CategorySearchForm $form Форма поиска
      * @return QueryBuilder Список категорий
+     * @throws AppException
      */
     public function listingFilter(CategorySearchForm $form): QueryBuilder
     {
-        $query = $this->createQueryBuilder('u');
+        $query = $this->createQueryBuilder('c');
 
         // filters
         if (!empty($form->id)) {
-            $query->andWhere('u.id = :id')
+            $query->andWhere('c.id = :id')
                 ->setParameter('id', $form->id);
         }
 
         if (!empty($form->status)) {
-            $query->andWhere('u.status = :status')
+            $query->andWhere('c.status = :status')
                 ->setParameter('status', $form->status);
         }
 
         if (!empty($form->title)) {
-            $query->andWhere('u.title like :title')
+            $query->andWhere('c.title like :title')
                 ->setParameter('title', '%'.$form->title.'%');
         }
 
         // order by
-        if (!empty($form->getOrderBy())) {
-            foreach ($form->getOrderBy() as $key => $value) {
+        $availableOrdersBy = [
+            'c.id_DESC' => ['c.id' => 'DESC'],
+            'c.id_ASC' => ['c.id' => 'ASC'],
+
+            'c.totalQuestions_DESC' => ['c.totalQuestions' => 'DESC'],
+            'c.totalQuestions_ASC' => ['c.totalQuestions' => 'ASC'],
+        ];
+
+        if (!empty($form->orderBy)) {
+            if (!isset($availableOrdersBy[$form->orderBy])) {
+                throw new AppException("Направление сортировки '{$form->orderBy}' не поддерживается");
+            }
+
+            foreach ($availableOrdersBy[$form->orderBy] as $key => $value) {
                 $query->addOrderBy($key, $value);
             }
         }

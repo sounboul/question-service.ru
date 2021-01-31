@@ -155,7 +155,7 @@ class AppFixtures extends BaseFixture
     /**
      * Загрузка Question Categories Fixtures
      *
-     * @throws \App\Exception\EntityValidationException
+     * @throws \App\Exception\EntityValidationException|\App\Exception\ServiceException
      */
     private function loadQuestionCategoriesFixtures()
     {

@@ -183,6 +183,14 @@ class User implements UserInterface
     }
 
     /**
+     * @return array Список возможных статусов
+     */
+    public static function getStatusList(): array
+    {
+        return array_flip(self::$statusList);
+    }
+
+    /**
      * Установить статус пользователя
      *
      * @param string $status Статус пользователя
