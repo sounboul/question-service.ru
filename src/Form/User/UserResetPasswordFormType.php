@@ -1,18 +1,17 @@
 <?php
 namespace App\Form\User;
 
+use App\Dto\User\UserResetPasswordForm;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 /**
- * Форма изменения пароля для пользователя
+ * Форма изменения пароля через форму восстановения пароля
  */
-class ChangePasswordFormType extends AbstractType
+class UserResetPasswordFormType extends AbstractType
 {
     /**
      * @inheritdoc
@@ -20,26 +19,15 @@ class ChangePasswordFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('plainPassword', RepeatedType::class, [
+            ->add('password', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'first_options' => [
-                    'constraints' => [
-                        new NotBlank([
-                            'message' => 'Введите пароль',
-                        ]),
-                        new Length([
-                            'min' => 8,
-                            'minMessage' => 'Пароль должен содержать минимум {{ limit }} символов',
-                            'max' => 100,
-                        ]),
-                    ],
                     'label' => 'Новый пароль',
                 ],
                 'second_options' => [
                     'label' => 'Повтор пароля',
                 ],
                 'invalid_message' => 'Указанные пароли не совпадают',
-                'mapped' => false,
             ])
         ;
     }
@@ -49,6 +37,8 @@ class ChangePasswordFormType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults([]);
+        $resolver->setDefaults([
+            'data_class' => UserResetPasswordForm::class,
+        ]);
     }
 }

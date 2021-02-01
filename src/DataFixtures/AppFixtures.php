@@ -4,9 +4,10 @@ namespace App\DataFixtures;
 use App\Dto\Question\AnswerCreateForm;
 use App\Dto\Question\CategoryCreateForm;
 use App\Dto\Question\QuestionCreateForm;
-use App\Dto\User\ProfileForm;
-use App\Dto\User\RegistrationForm;
-use App\Dto\User\UserForm;
+use App\Dto\User\UserCreateForm;
+use App\Dto\User\UserUpdateProfileForm;
+use App\Dto\User\UserRegistrationForm;
+use App\Dto\User\UserUpdateForm;
 use App\Service\Question\CategoryService;
 use App\Service\Question\QuestionService;
 use App\Service\Question\AnswerService;
@@ -107,40 +108,25 @@ class AppFixtures extends BaseFixture
         // несколько администраторов
         $staffUsers = ['ivan@webspec.ru', 'ivan@fulledu.ru', 'ivan@hookah.ru'];
         foreach ($staffUsers as $email) {
-            // регистрация
-            $formData = new RegistrationForm();
+            $formData = new UserCreateForm();
             $formData->email = $email;
             $formData->password = '1234567890';
-            $formData->agreeTerms = true;
-
-            $user = $this->userService->create($formData, false);
-
-            // заполнение профиля
-            $formData = new UserForm();
-            $formData->email = $user->getEmail();
-            $formData->username = $user->getUsername();
+            $formData->username = 'Ivan';
             $formData->about = 'Всем привет!';
             $formData->roles = ["ROLE_ADMIN"];
 
-            $this->users[] = $this->userService->updateUser($user->getId(), $formData)->getId();
+            $this->users[] = $this->userService->create($formData)->getId();
         }
 
         // и несколько сотен обычных пользователей
         for ($i = 0; $i < 300; $i++) {
-            // регистрация
-            $formData = new RegistrationForm();
+            $formData = new UserCreateForm();
             $formData->email = $this->faker->email;
             $formData->password = $this->faker->password(8);
-            $formData->agreeTerms = true;
-
-            $user = $this->userService->create($formData, false);
-
-            // заполнение профиля
-            $formData = new ProfileForm();
             $formData->username = $this->faker->name;
             $formData->about = $this->faker->realText();
 
-            $this->users[] = $this->userService->updateProfile($user->getId(), $formData)->getId();
+            $this->users[] = $this->userService->create($formData)->getId();
         }
     }
 

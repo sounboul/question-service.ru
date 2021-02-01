@@ -7,19 +7,37 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 /**
  * DTO для редактирования профиля пользователя
  */
-class ProfileForm
+class UserUpdateProfileForm
 {
+    /**
+     * @var int Идентификатор пользователя
+     *
+     * @Assert\NotBlank()
+     * @Assert\Type("integer")
+     */
+    public int $id;
+
     /**
      * @var string Имя пользователя
      *
      * @Assert\NotBlank()
      * @Assert\Type("string")
      * @Assert\Length(
-     *     min=3,
+     *     min=1,
      *     max=100
      * )
      */
     public string $username;
+
+    /**
+     * @var string|null О себе
+     *
+     * @Assert\Type("string")
+     * @Assert\Length(
+     *     max=3000
+     * )
+     */
+    public ?string $about = null;
 
     /**
      * @var UploadedFile|null Фотография
@@ -33,14 +51,4 @@ class ProfileForm
      * )
      */
     public ?UploadedFile $photo = null;
-
-    /**
-     * @var string|null О себе
-     *
-     * @Assert\Type("string")
-     * @Assert\Length(
-     *     max=3000
-     * )
-     */
-    public ?string $about = null;
 }

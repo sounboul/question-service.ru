@@ -11,11 +11,16 @@ use App\Utils\User\TokenGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use App\Dto\User\RegistrationForm;
-use App\Dto\User\FastRegistrationForm;
-use App\Dto\User\UserForm;
-use App\Dto\User\ProfileForm;
+use App\Dto\User\UserRegistrationForm;
+use App\Dto\User\UserFastRegistrationForm;
+use App\Dto\User\UserUpdateForm;
+use App\Dto\User\UserUpdateProfileForm;
 use App\Dto\User\UserSearchForm;
+use App\Dto\User\UserCreateForm;
+use App\Dto\User\UserChangePasswordForm;
+use App\Dto\User\UserResetPasswordRequestForm;
+use App\Dto\User\UserResetPasswordForm;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * Сервис для работы с пользователями
@@ -48,6 +53,11 @@ class UserService
     private UserPhotoService $userPhotoService;
 
     /**
+     * @var ValidatorInterface Validator Interface
+     */
+    private ValidatorInterface $validator;
+
+    /**
      * Конструктор сервиса
      *
      * @param UserRepository $userRepository User Repository
@@ -55,6 +65,7 @@ class UserService
      * @param UserNotification $userNotification User Notification
      * @param UserPhotoService $userPhotoService User Photo Service
      * @param UserPasswordEncoderInterface $passwordEncoder Password Encoder
+     * @param ValidatorInterface $validator Validator
      */
     public function __construct(
         UserRepository $userRepository,
@@ -62,7 +73,8 @@ class UserService
         UserNotification $userNotification,
         UserPhotoService $userPhotoService,
 
-        UserPasswordEncoderInterface $passwordEncoder
+        UserPasswordEncoderInterface $passwordEncoder,
+        ValidatorInterface $validator
     )
     {
         $this->userRepository = $userRepository;
@@ -71,6 +83,7 @@ class UserService
         $this->userPhotoService = $userPhotoService;
 
         $this->passwordEncoder = $passwordEncoder;
+        $this->validator = $validator;
     }
 
     /**
@@ -107,17 +120,16 @@ class UserService
     }
 
     /**
-     * Регистрация пользователя. Классический вариант.
+     * Создание пользователя
      *
-     * @param RegistrationForm $form Форма регистрации
-     * @param bool $sendEmailConfirmation Отправить письмо для подтверждения E-mail адреса?
-     * @return User Зарегистрированный пользователь
+     * @param UserCreateForm $form Форма
+     * @return User Созданный пользователь
      * @throws ServiceException|EntityValidationException
      */
-    public function create(RegistrationForm $form, bool $sendEmailConfirmation = true): User
+    public function create(UserCreateForm $form): User
     {
-        if (empty($form->agreeTerms)) {
-            throw new ServiceException("Необходимо подтвердить согласие с правилами сайта");
+        if (count($this->validator->validate($form)) > 0) {
+            throw new ServiceException("Ошибка валидации формы UserCreateForm");
         }
 
         $email = trim(mb_strtolower($form->email));
@@ -127,12 +139,43 @@ class UserService
         }
 
         $user = new User();
-        $user->setUsername(ucfirst(explode('@', $email)[0]));
+        $user->setUsername($form->username);
         $user->setStatus($user::STATUS_ACTIVE);
         $user->setEmail($email);
         $user->setPlainPassword($form->password, $this->passwordEncoder);
+        $user->setRoles($form->roles);
+        $user->setAbout((string) $form->about);
+        $user = $this->save($user);
 
-        $this->save($user);
+        if (!empty($form->photo)) {
+            $user->setPhoto($this->userPhotoService->uploadPhoto($form->photo, $user));
+        }
+
+        return $user;
+    }
+
+    /**
+     * Регистрация пользователя. Классический вариант.
+     *
+     * @param UserRegistrationForm $form Форма регистрации
+     * @param bool $sendEmailConfirmation Отправить письмо для подтверждения E-mail адреса?
+     * @return User Зарегистрированный пользователь
+     * @throws ServiceException|EntityValidationException
+     */
+    public function registration(UserRegistrationForm $form, bool $sendEmailConfirmation = true): User
+    {
+        if (count($this->validator->validate($form)) > 0) {
+            throw new ServiceException("Ошибка валидации формы UserRegistrationForm");
+        }
+
+        $email = trim(mb_strtolower($form->email));
+
+        $formData = new UserCreateForm();
+        $formData->username = ucfirst(explode('@', $email)[0]);
+        $formData->email = $email;
+        $formData->password = $form->password;
+
+        $user = $this->create($formData);
 
         // отправка письма для подтверждения E-mail адреса
         if ($sendEmailConfirmation) {
@@ -146,26 +189,81 @@ class UserService
      * Быстрая регистрация пользователя на основе только E-mail адреса.
      * Письмо с подтверждением приходит с указанием пароля.
      *
-     * @param FastRegistrationForm $form Форма регистрации
+     * @param UserFastRegistrationForm $form Форма регистрации
      * @param bool $sendEmailConfirmation Отправить письмо для подтверждения E-mail адреса?
      * @return User Зарегистрированный пользователь
      * @throws ServiceException|EntityValidationException
      */
-    public function fastCreate(FastRegistrationForm $form, bool $sendEmailConfirmation = true): User
+    public function fastRegistration(UserFastRegistrationForm $form, bool $sendEmailConfirmation = true): User
     {
-        $dto = new RegistrationForm();
-        $dto->email = $form->email;
-        $dto->password = PasswordGenerator::generate();
-        $dto->agreeTerms = true;
+        $formData = new UserRegistrationForm();
+        $formData->email = $form->email;
+        $formData->password = PasswordGenerator::generate();
+        $formData->agreeTerms = true;
 
-        $user = $this->create($dto, false);
+        $user = $this->registration($formData, false);
 
         // отправка письма для подтверждения E-mail адреса (с паролем)
         if ($sendEmailConfirmation) {
-            $this->sendEmailConfirmation($user->getEmail(), $dto->password);
+            $this->sendEmailConfirmation($user->getEmail(), $formData->password);
         }
 
         return $user;
+    }
+
+    /**
+     * Обновить пользователя
+     *
+     * @param UserUpdateForm $form Форма
+     * @return User Обновленный пользователь
+     * @throws ServiceException|EntityValidationException
+     */
+    public function update(UserUpdateForm $form): User
+    {
+        if (count($this->validator->validate($form)) > 0) {
+            throw new ServiceException("Ошибка валидации формы UserUpdateForm");
+        }
+
+        $user = $this->getUserById($form->id);
+        $email = mb_strtolower($form->email);
+        if ($user->getEmail() !== $email) {
+            $checkEmail = $this->userRepository->findOneByEmail($email, false);
+            if (!empty($checkEmail)) {
+                throw new ServiceException("E-mail адрес '$email' уже используется другим пользователем");
+            }
+        }
+
+        $user->setUsername($form->username);
+        $user->setEmail($email);
+        $user->setRoles($form->roles);
+        $user->setAbout((string) $form->about);
+
+        if (!empty($form->photo)) {
+            $user->setPhoto($this->userPhotoService->uploadPhoto($form->photo, $user));
+        }
+
+        return $this->save($user);
+    }
+
+    /**
+     * Обновить профиль пользователя
+     *
+     * @param UserUpdateProfileForm $form Форма
+     * @return User Обновленный пользователь
+     * @throws ServiceException|EntityValidationException
+     */
+    public function updateProfile(UserUpdateProfileForm $form): User
+    {
+        $user = $this->getUserById($form->id);
+
+        $user->setUsername($form->username);
+        $user->setAbout((string) $form->about);
+
+        if (!empty($form->photo)) {
+            $user->setPhoto($this->userPhotoService->uploadPhoto($form->photo, $user));
+        }
+
+        return $this->save($user);
     }
 
     /**
@@ -308,13 +406,17 @@ class UserService
     /**
      * Запрос на восстановление пароля пользователю
      *
-     * @param string $email E-mail адрес
+     * @param UserResetPasswordRequestForm $form
      * @return User Пользователь
      * @throws ServiceException
      */
-    public function forgotPasswordRequest(string $email): User
+    public function forgotPasswordRequest(UserResetPasswordRequestForm $form): User
     {
-        $user = $this->getUserByEmail($email);
+        if (count($this->validator->validate($form)) > 0) {
+            throw new ServiceException("Ошибка валидации формы UserResetPasswordRequestForm");
+        }
+
+        $user = $this->getUserByEmail($form->email);
 
         // формирование токена для подтверждения (срок действия токена - 1 день)
         do {
@@ -340,16 +442,19 @@ class UserService
     /**
      * Изменение пароля пользователю через систему восстановления пароля
      *
-     * @param string $token Password Restore Token
-     * @param string $password Новый пароль в открытом виде
+     * @param UserResetPasswordForm $form
      * @return User Пользователь
      * @throws ServiceException|EntityValidationException
      */
-    public function resetPassword(string $token, string $password): User
+    public function resetPassword(UserResetPasswordForm $form): User
     {
-        $user = $this->getUserByPasswordRestoreToken($token);
+        if (count($this->validator->validate($form)) > 0) {
+            throw new ServiceException("Ошибка валидации формы UserResetPasswordForm");
+        }
 
-        $user->setPlainPassword($password, $this->passwordEncoder);
+        $user = $this->getUserByPasswordRestoreToken($form->token);
+
+        $user->setPlainPassword($form->password, $this->passwordEncoder);
         $user->setPasswordRestoreToken(null);
 
         return $this->save($user);
@@ -358,15 +463,18 @@ class UserService
     /**
      * Изменение пароля пользователю
      *
-     * @param int $id Идентификатор пользователя
-     * @param string $password Новый пароль
-     * @return User Пользователь
+     * @param UserChangePasswordForm $form
+     * @return User Обновленный пользователь
      * @throws ServiceException|EntityValidationException
      */
-    public function changePassword(int $id, string $password): User
+    public function changePassword(UserChangePasswordForm $form): User
     {
-        $user = $this->getUserById($id);
-        $user->setPlainPassword($password, $this->passwordEncoder);
+        if (count($this->validator->validate($form)) > 0) {
+            throw new ServiceException("Ошибка валидации формы UserChangePasswordForm");
+        }
+
+        $user = $this->getUserById($form->id);
+        $user->setPlainPassword($form->password, $this->passwordEncoder);
 
         return $this->save($user);
     }
@@ -389,7 +497,9 @@ class UserService
 
         list($tokenString, $tokenTime) = explode('___', $token);
         if (empty($tokenTime) || $tokenTime < time()) {
-            $this->forgotPasswordRequest($user->getEmail());
+            $formData = new UserResetPasswordRequestForm();
+            $formData->email = $user->getEmail();
+            $this->forgotPasswordRequest($formData);
 
             throw new ServiceException("Прошёл срок действия указнного token. Мы выслали вам новое письмо, пройдите по ссылке из него.");
         }
@@ -491,61 +601,6 @@ class UserService
             $user->setEmailVerified(false);
             $this->sendEmailConfirmation($user->getEmail());
         }
-    }
-
-    /**
-     * Обновить пользователя
-     *
-     * @param int $id Идентификатор пользователя
-     * @param UserForm $form Форма
-     * @return User Обновленный пользователь
-     * @throws ServiceException|EntityValidationException
-     */
-    public function updateUser(int $id, UserForm $form): User
-    {
-        $user = $this->getUserById($id);
-
-        $email = mb_strtolower($form->email);
-        if ($user->getEmail() !== $email) {
-            $checkEmail = $this->getUserByEmail($email, false);
-            if (!empty($checkEmail)) {
-                throw new ServiceException("E-mail адрес '$email' уже используется другим пользователем");
-            }
-        }
-
-        $user->setEmail($email);
-        $user->setUsername($form->username);
-        $user->setAbout((string) $form->about);
-
-        if (!empty($form->photo)) {
-            $user->setPhoto($this->userPhotoService->uploadPhoto($form->photo, $user));
-        }
-
-        $user->setRoles($form->roles);
-
-        return $this->save($user);
-    }
-
-    /**
-     * Обновить профиль пользователя
-     *
-     * @param int $id Идентификатор пользователя
-     * @param ProfileForm $form Форма
-     * @return User Обновленный пользователь
-     * @throws ServiceException|EntityValidationException
-     */
-    public function updateProfile(int $id, ProfileForm $form): User
-    {
-        $user = $this->getUserById($id);
-
-        $user->setUsername($form->username);
-        $user->setAbout((string) $form->about);
-
-        if (!empty($form->photo)) {
-            $user->setPhoto($this->userPhotoService->uploadPhoto($form->photo, $user));
-        }
-
-        return $this->save($user);
     }
 
     /**

@@ -1,16 +1,16 @@
 <?php
 namespace App\Form\User;
 
+use App\Dto\User\UserResetPasswordRequestForm;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 /**
  * Форма для запроса на восстановление пароля пользователю
  */
-class ResetPasswordRequestFormType extends AbstractType
+class UserResetPasswordRequestFormType extends AbstractType
 {
     /**
      * @inheritdoc
@@ -20,11 +20,6 @@ class ResetPasswordRequestFormType extends AbstractType
         $builder
             ->add('email', EmailType::class, [
                 'label' => 'E-mail',
-                'constraints' => [
-                    new NotBlank([
-                        'message' => 'Введите E-mail адрес',
-                    ]),
-                ],
             ])
         ;
     }
@@ -34,6 +29,8 @@ class ResetPasswordRequestFormType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults([]);
+        $resolver->setDefaults([
+            'data_class' => UserResetPasswordRequestForm::class,
+        ]);
     }
 }

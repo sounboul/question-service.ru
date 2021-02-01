@@ -1,12 +1,13 @@
 <?php
 namespace App\Controller\Frontend;
 
-use App\Dto\User\ProfileForm;
+use App\Dto\User\UserChangePasswordForm;
+use App\Entity\User\User;
+use App\Dto\User\UserUpdateProfileForm;
 use App\Exception\AppException;
-use App\Form\User\ChangePasswordFormType;
-use App\Form\User\ProfileFormType;
+use App\Form\User\UserChangePasswordFormType;
+use App\Form\User\UserUpdateProfileFormType;
 use App\Service\User\UserService;
-use App\Service\User\UserPhotoService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -44,17 +45,19 @@ final class UserProfileController extends AppController
      */
     public function index(Request $request): Response
     {
+        /* @var User $user */
         $user = $this->getUser();
 
-        $formData = new ProfileForm();
+        $formData = new UserUpdateProfileForm();
+        $formData->id = $user->getId();
         $formData->username = $user->getUsername();
         $formData->about = $user->getAbout();
 
-        $form = $this->createForm(ProfileFormType::class, $formData);
+        $form = $this->createForm(UserUpdateProfileFormType::class, $formData);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $this->userService->updateProfile($user->getId(), $form->getData());
+                $this->userService->updateProfile($form->getData());
 
                 $this->addFlash('success', 'Профиль был успешно сохранен!');
 
@@ -80,11 +83,17 @@ final class UserProfileController extends AppController
      */
     public function changePassword(Request $request): Response
     {
-        $form = $this->createForm(ChangePasswordFormType::class);
+        /* @var User $user */
+        $user = $this->getUser();
+
+        $formData = new UserChangePasswordForm();
+        $formData->id = $user->getId();
+
+        $form = $this->createForm(UserChangePasswordFormType::class, $formData);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $this->userService->changePassword($this->getUser()->getId(), $form->get('plainPassword')->getData());
+                $this->userService->changePassword($form->getData());
 
                 $this->addFlash('success', 'Пароль был успешно изменен!');
 

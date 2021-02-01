@@ -1,18 +1,16 @@
 <?php
 namespace App\Form\User;
 
-use App\Dto\User\RegistrationForm;
+use App\Dto\User\UserFastRegistrationForm;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
- * Форма для регистрации пользователя
+ * Форма для быстрой регистрации пользователя
  */
-class RegistrationFormType extends AbstractType
+class UserFastRegistrationFormType extends AbstractType
 {
     /**
      * @inheritdoc
@@ -23,12 +21,6 @@ class RegistrationFormType extends AbstractType
             ->add('email', EmailType::class, [
                 'label' => 'E-mail',
             ])
-            ->add('password', PasswordType::class, [
-                'label' => 'Пароль',
-            ])
-            ->add('agreeTerms', CheckboxType::class, [
-                'label' => 'Я ознакомился с правилами сервиса и принимаю их',
-            ])
         ;
     }
 
@@ -38,7 +30,7 @@ class RegistrationFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => RegistrationForm::class,
+            'data_class' => UserFastRegistrationForm::class,
         ]);
     }
 }

@@ -103,7 +103,7 @@ class AnswerService
     public function create(AnswerCreateForm $form): Answer
     {
         if (count($this->validator->validate($form)) > 0) {
-            throw new ServiceException("Ошибка валидации формы");
+            throw new ServiceException("Ошибка валидации формы AnswerCreateForm");
         }
 
         $answer = new Answer();
@@ -130,7 +130,7 @@ class AnswerService
     public function update(AnswerUpdateForm $form): Answer
     {
         if (count($this->validator->validate($form)) > 0) {
-            throw new ServiceException("Ошибка валидации формы");
+            throw new ServiceException("Ошибка валидации формы AnswerUpdateForm");
         }
 
         $question = $this->getById($form->id);

@@ -1,12 +1,13 @@
 <?php
 namespace App\Controller\Backend;
 
-use App\Dto\User\UserForm;
+use App\Dto\User\UserChangePasswordForm;
+use App\Dto\User\UserUpdateForm;
 use App\Exception\AppException;
 use App\Exception\ServiceException;
 use App\Form\User\UserSearchFormType;
-use App\Form\User\FastRegistrationFormType;
-use App\Form\User\UserFormType;
+use App\Form\User\UserFastRegistrationFormType;
+use App\Form\User\UserUpdateFormType;
 use App\Service\User\UserService;
 use App\Utils\User\PasswordGenerator;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -53,11 +54,11 @@ final class UserController extends AppController
      */
     public function registration(Request $request): Response
     {
-        $form = $this->createForm(FastRegistrationFormType::class);
+        $form = $this->createForm(UserFastRegistrationFormType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $user = $this->userService->fastCreate($form->getData());
+                $user = $this->userService->fastRegistration($form->getData());
 
                 $this->addFlash('success', 'Пользователь успешно зарегистрирован. Пароль отправлен на почту вместе с письмом о подтверждении e-mail адреса.');
 
@@ -141,17 +142,18 @@ final class UserController extends AppController
             throw new NotFoundHttpException($e->getMessage());
         }
 
-        $formData = new UserForm();
+        $formData = new UserUpdateForm();
+        $formData->id = $user->getId();
         $formData->email = $user->getEmail();
         $formData->username = $user->getUsername();
         $formData->about = $user->getAbout();
         $formData->roles = $user->getRoles();
 
-        $form = $this->createForm(UserFormType::class, $formData);
+        $form = $this->createForm(UserUpdateFormType::class, $formData);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $this->userService->updateUser($id, $form->getData());
+                $this->userService->update($form->getData());
 
                 $this->addFlash('success', 'Пользователь был успешно сохранен!');
 
@@ -261,10 +263,13 @@ final class UserController extends AppController
         $this->checkCsrfToken($request);
 
         try {
-            $password = PasswordGenerator::generate();
-            $this->userService->changePassword($id, $password);
+            $formData = new UserChangePasswordForm();
+            $formData->id = $id;
+            $formData->password = PasswordGenerator::generate();
 
-            $this->addFlash('success', "Пароль изменен! Новый пароль: '{$password}'");
+            $this->userService->changePassword($formData);
+
+            $this->addFlash('success', "Пароль изменен! Новый пароль: '{$formData->password}'");
         } catch (AppException $e) {
             $this->addFlash('error', $e->getMessage());
         } catch (\Exception $e) {

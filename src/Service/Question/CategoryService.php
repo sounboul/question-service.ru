@@ -108,7 +108,7 @@ final class CategoryService
     public function create(CategoryCreateForm $form): Category
     {
         if (count($this->validator->validate($form)) > 0) {
-            throw new ServiceException("Ошибка валидации формы");
+            throw new ServiceException("Ошибка валидации формы CategoryCreateForm");
         }
 
         if (empty($form->slug)) {
@@ -137,7 +137,7 @@ final class CategoryService
     public function update(CategoryUpdateForm $form): Category
     {
         if (count($this->validator->validate($form)) > 0) {
-            throw new ServiceException("Ошибка валидации формы");
+            throw new ServiceException("Ошибка валидации формы CategoryUpdateForm");
         }
 
         if (empty($form->slug)) {

@@ -103,7 +103,7 @@ class QuestionService
     public function create(QuestionCreateForm $form): Question
     {
         if (count($this->validator->validate($form)) > 0) {
-            throw new ServiceException("Ошибка валидации формы");
+            throw new ServiceException("Ошибка валидации формы QuestionCreateForm");
         }
 
         if (empty($form->slug)) {
@@ -136,7 +136,7 @@ class QuestionService
     public function update(QuestionUpdateForm $form): Question
     {
         if (count($this->validator->validate($form)) > 0) {
-            throw new ServiceException("Ошибка валидации формы");
+            throw new ServiceException("Ошибка валидации формы QuestionUpdateForm");
         }
 
         if (empty($form->slug)) {

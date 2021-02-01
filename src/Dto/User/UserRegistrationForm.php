@@ -6,7 +6,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * DTO для регистрации пользователя
  */
-class RegistrationForm
+class UserRegistrationForm
 {
     /**
      * @var string E-mail

@@ -6,7 +6,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * DTO для быстрой регистрации пользователя (на основе E-mail адреса)
  */
-class FastRegistrationForm
+class UserFastRegistrationForm
 {
     /**
      * @var string E-mail

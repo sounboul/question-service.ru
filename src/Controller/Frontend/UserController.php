@@ -1,10 +1,13 @@
 <?php
 namespace App\Controller\Frontend;
 
+use App\Dto\User\UserChangePasswordForm;
+use App\Dto\User\UserResetPasswordForm;
 use App\Exception\AppException;
-use App\Form\User\ChangePasswordFormType;
-use App\Form\User\RegistrationFormType;
-use App\Form\User\ResetPasswordRequestFormType;
+use App\Form\User\UserChangePasswordFormType;
+use App\Form\User\UserRegistrationFormType;
+use App\Form\User\UserResetPasswordFormType;
+use App\Form\User\UserResetPasswordRequestFormType;
 use App\Security\LoginFormAuthenticator;
 use App\Service\User\UserService;
 use Symfony\Component\HttpFoundation\Request;
@@ -87,12 +90,12 @@ final class UserController extends AppController
             return $this->redirectToAuthbox();
         }
 
-        $form = $this->createForm(RegistrationFormType::class);
+        $form = $this->createForm(UserRegistrationFormType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 // регистрация
-                $user = $this->userService->create($form->getData());
+                $user = $this->userService->registration($form->getData());
 
                 // авторизация
                 $userAuthenticator->authenticateUser($user, $loginFormAuthenticator, $request);
@@ -168,11 +171,11 @@ final class UserController extends AppController
      */
     public function forgotPasswordRequest(Request $request): Response
     {
-        $form = $this->createForm(ResetPasswordRequestFormType::class);
+        $form = $this->createForm(UserResetPasswordRequestFormType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $this->userService->forgotPasswordRequest($form->get('email')->getData());
+                $this->userService->forgotPasswordRequest($form->getData());
 
                 $this->addFlash('success', 'Мы на почту отправили Вам сообщение с ссылкой на восстановление пароля. Если вы его не получили, то посмотрите папку "спам", либо попробуйте еще раз.');
 
@@ -201,7 +204,8 @@ final class UserController extends AppController
     {
         // проверка token
         try {
-            $user = $this->userService->getUserByPasswordRestoreToken($request->get('token', ''));
+            $token = $request->get('token', '');
+            $this->userService->getUserByPasswordRestoreToken($token);
         } catch (AppException $e) {
             $this->addFlash('error', $e->getMessage());
             return $this->redirectToAuthbox();
@@ -210,12 +214,15 @@ final class UserController extends AppController
             return $this->redirectToAuthbox();
         }
 
+        $formData = new UserResetPasswordForm();
+        $formData->token = $token;
+
         // отображение формы
-        $form = $this->createForm(ChangePasswordFormType::class);
+        $form = $this->createForm(UserResetPasswordFormType::class, $formData);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $this->userService->resetPassword($user->getPasswordRestoreToken(), $form->get('plainPassword')->getData());
+                $this->userService->resetPassword($form->getData());
 
                 $this->addFlash('success', 'Пароль был успешно изменен!');
 
