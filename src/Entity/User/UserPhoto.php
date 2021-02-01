@@ -59,41 +59,61 @@ class UserPhoto
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
-     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Column(
+     *     name="id",
+     *     type="integer",
+     *     nullable=false
+     * )
      */
-    private ?int $id;
+    private int $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User\User")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     * @ORM\ManyToOne(
+     *     targetEntity="App\Entity\User\User"
+     * )
+     * @ORM\JoinColumn(
+     *     name="user_id",
+     *     referencedColumnName="id",
+     *     nullable=false
+     * )
      */
     private User $user;
 
     /**
-     * @ORM\Column(type="string", length=50)
+     * @ORM\Column(
+     *     type="string",
+     *     length=20,
+     *     nullable=false
+     * )
      */
     private string $status = self::STATUS_ACTIVE;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(
+     *     type="text",
+     *     nullable=false
+     * )
      */
     private string $originalPath;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(
+     *     type="text",
+     *     nullable=true
+     * )
      */
-    private string $thumbnailPath;
+    private ?string $thumbnailPath = null;
 
     /**
-     * @return int|null Получить идентификатор фотографии
+     * @return int Идентификатор фотографии
      */
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
 
     /**
-     * @return User Получить пользователя
+     * @return User Пользователь
      */
     public function getUser(): User
     {
@@ -114,7 +134,7 @@ class UserPhoto
     }
 
     /**
-     * @return string Получить статус фотографии
+     * @return string Статус фотографии
      */
     public function getStatus(): string
     {
@@ -140,7 +160,7 @@ class UserPhoto
     }
 
     /**
-     * @return string Получить originalPath
+     * @return string originalPath
      */
     public function getOriginalPath(): string
     {
@@ -161,11 +181,11 @@ class UserPhoto
     }
 
     /**
-     * @return string Получить thumbnailPath
+     * @return string thumbnailPath
      */
     public function getThumbnailPath(): string
     {
-        return $this->thumbnailPath;
+        return (string) $this->thumbnailPath;
     }
 
     /**

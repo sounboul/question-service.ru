@@ -9,28 +9,28 @@ use Symfony\Component\Validator\Constraints as Assert;
 class CategorySearchForm
 {
     /**
-     * @var int Идентификатор категории
+     * @var int|null Идентификатор категории
      */
-    public int $id;
+    public ?int $id;
 
     /**
-     * @var string Статус категории
+     * @var string|null Статус категории
      *
      * @Assert\Choice(
      *     callback={"App\Entity\Question\Category", "getStatusList"}
      * )
      */
-    public string $status;
+    public ?string $status;
 
     /**
-     * @var string Название категории
+     * @var string|null Название категории
      */
-    public string $title;
+    public ?string $title;
 
     /**
-     * @var string Сортировка
+     * @var string|null Сортировка
      */
-    public string $orderBy;
+    public ?string $orderBy;
 
     /**
      * @return array Доступные варианты сортировки

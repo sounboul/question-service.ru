@@ -6,9 +6,12 @@ use App\Exception\ServiceException;
 use App\Exception\EntityValidationException;
 use App\Pagination\Paginator;
 use App\Repository\Question\CategoryRepository;
-use App\Dto\Question\CategoryForm;
+use App\Dto\Question\CategoryCreateForm;
+use App\Dto\Question\CategoryUpdateForm;
+use App\Utils\SlugHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Dto\Question\CategorySearchForm;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * Сервис для работы с категориями вопросов
@@ -26,18 +29,26 @@ final class CategoryService
     private EntityManagerInterface $entityManager;
 
     /**
+     * @var ValidatorInterface Validator Interface
+     */
+    private ValidatorInterface $validator;
+
+    /**
      * Конструктор сервиса
      *
      * @param CategoryRepository $categoryRepository
      * @param EntityManagerInterface $entityManager
+     * @param ValidatorInterface $validator
      */
     public function __construct(
         CategoryRepository $categoryRepository,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        ValidatorInterface $validator
     )
     {
         $this->categoryRepository = $categoryRepository;
         $this->entityManager = $entityManager;
+        $this->validator = $validator;
     }
 
     /**
@@ -90,13 +101,21 @@ final class CategoryService
     /**
      * Создание категории
      *
-     * @param CategoryForm $form
+     * @param CategoryCreateForm $form
      * @return Category Созданная категория
      * @throws EntityValidationException|ServiceException
      */
-    public function create(CategoryForm $form): Category
+    public function create(CategoryCreateForm $form): Category
     {
-        if (!empty($this->getBySlug($form->slug))) {
+        if (count($this->validator->validate($form)) > 0) {
+            throw new ServiceException("Ошибка валидации формы");
+        }
+
+        if (empty($form->slug)) {
+            $form->slug = SlugHelper::generate($form->title);
+        }
+
+        if (!empty($this->categoryRepository->findOneBySlug($form->slug))) {
             throw new ServiceException("Slug '$form->slug' уже используется другой категорией");
         }
 
@@ -104,7 +123,6 @@ final class CategoryService
         $category->setStatus(Category::STATUS_ACTIVE);
         $category->setTitle($form->title);
         $category->setSlug($form->slug);
-        $category->setHref('');
 
         return $this->save($category);
     }
@@ -113,15 +131,23 @@ final class CategoryService
      * Редактирование категории
      *
      * @param int $id Идентификатор категории
-     * @param CategoryForm $form
+     * @param CategoryUpdateForm $form
      * @return Category Сохраненная категория
      * @throws EntityValidationException|ServiceException
      */
-    public function update(int $id, CategoryForm $form): Category
+    public function update(int $id, CategoryUpdateForm $form): Category
     {
+        if (count($this->validator->validate($form)) > 0) {
+            throw new ServiceException("Ошибка валидации формы");
+        }
+
+        if (empty($form->slug)) {
+            $form->slug = SlugHelper::generate($form->title);
+        }
+
         $category = $this->getById($id);
         if ($category->getSlug() !== $form->slug) {
-            if (!empty($this->getBySlug($form->slug))) {
+            if (!empty($this->categoryRepository->findOneBySlug($form->slug))) {
                 throw new ServiceException("Slug '$form->slug' уже используется другой категорией");
             }
         }
@@ -155,12 +181,16 @@ final class CategoryService
      * @param int $page Номер страницы
      * @param int $pageSize Количество записей на страницу
      * @return Paginator Результат выборка с постраничным выводом
-     * @throws \App\Exception\AppException
+     * @throws ServiceException
      */
     public function listing(CategorySearchForm $form, $page = 1, $pageSize = 30): Paginator
     {
-        $query = $this->categoryRepository->listingFilter($form);
-        return (new Paginator($query, $pageSize))->paginate($page);
+        try {
+            $query = $this->categoryRepository->listingFilter($form);
+            return (new Paginator($query, $pageSize))->paginate($page);
+        } catch (\Exception $e) {
+            throw new ServiceException($e->getMessage());
+        }
     }
 
     /**

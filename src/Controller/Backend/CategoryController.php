@@ -1,23 +1,24 @@
 <?php
 namespace App\Controller\Backend;
 
+use App\Dto\Question\CategoryUpdateForm;
 use App\Exception\AppException;
 use App\Exception\ServiceException;
-use App\Form\Question\CategoryFormType;
+use App\Form\Question\CategoryCreateFormType;
+use App\Form\Question\CategoryUpdateFormType;
 use App\Form\Question\CategorySeachFormType;
 use App\Service\Question\CategoryService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Dto\Question\CategoryForm;
 
 /**
  * Контроллер управления категориями вопросов
  *
- * @Route("/question-category", name="questioncategory_")
+ * @Route("/question-category", name="category_")
  */
-class QuestionCategoryController extends AppController
+class CategoryController extends AppController
 {
     /**
      * @inheritdoc
@@ -51,7 +52,7 @@ class QuestionCategoryController extends AppController
      */
     public function create(Request $request): Response
     {
-        $form = $this->createForm(CategoryFormType::class);
+        $form = $this->createForm(CategoryCreateFormType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
@@ -59,7 +60,7 @@ class QuestionCategoryController extends AppController
 
                 $this->addFlash('success', 'Категория успешно создана.');
 
-                return $this->redirectToRoute('backend_questioncategory_view', ['id' => $category->getId()]);
+                return $this->redirectToRoute('backend_category_view', ['id' => $category->getId()]);
             } catch (AppException $e) {
                 $this->addFlash('error', $e->getMessage());
             } catch (\Exception $e) {
@@ -67,7 +68,7 @@ class QuestionCategoryController extends AppController
             }
         }
 
-        return $this->render('question-category/create.html.twig', [
+        return $this->render('category/create.html.twig', [
             'form' => $form->createView(),
         ]);
     }
@@ -79,17 +80,12 @@ class QuestionCategoryController extends AppController
      *
      * @param Request $request
      * @return Response
-     * @throws \Exception
      */
     public function list(Request $request): Response
     {
         $form = $this->createNamedForm('', CategorySeachFormType::class);
         $form->submit(array_diff_key($request->query->all(), array_flip(['page'])));
-        if ($form->isSubmitted() && $form->isValid()) {
-            $filters = (array) $form->getData();
-        } else {
-            $filters = [];
-        }
+        $filters = $form->isSubmitted() && $form->isValid() ? (array) $form->getData() : [];
 
         try {
             $page = (int) $request->get('page', 1);
@@ -99,7 +95,7 @@ class QuestionCategoryController extends AppController
             $paginator = null;
         }
 
-        return $this->render('question-category/list.html.twig', [
+        return $this->render('category/list.html.twig', [
             'filterForm' => $form->createView(),
             'filters' => $filters,
             'paginator' => $paginator,
@@ -122,7 +118,7 @@ class QuestionCategoryController extends AppController
             throw new NotFoundHttpException($e->getMessage());
         }
 
-        return $this->render('question-category/view.html.twig', [
+        return $this->render('category/view.html.twig', [
             'category' => $category,
         ]);
     }
@@ -144,11 +140,11 @@ class QuestionCategoryController extends AppController
             throw new NotFoundHttpException($e->getMessage());
         }
 
-        $formData = new CategoryForm();
+        $formData = new CategoryUpdateForm();
         $formData->title = $category->getTitle();
         $formData->slug = $category->getSlug();
 
-        $form = $this->createForm(CategoryFormType::class, $formData);
+        $form = $this->createForm(CategoryUpdateFormType::class, $formData);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
@@ -156,7 +152,7 @@ class QuestionCategoryController extends AppController
 
                 $this->addFlash('success', 'Категория успешно обновлена.');
 
-                return $this->redirectToRoute('backend_questioncategory_view', ['id' => $category->getId()]);
+                return $this->redirectToRoute('backend_category_view', ['id' => $category->getId()]);
             } catch (AppException $e) {
                 $this->addFlash('error', $e->getMessage());
             } catch (\Exception $e) {
@@ -164,7 +160,7 @@ class QuestionCategoryController extends AppController
             }
         }
 
-        return $this->render('question-category/update.html.twig', [
+        return $this->render('category/update.html.twig', [
             'form' => $form->createView(),
             'category' => $category,
         ]);
@@ -193,7 +189,7 @@ class QuestionCategoryController extends AppController
             $this->addFlash('error', "Произошла ошибка при удалении. Попробуйте позже.");
         }
 
-        return $this->redirectToRoute('backend_questioncategory_view', ['id' => $id]);
+        return $this->redirectToRoute('backend_category_view', ['id' => $id]);
     }
 
     /**
@@ -219,6 +215,6 @@ class QuestionCategoryController extends AppController
             $this->addFlash('error', "Произошла ошибка при восстановлении. Попробуйте позже.");
         }
 
-        return $this->redirectToRoute('backend_questioncategory_view', ['id' => $id]);
+        return $this->redirectToRoute('backend_category_view', ['id' => $id]);
     }
 }

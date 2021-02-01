@@ -1,13 +1,13 @@
 {% extends 'backend/layouts/controlbox.html.twig' %}
 {% import "backend/components/tools.html.twig" as tools %}
 
-{% block title %}Вопрос '{{ question.title }}' - Вопросы - Панель управления{% endblock %}
-{% block header %}Вопрос '{{ question.title }}'{% endblock %}
+{% block title %}Вопрос #{{ question.id }} - Вопросы - Панель управления{% endblock %}
+{% block header %}Вопрос #{{ question.id }}{% endblock %}
 
 {% block breadcrumbs %}
     <li class="breadcrumb-item"><a href="{{ path('backend_index') }}">Главная</a></li>
     <li class="breadcrumb-item"><a href="{{ path('backend_question_list') }}">Вопросы</a></li>
-    <li class="breadcrumb-item">Вопрос '{{ question.title }}'</li>
+    <li class="breadcrumb-item">Вопрос #{{ question.id }}</li>
 {% endblock %}
 
 {% block content %}
@@ -89,9 +89,95 @@
         </table>
     </div>
 
+    {% set items = answers.results %}
     <div class="answers-block">
-        <h2>Ответы</h2>
+        <h2>Ответы ({{ answers.numResults }})</h2>
 
-        <p>Тут будет листинг ответов к вопросу</p>
+        {% if items|length > 0 %}
+            {% for item in items %}
+                <div class="card" style="margin-bottom: 15px;">
+                    <div class="card-header text-muted">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <b>#{{ item.id }}</b>
+                                {{ tools.statusLabel(item.status, item.statusAsText) }}
+                            </div>
+
+                            <div class="col-md-6 text-right">
+                                <a class="btn btn-success btn-sm" href="{{ path('backend_answer_view', {'id': item.id}) }}" target="_blank" title="Просмотр">
+                                    Просмотр
+                                </a>
+
+                                {% if item.isActive %}
+                                    <a class="btn btn-primary btn-sm" href="{{ path('backend_answer_update', {'id': item.id}) }}" target="_blank" title="Редактировать">
+                                        Редактировать
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <p>{{ item.text|nl2br }}</p>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-md-3">
+                                {{ item.createdAt|date }}
+                            </div>
+
+                            <div class="col-md-3">
+                                <b>IP:</b> {{ item.createdByIp }}
+                            </div>
+
+                            <div class="col-md-3">
+                                <b>Автор:</b> <a href="{{ path('backend_user_view', {'id': item.user.id}) }}" target="_blank">{{ item.user.username }}</a>
+                            </div>
+
+                            <div class="col-md-3">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+            {% include "backend/components/paginator.html.twig" with {
+                'paginator': answers,
+                'filters': filters
+            } only %}
+        {% else %}
+            {{ tools.alert('info', "Ничего не найдено. Попробуйте изменить критерии поиска.") }}
+        {% endif %}
+    </div>
+
+    <div class="answer-create">
+        <h2>Ответить</h2>
+
+        {{ form_start(createForm) }}
+        {{ form_row(createForm.text) }}
+
+        <button class="btn btn-primary">Ответить</button>
+        {{ form_end(createForm) }}
+    </div>
+{% endblock %}
+
+{% block filters %}
+    <div class="card" style="margin-top: 20px;">
+        <div class="card-header">
+            <b>Фильтры к ответам</b>
+        </div>
+
+        <div class="card-body">
+            {{ form_start(filterForm) }}
+            {{ form_row(filterForm.status) }}
+            {{ form_row(filterForm.text) }}
+            {{ form_row(filterForm.userId) }}
+            {{ form_row(filterForm.createdByIp) }}
+
+            <button class="btn btn-primary">Найти</button>
+            {{ form_end(filterForm) }}
+        </div>
     </div>
 {% endblock %}

@@ -86,11 +86,7 @@ final class UserController extends AppController
     {
         $form = $this->createNamedForm('', UserSearchFormType::class);
         $form->submit(array_diff_key($request->query->all(), array_flip(['page'])));
-        if ($form->isSubmitted() && $form->isValid()) {
-            $filters = (array) $form->getData();
-        } else {
-            $filters = [];
-        }
+        $filters = $form->isSubmitted() && $form->isValid() ? (array) $form->getData() : [];
 
         try {
             $page = (int) $request->get('page', 1);

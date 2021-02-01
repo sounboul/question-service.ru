@@ -42,6 +42,7 @@ class QuestionUpdateFormType extends AbstractType
             ])
             ->add('slug', TextType::class, [
                 'label' => 'Slug',
+                'required' => false,
             ])
         ;
     }

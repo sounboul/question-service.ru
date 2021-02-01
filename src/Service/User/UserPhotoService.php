@@ -54,6 +54,21 @@ class UserPhotoService
     }
 
     /**
+     * @param int $id Идентификатор фотографии
+     * @return UserPhoto Фотография
+     * @throws ServiceException В случае если фотография не найдена
+     */
+    public function getById(int $id): UserPhoto
+    {
+        $photo = $this->userPhotoRepository->findOneById($id);
+        if (empty($photo)) {
+            throw new ServiceException("Не найдена фотография с указанным идентификатором");
+        }
+
+        return $photo;
+    }
+
+    /**
      * Загрузка фотографии
      *
      * @param UploadedFile $file Информация о загруженном изображении
@@ -98,21 +113,6 @@ class UserPhotoService
         }
 
         $this->userPhotoRepository->switchUserPhoto($user->getId(), $photoId);
-
-        return $photo;
-    }
-
-    /**
-     * @param int $id Идентификатор фотографии
-     * @return UserPhoto Фотография
-     * @throws ServiceException В случае если фотография не найдена
-     */
-    public function getById(int $id): UserPhoto
-    {
-        $photo = $this->userPhotoRepository->findOneById($id);
-        if (empty($photo)) {
-            throw new ServiceException("Не найдена фотография с указанным идентификатором");
-        }
 
         return $photo;
     }

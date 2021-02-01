@@ -9,9 +9,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 class QuestionUpdateForm
 {
     /**
-     * @var int|null Category
+     * @var int Категория
      */
-    public ?int $categoryId;
+    public int $categoryId;
 
     /**
      * @var string Название вопроса
@@ -34,9 +34,8 @@ class QuestionUpdateForm
     public ?string $text;
 
     /**
-     * @var string Slug вопроса
+     * @var string|null Slug вопроса
      *
-     * @Assert\NotBlank()
      * @Assert\Length(
      *     min=3,
      *     max=100
@@ -45,5 +44,5 @@ class QuestionUpdateForm
      *     pattern="/^[-_\w]+$/"
      * )
      */
-    public string $slug;
+    public ?string $slug;
 }

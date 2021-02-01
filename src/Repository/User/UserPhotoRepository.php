@@ -29,7 +29,7 @@ class UserPhotoRepository extends ServiceEntityRepository
      */
     public function findOneById(int $id): ?UserPhoto
     {
-        return $this->findOneBy(['id' => $id]);
+        return $this->find($id);
     }
 
     /**

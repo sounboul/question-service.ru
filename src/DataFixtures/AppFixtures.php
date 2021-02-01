@@ -1,20 +1,18 @@
 <?php
 namespace App\DataFixtures;
 
-use App\Dto\Question\CategoryForm;
+use App\Dto\Question\AnswerCreateForm;
+use App\Dto\Question\CategoryCreateForm;
+use App\Dto\Question\QuestionCreateForm;
 use App\Dto\User\ProfileForm;
 use App\Dto\User\RegistrationForm;
 use App\Dto\User\UserForm;
-use App\Entity\Question\Answer;
-use App\Entity\Question\Category;
-use App\Entity\Question\Question;
-use App\Entity\User\User;
 use App\Service\Question\CategoryService;
 use App\Service\Question\QuestionService;
 use App\Service\Question\AnswerService;
 use App\Service\User\UserService;
 use Doctrine\Persistence\ObjectManager;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use App\Exception\AppException;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 /**
@@ -44,11 +42,6 @@ class AppFixtures extends BaseFixture
     private AnswerService $answerService;
 
     /**
-     * @var UserPasswordEncoderInterface Password Encoder
-     */
-    private UserPasswordEncoderInterface $passwordEncoder;
-
-    /**
      * @var SluggerInterface Slugger
      */
     private SluggerInterface $slugger;
@@ -70,7 +63,6 @@ class AppFixtures extends BaseFixture
      * @param QuestionService $questionService
      * @param CategoryService $categoryService
      * @param AnswerService $answerService
-     * @param UserPasswordEncoderInterface $passwordEncoder Password Encoder
      * @param SluggerInterface $slugger Slugger
      */
     public function __construct(
@@ -78,7 +70,6 @@ class AppFixtures extends BaseFixture
         QuestionService $questionService,
         CategoryService $categoryService,
         AnswerService $answerService,
-        UserPasswordEncoderInterface $passwordEncoder,
         SluggerInterface $slugger
     )
     {
@@ -86,7 +77,6 @@ class AppFixtures extends BaseFixture
         $this->questionService = $questionService;
         $this->categoryService = $categoryService;
         $this->answerService = $answerService;
-        $this->passwordEncoder = $passwordEncoder;
         $this->slugger = $slugger;
     }
 
@@ -109,6 +99,8 @@ class AppFixtures extends BaseFixture
 
     /**
      * Загрузка User Fixtures
+     *
+     * @throws AppException
      */
     private function loadUserFixtures(): void
     {
@@ -130,7 +122,7 @@ class AppFixtures extends BaseFixture
             $formData->about = 'Всем привет!';
             $formData->roles = ["ROLE_ADMIN"];
 
-            $this->users[] = $this->userService->updateUser($user->getId(), $formData);
+            $this->users[] = $this->userService->updateUser($user->getId(), $formData)->getId();
         }
 
         // и несколько сотен обычных пользователей
@@ -148,57 +140,53 @@ class AppFixtures extends BaseFixture
             $formData->username = $this->faker->name;
             $formData->about = $this->faker->realText();
 
-            $this->users[] = $this->userService->updateProfile($user->getId(), $formData);
+            $this->users[] = $this->userService->updateProfile($user->getId(), $formData)->getId();
         }
     }
 
     /**
      * Загрузка Question Categories Fixtures
      *
-     * @throws \App\Exception\EntityValidationException|\App\Exception\ServiceException
+     * @throws AppException
      */
     private function loadQuestionCategoriesFixtures()
     {
         // 20 категорий будет достаточно
         for ($i = 0; $i < 20; $i++) {
-            $category = new CategoryForm();
+            $category = new CategoryCreateForm();
             $category->title = $this->faker->name;
             $category->slug = $this->slugger->slug($category->title);
 
-            $this->categories[] = $this->categoryService->create($category);
+            $this->categories[] = $this->categoryService->create($category)->getId();
         }
     }
 
     /**
      * Загрузка Question Fixtures
+     *
+     * @throws AppException
      */
     private function loadQuestionFixtures()
     {
         for ($i = 0; $i < 500; $i++) {
             // создание вопросы
-            $question = new Question();
-            $question->setStatus(Question::STATUS_ACTIVE);
-            $question->setUser($this->users[array_rand($this->users)]);
-            $question->setCategory($this->categories[array_rand($this->categories)]);
-            $question->setTitle($this->faker->text(100));
-            $question->setText($i % 2 == 0 ? $this->faker->paragraph() : '');
-            $question->setSlug($this->slugger->slug($question->getTitle()));
-            $question->setHref('');
-            $question->setCreatedByIp($this->faker->ipv4);
-
-            $this->questionService->updateQuestion($question);
+            $formData = new QuestionCreateForm();
+            $formData->userId = $this->users[array_rand($this->users)];
+            $formData->categoryId = $this->categories[array_rand($this->categories)];
+            $formData->title = $this->faker->text(100);
+            $formData->text = $i % 2 == 0 ? $this->faker->paragraph() : '';
+            $formData->createdByIp = $this->faker->ipv4;
+            $questionId = $this->questionService->create($formData)->getId();
 
             // создание ответов к вопросу
             $count = rand(0, 20);
             for ($n = 0; $n < $count; $n++) {
-                $answer = new Answer();
-                $answer->setStatus(Answer::STATUS_ACTIVE);
-                $answer->setUser($this->users[array_rand($this->users)]);
-                $answer->setQuestion($question);
-                $answer->setText($this->faker->paragraph);
-                $answer->setCreatedByIp($this->faker->ipv4);
-
-                $this->answerService->updateAnswer($answer);
+                $answer = new AnswerCreateForm();
+                $answer->questionId = $questionId;
+                $answer->userId = $this->users[array_rand($this->users)];
+                $answer->text = $this->faker->paragraph;
+                $answer->createdByIp = $this->faker->ipv4;
+                $this->answerService->create($answer);
             }
         }
     }

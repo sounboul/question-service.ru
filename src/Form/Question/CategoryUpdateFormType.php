@@ -1,16 +1,16 @@
 <?php
 namespace App\Form\Question;
 
-use App\Dto\Question\CategoryForm;
+use App\Dto\Question\CategoryUpdateForm;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
- * Форма для создания/редактирования категории вопросов
+ * Форма для редактирования категории вопросов
  */
-class CategoryFormType extends AbstractType
+class CategoryUpdateFormType extends AbstractType
 {
     /**
      * @inheritdoc
@@ -23,6 +23,7 @@ class CategoryFormType extends AbstractType
             ])
             ->add('slug', TextType::class, [
                 'label' => 'Slug',
+                'required' => false,
             ])
         ;
     }
@@ -33,7 +34,7 @@ class CategoryFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => CategoryForm::class,
+            'data_class' => CategoryUpdateForm::class,
         ]);
     }
 }

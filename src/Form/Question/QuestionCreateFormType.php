@@ -1,6 +1,7 @@
 <?php
 namespace App\Form\Question;
 
+use App\Dto\Question\QuestionCreateForm;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -48,7 +49,7 @@ class QuestionCreateFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => QuestionCreateFormType::class,
+            'data_class' => QuestionCreateForm::class,
         ]);
 
         $resolver->setRequired('categoryService');

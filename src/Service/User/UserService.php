@@ -74,6 +74,39 @@ class UserService
     }
 
     /**
+     * @param int $id Идентификатор пользователя
+     * @param bool $isActive Выборка только активного пользователя
+     * @return User Получить пользователя по его идентификатору
+     * @throws ServiceException В случае если пользователь не найден
+     */
+    public function getUserById(int $id, bool $isActive = true): User
+    {
+        $user = $this->userRepository->findOneById($id, $isActive);
+        if (empty($user)) {
+            throw new ServiceException("Не найден пользователь с ID '$id'");
+        }
+
+        return $user;
+    }
+
+    /**
+     * @param string $email E-mail адрес
+     * @param bool $isActive Выборка только активного пользователя
+     * @return User Получить пользователя по его E-mail адресу
+     * @throws ServiceException В случае если пользователь не найден
+     */
+    public function getUserByEmail(string $email, bool $isActive = true): User
+    {
+        $email = trim(mb_strtolower($email));
+        $user = $this->userRepository->findOneByEmail($email, $isActive);
+        if (empty($user)) {
+            throw new ServiceException("Не найден пользователь с e-mail '$email'");
+        }
+
+        return $user;
+    }
+
+    /**
      * Регистрация пользователя. Классический вариант.
      *
      * @param RegistrationForm $form Форма регистрации
@@ -365,51 +398,22 @@ class UserService
     }
 
     /**
-     * @param int $id Идентификатор пользователя
-     * @param bool $isActive Выборка только активного пользователя
-     * @return User Получить пользователя по его идентификатору
-     * @throws ServiceException В случае если пользователь не найден
-     */
-    public function getUserById(int $id, bool $isActive = true): User
-    {
-        $user = $this->userRepository->findOneById($id, $isActive);
-        if (empty($user)) {
-            throw new ServiceException("Не найден пользователь с ID '$id'");
-        }
-
-        return $user;
-    }
-
-    /**
-     * @param string $email E-mail адрес
-     * @param bool $isActive Выборка только активного пользователя
-     * @return User Получить пользователя по его E-mail адресу
-     * @throws ServiceException В случае если пользователь не найден
-     */
-    public function getUserByEmail(string $email, bool $isActive = true): User
-    {
-        $email = trim(mb_strtolower($email));
-        $user = $this->userRepository->findOneByEmail($email, $isActive);
-        if (empty($user)) {
-            throw new ServiceException("Не найден пользователь с e-mail '$email'");
-        }
-
-        return $user;
-    }
-
-    /**
      * Листинг пользователей с фильтрацией
      *
      * @param UserSearchForm $form Форма поиска
      * @param int $page Номер страницы
      * @param int $pageSize Количество записей на страницу
      * @return Paginator Результат выборка с постраничным выводом
-     * @throws \Exception
+     * @throws ServiceException
      */
     public function listing(UserSearchForm $form, $page = 1, $pageSize = 30): Paginator
     {
-        $query = $this->userRepository->listingFilter($form);
-        return (new Paginator($query, $pageSize))->paginate($page);
+        try {
+            $query = $this->userRepository->listingFilter($form);
+            return (new Paginator($query, $pageSize))->paginate($page);
+        } catch (\Exception $e) {
+            throw new ServiceException($e->getMessage());
+        }
     }
 
     /**

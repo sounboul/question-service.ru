@@ -37,8 +37,8 @@ class UserSearchFormType extends AbstractType
             ])
             ->add('status', ChoiceType::class, [
                 'label' => 'Статус',
-                'choices' => array_flip(User::$statusList),
                 'required' => false,
+                'choices' => array_flip(User::$statusList),
             ])
             ->add('email', TextType::class, [
                 'label' => 'E-mail',

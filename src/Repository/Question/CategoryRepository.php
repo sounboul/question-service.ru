@@ -32,7 +32,7 @@ class CategoryRepository extends ServiceEntityRepository
      */
     public function findOneById(int $id): ?Category
     {
-        return $this->findOneBy(['id' => $id]);
+        return $this->find($id);
     }
 
     /**
@@ -41,7 +41,7 @@ class CategoryRepository extends ServiceEntityRepository
      */
     public function findOneBySlug(string $slug): ?Category
     {
-        return $this->findOneBy(['slug' => $slug]);
+        return $this->findOneBy(['slug' => trim($slug)]);
     }
 
     /**

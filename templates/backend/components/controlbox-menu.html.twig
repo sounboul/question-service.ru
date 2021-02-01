@@ -13,9 +13,9 @@
         'active': 'backend_user_' in currentRoute,
     }, {
         'label': 'Категории',
-        'route': 'backend_questioncategory_list',
+        'route': 'backend_category_list',
         'visible': true,
-        'active': 'backend_questioncategory_' in currentRoute,
+        'active': 'backend_category_' in currentRoute,
     }, {
         'label': 'Вопросы',
         'route': 'backend_question_list',
@@ -23,9 +23,9 @@
         'active': 'backend_question_' in currentRoute,
     }, {
         'label': 'Ответы',
-        'route': 'backend_questionanswer_list',
-        'visible': false,
-        'active': 'backend_questionanswer_' in currentRoute,
+        'route': 'backend_answer_list',
+        'visible': true,
+        'active': 'backend_answer_' in currentRoute,
     }
 ] %}
 <div class="list-group">

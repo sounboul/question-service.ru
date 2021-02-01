@@ -4,9 +4,9 @@ namespace App\Dto\Question;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * DTO для создания/редактирования категории
+ * DTO для редактирования категории
  */
-class CategoryForm
+class CategoryUpdateForm
 {
     /**
      * @var string Название категории
@@ -20,9 +20,8 @@ class CategoryForm
     public string $title;
 
     /**
-     * @var string Slug категории
+     * @var string|null Slug категории
      *
-     * @Assert\NotBlank()
      * @Assert\Length(
      *     min=3,
      *     max=100
@@ -31,5 +30,5 @@ class CategoryForm
      *     pattern="/^[-_\w]+$/"
      * )
      */
-    public string $slug;
+    public ?string $slug;
 }

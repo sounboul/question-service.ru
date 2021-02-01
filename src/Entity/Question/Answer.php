@@ -46,47 +46,74 @@ class Answer
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
-     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Column(
+     *     name="id",
+     *     type="integer",
+     *     nullable=false
+     * )
      */
-    private ?int $id;
+    private int $id;
 
     /**
-     * @ORM\Column(type="string", length=50)
+     * @ORM\Column(
+     *     type="string",
+     *     length=20,
+     *     nullable=false
+     * )
      */
     private string $status = self::STATUS_ACTIVE;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User\User")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     * @ORM\ManyToOne(
+     *     targetEntity="App\Entity\User\User"
+     * )
+     * @ORM\JoinColumn(
+     *     name="user_id",
+     *     referencedColumnName="id",
+     *     nullable=true
+     * )
      */
-    private User $user;
+    private ?User $user = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Question\Question")
-     * @ORM\JoinColumn(name="question_id", referencedColumnName="id")
+     * @ORM\ManyToOne(
+     *     targetEntity="App\Entity\Question\Question"
+     * )
+     * @ORM\JoinColumn(
+     *     name="question_id",
+     *     referencedColumnName="id",
+     *     nullable=false
+     * )
      */
     private Question $question;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(
+     *     type="text",
+     *     nullable=false
+     * )
      */
     private string $text;
 
     /**
-     * @ORM\Column(type="string", length=250)
+     * @ORM\Column(
+     *     type="string",
+     *     length=46,
+     *     nullable=true
+     * )
      */
-    private string $createdByIp;
+    private ?string $createdByIp = null;
 
     /**
-     * @return int|null Получить идентификатор категории
+     * @return int Идентификатор ответа
      */
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
 
     /**
-     * @return string Получить статус ответа
+     * @return string Статус ответа
      */
     public function getStatus(): string
     {
@@ -94,7 +121,7 @@ class Answer
     }
 
     /**
-     * @return string Получить статус в виде текста
+     * @return string Статус в виде текста
      */
     public function getStatusAsText(): string
     {
@@ -128,9 +155,9 @@ class Answer
     }
 
     /**
-     * @return User Получить пользователя
+     * @return User|null Пользователь
      */
-    public function getUser(): User
+    public function getUser(): ?User
     {
         return $this->user;
     }
@@ -149,7 +176,7 @@ class Answer
     }
 
     /**
-     * @return Question Получить вопрос
+     * @return Question Вопрос
      */
     public function getQuestion(): Question
     {
@@ -159,7 +186,7 @@ class Answer
     /**
      * Установить вопрос
      *
-     * @param Question $question Question
+     * @param Question $question Вопрос
      * @return self
      */
     public function setQuestion(Question $question): self
@@ -170,7 +197,7 @@ class Answer
     }
 
     /**
-     * @return string Получить текст
+     * @return string Текст ответа
      */
     public function getText(): string
     {
@@ -180,7 +207,7 @@ class Answer
     /**
      * Установить текст
      *
-     * @param string $text Текст
+     * @param string $text Текст ответа
      * @return self
      */
     public function setText(string $text): self
@@ -195,7 +222,7 @@ class Answer
      */
     public function getCreatedByIp(): string
     {
-        return $this->createdByIp;
+        return (string) $this->createdByIp;
     }
 
     /**

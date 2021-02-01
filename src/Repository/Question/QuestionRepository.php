@@ -32,7 +32,7 @@ class QuestionRepository extends ServiceEntityRepository
      */
     public function findOneById(int $id): ?Question
     {
-        return $this->findOneBy(['id' => $id]);
+        return $this->find($id);
     }
 
     /**

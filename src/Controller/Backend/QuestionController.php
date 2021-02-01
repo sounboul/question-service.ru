@@ -1,13 +1,18 @@
 <?php
 namespace App\Controller\Backend;
 
+use App\Dto\Question\AnswerSearchForm;
 use App\Dto\Question\QuestionUpdateForm;
+use App\Dto\Question\AnswerCreateForm;
 use App\Exception\AppException;
 use App\Exception\ServiceException;
 use App\Dto\Question\QuestionCreateForm;
+use App\Form\Question\AnswerCreateFormType;
+use App\Form\Question\AnswerSearchInQuestionFormType;
 use App\Form\Question\QuestionCreateFormType;
 use App\Form\Question\QuestionSearchFormType;
 use App\Form\Question\QuestionUpdateFormType;
+use App\Service\Question\AnswerService;
 use App\Service\Question\QuestionService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,18 +43,26 @@ class QuestionController extends AppController
     private CategoryService $categoryService;
 
     /**
+     * @var AnswerService Question Answer Service
+     */
+    private AnswerService $answerService;
+
+    /**
      * Конструктор
      *
      * @param QuestionService $questionService Question Service
      * @param CategoryService $categoryService Category Service
+     * @param AnswerService $answerService Answer Service
      */
     public function __construct(
         QuestionService $questionService,
-        CategoryService $categoryService
+        CategoryService $categoryService,
+        AnswerService $answerService
     )
     {
         $this->questionService = $questionService;
         $this->categoryService = $categoryService;
+        $this->answerService = $answerService;
     }
 
     /**
@@ -68,7 +81,9 @@ class QuestionController extends AppController
             try {
                 /* @var QuestionCreateForm $formData */
                 $formData = $form->getData();
-                $formData->userId = $this->getUser()->getId();
+                if (!empty($this->getUser())) {
+                    $formData->userId = $this->getUser()->getId();
+                }
                 $formData->createdByIp = $request->getClientIp();
 
                 $question = $this->questionService->create($formData);
@@ -95,17 +110,12 @@ class QuestionController extends AppController
      *
      * @param Request $request
      * @return Response
-     * @throws \Exception
      */
     public function list(Request $request): Response
     {
         $form = $this->createNamedForm('', QuestionSearchFormType::class, null, ['categoryService' => $this->categoryService]);
         $form->submit(array_diff_key($request->query->all(), array_flip(['page'])));
-        if ($form->isSubmitted() && $form->isValid()) {
-            $filters = (array) $form->getData();
-        } else {
-            $filters = [];
-        }
+        $filters = $form->isSubmitted() && $form->isValid() ? (array) $form->getData() : [];
 
         try {
             $page = (int) $request->get('page', 1);
@@ -127,19 +137,68 @@ class QuestionController extends AppController
      *
      * @Route("/view/{id<[1-9]\d*>}/", name="view")
      *
+     * @param Request $request
      * @param int $id Идентификатор вопроса
      * @return Response
      */
-    public function view(int $id): Response
+    public function view(Request $request, int $id): Response
     {
+        // Поиск указанного вопроса
         try {
             $question = $this->questionService->getById($id);
         } catch (ServiceException $e) {
             throw new NotFoundHttpException($e->getMessage());
         }
 
+        // Добавление нового ответа к вопросу
+        $createForm = $this->createForm(AnswerCreateFormType::class);
+        $createForm->handleRequest($request);
+        if ($createForm->isSubmitted() && $createForm->isValid()) {
+            try {
+                /* @var AnswerCreateForm $formData */
+                $formData = $createForm->getData();
+                $formData->questionId = $id;
+                if (!empty($this->getUser())) {
+                    $formData->userId = $this->getUser()->getId();
+                }
+                $formData->createdByIp = $request->getClientIp();
+
+                $answer = $this->answerService->create($createForm->getData());
+
+                $this->addFlash('success', 'Ответ успешно добавлен');
+
+                return $this->redirectToRoute('backend_question_view', ['id' => $id]);
+            } catch (AppException $e) {
+                $this->addFlash('error', $e->getMessage());
+            } catch (\Exception $e) {
+                $this->addFlash('error', "Произошла ошибка. Попробуйте позже.");
+            }
+        }
+
+        // Листинг ответов к вопросу с возможностью поиска и фильтрации
+        $form = $this->createNamedForm('', AnswerSearchInQuestionFormType::class);
+        $form->submit(array_diff_key($request->query->all(), array_flip(['id', 'page'])));
+        $filters = $form->isSubmitted() && $form->isValid() ? (array) $form->getData() : [];
+
+        try {
+            $page = (int) $request->get('page', 1);
+
+            /* @var AnswerSearchForm $formData */
+            $formData = $form->getData();
+            $formData->questionId = $id;
+
+            $answers = $this->answerService->listing($formData, $page, 10);
+        } catch (AppException $e) {
+            $this->addFlash('error', $e->getMessage());
+            $answers = null;
+        }
+
         return $this->render('question/view.html.twig', [
             'question' => $question,
+            'createForm' => $createForm->createView(),
+            'filterForm' => $form->createView(),
+            'filters' => array_merge($filters, ['id' => $id]),
+            'answers' => $answers,
         ]);
     }
 

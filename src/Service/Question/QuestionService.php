@@ -3,16 +3,17 @@ namespace App\Service\Question;
 
 use App\Entity\Question\Question;
 use App\Exception\ServiceException;
+use App\Exception\AppException;
 use App\Exception\EntityValidationException;
 use App\Repository\Question\QuestionRepository;
+use App\Utils\SlugHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Dto\Question\QuestionSearchForm;
 use App\Dto\Question\QuestionCreateForm;
 use App\Pagination\Paginator;
-use Symfony\Component\String\Slugger\SluggerInterface;
 use App\Service\User\UserService;
-use App\Service\Question\CategoryService;
 use App\Dto\Question\QuestionUpdateForm;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * Сервис для работы с вопросами и ответами
@@ -40,9 +41,9 @@ class QuestionService
     private EntityManagerInterface $entityManager;
 
     /**
-     * @var SluggerInterface Slugger
+     * @var ValidatorInterface Validator Interface
      */
-    private SluggerInterface $slugger;
+    private ValidatorInterface $validator;
 
     /**
      * Конструктор сервиса
@@ -51,21 +52,21 @@ class QuestionService
      * @param CategoryService $categoryService
      * @param QuestionRepository $questionRepository
      * @param EntityManagerInterface $entityManager
-     * @param SluggerInterface $slugger
+     * @param ValidatorInterface $validator
      */
     public function __construct(
         UserService $userService,
         CategoryService $categoryService,
         QuestionRepository $questionRepository,
         EntityManagerInterface $entityManager,
-        SluggerInterface $slugger
+        ValidatorInterface $validator
     )
     {
         $this->userService = $userService;
         $this->categoryService = $categoryService;
         $this->questionRepository = $questionRepository;
         $this->entityManager = $entityManager;
-        $this->slugger = $slugger;
+        $this->validator = $validator;
     }
 
     /**
@@ -97,18 +98,29 @@ class QuestionService
      *
      * @param QuestionCreateForm $form
      * @return Question Созданный вопрос
-     * @throws \App\Exception\AppException
+     * @throws AppException
      */
     public function create(QuestionCreateForm $form): Question
     {
+        if (count($this->validator->validate($form)) > 0) {
+            throw new ServiceException("Ошибка валидации формы");
+        }
+
+        if (empty($form->slug)) {
+            $form->slug = SlugHelper::generate($form->title);
+        }
+
         $question = new Question();
         $question->setStatus(Question::STATUS_ACTIVE);
-        $question->setUser($this->userService->getUserById($form->userId));
+
+        if (!empty($form->userId)) {
+            $question->setUser($this->userService->getUserById($form->userId));
+        }
+
         $question->setCategory($this->categoryService->getById($form->categoryId));
         $question->setTitle($form->title);
         $question->setText((string) $form->text);
-        $question->setSlug($this->slugger->slug($form->title));
-        $question->setHref('');
+        $question->setSlug($form->slug);
         $question->setCreatedByIp((string) $form->createdByIp);
 
         return $this->save($question);
@@ -124,8 +136,15 @@ class QuestionService
      */
     public function update(int $id, QuestionUpdateForm $form): Question
     {
-        $question = $this->getById($id);
+        if (count($this->validator->validate($form)) > 0) {
+            throw new ServiceException("Ошибка валидации формы");
+        }
 
+        if (empty($form->slug)) {
+            $form->slug = SlugHelper::generate($form->title);
+        }
+
+        $question = $this->getById($id);
         $question->setCategory($this->categoryService->getById($form->categoryId));
         $question->setTitle($form->title);
         $question->setText((string) $form->text);
@@ -141,12 +160,16 @@ class QuestionService
      * @param int $page Номер страницы
      * @param int $pageSize Количество записей на страницу
      * @return Paginator Результат выборка с постраничным выводом
-     * @throws \Exception
+     * @throws ServiceException
      */
     public function listing(QuestionSearchForm $form, $page = 1, $pageSize = 30): Paginator
     {
-        $query = $this->questionRepository->listingFilter($form);
-        return (new Paginator($query, $pageSize))->paginate($page);
+        try {
+            $query = $this->questionRepository->listingFilter($form);
+            return (new Paginator($query, $pageSize))->paginate($page);
+        } catch (\Exception $e) {
+            throw new ServiceException($e->getMessage());
+        }
     }
 
     /**

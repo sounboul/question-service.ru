@@ -72,81 +72,135 @@ class User implements UserInterface
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
-     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Column(
+     *     name="id",
+     *     type="integer",
+     *     nullable=false
+     * )
      */
-    private ?int $id;
+    private int $id;
 
     /**
-     * @ORM\Column(type="string", length=200)
+     * @ORM\Column(
+     *     type="string",
+     *     length=200,
+     *     nullable=false
+     * )
      */
-    private ?string $username;
+    private string $username;
 
     /**
-     * @ORM\Column(type="string", length=50)
+     * @ORM\Column(
+     *     type="string",
+     *     length=20,
+     *     nullable=false
+     * )
      */
     private string $status = self::STATUS_ACTIVE;
 
     /**
-     * @ORM\Column(type="string", length=180, unique=true)
+     * @ORM\Column(
+     *     type="string",
+     *     length=200,
+     *     unique=true,
+     *     nullable=false
+     * )
      */
-    private ?string $email;
+    private string $email;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(
+     *     type="boolean",
+     *     nullable=false
+     * )
      */
     private bool $emailVerified = false;
 
     /**
-     * @ORM\Column(type="string", length=100, unique=true, nullable=true)
+     * @ORM\Column(
+     *     type="string",
+     *     length=100,
+     *     unique=true,
+     *     nullable=true
+     * )
      */
     private ?string $emailVerifiedToken = null;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(
+     *     type="boolean",
+     *     nullable=false
+     * )
      */
     private bool $emailSubscribed = false;
 
     /**
-     * @ORM\Column(type="string", length=100, unique=true, nullable=true)
+     * @ORM\Column(
+     *     type="string",
+     *     length=100,
+     *     unique=true,
+     *     nullable=true
+     * )
      */
     private ?string $emailSubscribedToken = null;
 
     /**
-     * @ORM\Column(type="json")
+     * @ORM\Column(
+     *     type="json",
+     *     nullable=false
+     * )
      */
     private array $roles = [];
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(
+     *     type="string",
+     *     nullable=false
+     * )
      */
     private string $password;
 
     /**
-     * @ORM\Column(type="string", length=100, unique=true, nullable=true)
+     * @ORM\Column(
+     *     type="string",
+     *     length=100,
+     *     unique=true,
+     *     nullable=true
+     * )
      */
-    private ?string $passwordRestoreToken;
+    private ?string $passwordRestoreToken = null;
 
     /**
-     * @ORM\Column(type="text", nullable=true)
+     * @ORM\Column(
+     *     type="text",
+     *     nullable=true
+     * )
      */
-    private ?string $about;
+    private ?string $about = null;
 
     /**
-     * @ORM\OneToOne(targetEntity="App\Entity\User\UserPhoto")
-     * @ORM\JoinColumn(name="photo_id", referencedColumnName="id", onDelete="CASCADE")
+     * @ORM\OneToOne(
+     *     targetEntity="App\Entity\User\UserPhoto"
+     * )
+     * @ORM\JoinColumn(
+     *     name="photo_id",
+     *     referencedColumnName="id",
+     *     onDelete="CASCADE",
+     *     nullable=true
+     * )
      */
-    private ?UserPhoto $photo;
+    private ?UserPhoto $photo = null;
 
     /**
-     * @return int|null Получить идентификатор пользователя
+     * @return int Идентификатор пользователя
      */
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
 
     /**
-     * @return string Получить имя пользователя
+     * @return string Имя пользователя
      */
     public function getUsername(): string
     {
@@ -167,7 +221,7 @@ class User implements UserInterface
     }
 
     /**
-     * @return string Получить статус пользователя
+     * @return string Статус пользователя
      */
     public function getStatus(): string
     {
@@ -224,7 +278,7 @@ class User implements UserInterface
      */
     public function setEmail(string $email): self
     {
-        $this->email = mb_strtolower($email);
+        $this->email = (string) mb_strtolower($email);
 
         return $this;
     }
@@ -357,12 +411,10 @@ class User implements UserInterface
 
     /**
      * @return string Получить пароль пользователя
-     *
-     * @see UserInterface
      */
     public function getPassword(): string
     {
-        return (string) $this->password;
+        return $this->password;
     }
 
     /**
@@ -400,11 +452,11 @@ class User implements UserInterface
     }
 
     /**
-     * @return string|null Получить описание
+     * @return string Получить описание
      */
-    public function getAbout(): ?string
+    public function getAbout(): string
     {
-        return $this->about;
+        return (string) $this->about;
     }
 
     /**
@@ -413,7 +465,7 @@ class User implements UserInterface
      * @param string|null $about Описание
      * @return self
      */
-    public function setAbout(?string $about): self
+    public function setAbout(string $about): self
     {
         $this->about = trim(strip_tags($about));
 
@@ -421,7 +473,7 @@ class User implements UserInterface
     }
 
     /**
-     * @return UserPhoto|null Получить фото
+     * @return UserPhoto|null Фотография
      */
     public function getPhoto(): ?UserPhoto
     {

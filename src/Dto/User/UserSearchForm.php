@@ -9,57 +9,57 @@ use Symfony\Component\Validator\Constraints as Assert;
 class UserSearchForm
 {
     /**
-     * @var int Идентификатор
+     * @var int|null Идентификатор
      */
-    public int $id;
+    public ?int $id;
 
     /**
-     * @var string Имя пользователя
+     * @var string|null Имя пользователя
      */
-    public string $username;
+    public ?string $username;
 
     /**
-     * @var string Статус
+     * @var string|null Статус
      *
      * @Assert\Choice(
      *     callback={"App\Entity\User\User", "getStatusList"}
      * )
      */
-    public string $status;
+    public ?string $status;
 
     /**
-     * @var string E-mail
+     * @var string|null E-mail
      */
-    public string $email;
+    public ?string $email;
 
     /**
-     * @var bool E-mail подтвержден
+     * @var bool|null E-mail подтвержден
      */
     public ?bool $emailVerified = null;
 
     /**
-     * @var bool E-mail подписан на рассылку
+     * @var bool|null E-mail подписан на рассылку
      */
     public ?bool $emailSubscribed = null;
 
     /**
-     * @var string Роль
+     * @var string|null Роль
      *
      * @Assert\Choice(
      *     callback={"App\Entity\User\User", "getRolesList"}
      * )
      */
-    public string $role;
+    public ?string $role;
 
     /**
-     * @var bool С фотографией
+     * @var bool|null С фотографией
      */
     public ?bool $withPhoto = null;
 
     /**
-     * @var string Сортировка
+     * @var string|null Сортировка
      */
-    public string $orderBy;
+    public ?string $orderBy;
 
     /**
      * @return array Доступные варианты сортировки

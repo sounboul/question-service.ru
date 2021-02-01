@@ -46,45 +46,68 @@ class Category
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
-     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Column(
+     *     name="id",
+     *     type="integer",
+     *     nullable=false
+     * )
      */
-    private ?int $id;
+    private int $id;
 
     /**
-     * @ORM\Column(type="string", length=50)
+     * @ORM\Column(
+     *     type="string",
+     *     length=20,
+     *     nullable=false
+     * )
      */
     private string $status = self::STATUS_ACTIVE;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(
+     *     type="text",
+     *     nullable=false
+     * )
      */
     private string $title;
 
     /**
-     * @ORM\Column(type="string", length=200, unique=true)
+     * @ORM\Column(
+     *     type="string",
+     *     length=200,
+     *     unique=true,
+     *     nullable=false
+     * )
      */
     private string $slug;
 
     /**
-     * @ORM\Column(type="string", length=250)
+     * @ORM\Column(
+     *     type="string",
+     *     length=250,
+     *     nullable=true
+     * )
      */
-    private string $href;
+    private ?string $href = null;
 
     /**
-     * @ORM\Column(type="integer", nullable=false)
+     * @ORM\Column(
+     *     type="integer",
+     *     nullable=false
+     * )
      */
     private int $totalQuestions = 0;
 
     /**
-     * @return int|null Получить идентификатор категории
+     * @return int Идентификатор категории
      */
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
 
     /**
-     * @return string Получить статус категории
+     * @return string Статус категории
      */
     public function getStatus(): string
     {
@@ -92,7 +115,7 @@ class Category
     }
 
     /**
-     * @return string Получить статус в виде текста
+     * @return string Статус в виде текста
      */
     public function getStatusAsText(): string
     {
@@ -126,7 +149,7 @@ class Category
     }
 
     /**
-     * @return string Получить название категории
+     * @return string Название категории
      */
     public function getTitle(): string
     {
@@ -147,7 +170,7 @@ class Category
     }
 
     /**
-     * @return string Получить slug
+     * @return string Slug категории
      */
     public function getSlug(): string
     {
@@ -163,23 +186,21 @@ class Category
      */
     public function setSlug(string $slug): self
     {
-        $this->slug = trim(strip_tags($slug));
-        if (empty($this->slug)) {
-            throw new EntityValidationException("Передан невалидный slug");
+        if (empty($slug) || !preg_match('/^[-_\w]+$/isU', $slug)) {
+            throw new EntityValidationException("Передан невалидный slug '$slug'");
         }
 
-        $this->slug = implode("-", array_slice(explode("-", $this->slug), 0, 6));
-        $this->slug = mb_strtolower(mb_substr($this->slug, 0, 150));
+        $this->slug = (string) mb_strtolower(mb_substr($slug, 0, 200));
 
         return $this;
     }
 
     /**
-     * @return string Получить href
+     * @return string Href категории
      */
     public function getHref(): string
     {
-        return $this->href;
+        return (string) $this->href;
     }
 
     /**
@@ -190,13 +211,13 @@ class Category
      */
     public function setHref(string $href): self
     {
-        $this->href = trim(strip_tags($href));
+        $this->href = $href;
 
         return $this;
     }
 
     /**
-     * @return int Получить количество вопросов в категории
+     * @return int Количество вопросов в категории
      */
     public function getTotalQuestions(): int
     {

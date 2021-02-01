@@ -14,12 +14,12 @@ class QuestionCreateForm
     public ?int $userId;
 
     /**
-     * @var int Category
+     * @var int Категория
      */
     public int $categoryId;
 
     /**
-     * @var string Название вопроса
+     * @var string Текст вопроса
      *
      * @Assert\NotBlank()
      * @Assert\Length(
@@ -37,6 +37,19 @@ class QuestionCreateForm
      * )
      */
     public ?string $text;
+
+    /**
+     * @var string|null Slug вопроса
+     *
+     * @Assert\Length(
+     *     min=3,
+     *     max=100
+     * )
+     * @Assert\Regex(
+     *     pattern="/^[-_\w]+$/"
+     * )
+     */
+    public ?string $slug;
 
     /**
      * @var string|null IP

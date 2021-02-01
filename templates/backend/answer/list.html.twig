@@ -1,21 +1,15 @@
 {% extends 'backend/layouts/controlbox.html.twig' %}
 {% import "backend/components/tools.html.twig" as tools %}
 
-{% block title %}Вопросы - Панель управления{% endblock %}
-{% block header %}Вопросы{% endblock %}
+{% block title %}Ответы - Панель управления{% endblock %}
+{% block header %}Ответы{% endblock %}
 
 {% block breadcrumbs %}
     <li class="breadcrumb-item"><a href="{{ path('backend_index') }}">Главная</a></li>
-    <li class="breadcrumb-item">Вопросы</li>
+    <li class="breadcrumb-item">Ответы</li>
 {% endblock %}
 
 {% block content %}
-    <div class="control-buttons">
-        <a class="btn btn-primary" href="{{ path('backend_question_create') }}" title="Создать вопрос">
-            <i class="fas fa-plus"></i> Создать вопрос
-        </a>
-    </div>
-
     {% set items = paginator.results %}
     {% if items|length > 0 %}
         <div class="questions-cards">
@@ -26,17 +20,19 @@
                             <div class="col-md-6">
                                 <b>#{{ item.id }}</b>
                                 {{ tools.statusLabel(item.status, item.statusAsText) }}
-                                |
-                                <i class="fas fa-comments"></i> {{ item.totalAnswers }}
                             </div>
 
                             <div class="col-md-6 text-right">
-                                <a class="btn btn-success btn-sm" href="{{ path('backend_question_view', {'id': item.id}) }}" target="_blank" title="Просмотр">
+                                <a class="btn btn-success btn-sm" href="{{ path('backend_answer_list', {'questionId': item.question.id}) }}" target="_blank" title="Просмотр">
+                                    Все ответы
+                                </a>
+
+                                <a class="btn btn-success btn-sm" href="{{ path('backend_answer_view', {'id': item.id}) }}" target="_blank" title="Просмотр">
                                     Просмотр
                                 </a>
 
                                 {% if item.isActive %}
-                                    <a class="btn btn-primary btn-sm" href="{{ path('backend_question_update', {'id': item.id}) }}" target="_blank" title="Редактировать">
+                                    <a class="btn btn-primary btn-sm" href="{{ path('backend_answer_update', {'id': item.id}) }}" target="_blank" title="Редактировать">
                                         Редактировать
                                     </a>
                                 {% endif %}
@@ -45,17 +41,7 @@
                     </div>
 
                     <div class="card-body">
-                        <h3>
-                            {% if item.isActive %}
-                                <a href="{{ appHost }}{{ item.href }}" target="_blank">{{ item.title }}</a>
-                            {% else %}
-                                {{ item.title }}
-                            {% endif %}
-                        </h3>
-
-                        {% if item.text %}
-                            <p>{{ item.text|nl2br }}</p>
-                        {% endif %}
+                        <p>{{ item.text|nl2br }}</p>
                     </div>
 
                     <div class="card-footer">
@@ -73,7 +59,7 @@
                             </div>
 
                             <div class="col-md-3">
-                                <b>Категория:</b> {{ item.category.title }}
+                                <b>Вопрос:</b> <a href="{{ path('backend_question_view', {'id': item.question.id}) }}" target="_blank">#{{ item.question.id }}</a>
                             </div>
                         </div>
                     </div>
@@ -100,10 +86,9 @@
             {{ form_row(filterForm.id) }}
             {{ form_row(filterForm.status) }}
             {{ form_row(filterForm.text) }}
-            {{ form_row(filterForm.categoryId) }}
+            {{ form_row(filterForm.questionId) }}
             {{ form_row(filterForm.userId) }}
             {{ form_row(filterForm.createdByIp) }}
-            {{ form_row(filterForm.withoutAnswers) }}
 
             <button class="btn btn-primary">Найти</button>
             {{ form_end(filterForm) }}

@@ -46,67 +46,108 @@ class Question
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
-     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Column(
+     *     name="id",
+     *     type="integer",
+     *     nullable=false
+     * )
      */
-    private ?int $id;
+    private int $id;
 
     /**
-     * @ORM\Column(type="string", length=50)
+     * @ORM\Column(
+     *     type="string",
+     *     length=20,
+     *     nullable=false
+     * )
      */
     private string $status = self::STATUS_ACTIVE;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User\User")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     * @ORM\ManyToOne(
+     *     targetEntity="App\Entity\User\User"
+     * )
+     * @ORM\JoinColumn(
+     *     name="user_id",
+     *     referencedColumnName="id",
+     *     nullable=true
+     * )
      */
-    private User $user;
+    private ?User $user = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Question\Category")
-     * @ORM\JoinColumn(name="category_id", referencedColumnName="id")
+     * @ORM\ManyToOne(
+     *     targetEntity="App\Entity\Question\Category"
+     * )
+     * @ORM\JoinColumn(
+     *     name="category_id",
+     *     referencedColumnName="id",
+     *     nullable=false
+     * )
      */
     private Category $category;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(
+     *     type="text",
+     *     nullable=false
+     * )
      */
     private string $title;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(
+     *     type="text",
+     *     nullable=true
+     * )
      */
-    private string $text;
+    private ?string $text = null;
 
     /**
-     * @ORM\Column(type="string", length=200)
+     * @ORM\Column(
+     *     type="string",
+     *     length=200,
+     *     nullable=false
+     * )
      */
     private string $slug;
 
     /**
-     * @ORM\Column(type="string", length=250)
+     * @ORM\Column(
+     *     type="string",
+     *     length=250,
+     *     nullable=true
+     * )
      */
-    private string $href;
+    private ?string $href = null;
 
     /**
-     * @ORM\Column(type="string", length=250)
+     * @ORM\Column(
+     *     type="string",
+     *     length=46,
+     *     nullable=true
+     * )
      */
-    private string $createdByIp;
+    private ?string $createdByIp = null;
 
     /**
-     * @ORM\Column(type="integer", nullable=false)
+     * @ORM\Column(
+     *     type="integer",
+     *     nullable=false
+     * )
      */
     private int $totalAnswers = 0;
 
     /**
-     * @return int|null Получить идентификатор категории
+     * @return int Идентификатор вопроса
      */
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
 
     /**
-     * @return string Получить статус вопроса
+     * @return string Статус вопроса
      */
     public function getStatus(): string
     {
@@ -114,7 +155,7 @@ class Question
     }
 
     /**
-     * @return string Получить статус в виде текста
+     * @return string Статус в виде текста
      */
     public function getStatusAsText(): string
     {
@@ -148,9 +189,9 @@ class Question
     }
 
     /**
-     * @return User Получить пользователя
+     * @return User|null Пользователь
      */
-    public function getUser(): User
+    public function getUser(): ?User
     {
         return $this->user;
     }
@@ -169,7 +210,7 @@ class Question
     }
 
     /**
-     * @return Category Получить категорию
+     * @return Category Категория
      */
     public function getCategory(): Category
     {
@@ -190,7 +231,7 @@ class Question
     }
 
     /**
-     * @return string Получить заголовок
+     * @return string Название вопроса
      */
     public function getTitle(): string
     {
@@ -198,32 +239,32 @@ class Question
     }
 
     /**
-     * Установить заголовок
+     * Установить название вопроса
      *
-     * @param string $title Заголовок
+     * @param string $title Название
      * @return self
      * @throws EntityValidationException
      */
     public function setTitle(string $title): self
     {
         $this->title = trim(strip_tags($title));
-        if (empty($this->title) || mb_strlen($this->title) < 10) {
-            throw new EntityValidationException("Заголовок вопроса должен содержать не менее 10 символов");
+        if (empty($this->title) || mb_strlen($this->title) < 15) {
+            throw new EntityValidationException("Вопрос должен содержать не менее 15 символов");
         }
 
         return $this;
     }
 
     /**
-     * @return string Получить текст
+     * @return string Текст вопроса
      */
     public function getText(): string
     {
-        return $this->text;
+        return (string) $this->text;
     }
 
     /**
-     * Установить текст
+     * Установить текст вопроса
      *
      * @param string $text Текст
      * @return self
@@ -236,7 +277,7 @@ class Question
     }
 
     /**
-     * @return string Получить slug
+     * @return string Slug вопроса
      */
     public function getSlug(): string
     {
@@ -252,23 +293,21 @@ class Question
      */
     public function setSlug(string $slug): self
     {
-        $this->slug = trim(strip_tags($slug));
-        if (empty($this->slug)) {
-            throw new EntityValidationException("Передан невалидный slug");
+        if (empty($slug) || !preg_match('/^[-_\w]+$/isU', $slug)) {
+            throw new EntityValidationException("Передан невалидный slug '$slug'");
         }
 
-        $this->slug = implode("-", array_slice(explode("-", $this->slug), 0, 6));
-        $this->slug = mb_strtolower(mb_substr($this->slug, 0, 150));
+        $this->slug = (string) mb_strtolower(mb_substr($slug, 0, 200));
 
         return $this;
     }
 
     /**
-     * @return string Получить href
+     * @return string Href вопроса
      */
     public function getHref(): string
     {
-        return $this->href;
+        return (string) $this->href;
     }
 
     /**
@@ -279,17 +318,17 @@ class Question
      */
     public function setHref(string $href): self
     {
-        $this->href = trim(strip_tags($href));
+        $this->href = $href;
 
         return $this;
     }
 
     /**
-     * @return string Получить IP автора вопроса
+     * @return string IP автора вопроса
      */
     public function getCreatedByIp(): string
     {
-        return $this->createdByIp;
+        return (string) $this->createdByIp;
     }
 
     /**
@@ -306,7 +345,7 @@ class Question
     }
 
     /**
-     * @return int Получить количество ответов к вопросу
+     * @return int Количество ответов к вопросу
      */
     public function getTotalAnswers(): int
     {

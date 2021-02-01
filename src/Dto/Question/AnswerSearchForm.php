@@ -4,20 +4,20 @@ namespace App\Dto\Question;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * DTO для поиска с фильстрацией по вопросам
+ * DTO для поиска с фильстрацией по ответам
  */
-class QuestionSearchForm
+class AnswerSearchForm
 {
     /**
-     * @var int|null Идентификатор вопроса
+     * @var int|null Идентификатор ответа
      */
     public ?int $id;
 
     /**
-     * @var string|null Статус вопроса
+     * @var string|null Статус ответа
      *
      * @Assert\Choice(
-     *     callback={"App\Entity\Question\Question", "getStatusList"}
+     *     callback={"App\Entity\Question\Answer", "getStatusList"}
      * )
      */
     public ?string $status;
@@ -28,12 +28,12 @@ class QuestionSearchForm
     public ?string $text;
 
     /**
-     * @var int|null Категория
+     * @var int|null Вопрос
      */
-    public ?int $categoryId;
+    public ?int $questionId;
 
     /**
-     * @var int Автор
+     * @var int|null Автор
      */
     public ?int $userId;
 
@@ -41,11 +41,6 @@ class QuestionSearchForm
      * @var string|null IP автора
      */
     public ?string $createdByIp;
-
-    /**
-     * @var bool|null Вопросы без ответа
-     */
-    public ?bool $withoutAnswers = null;
 
     /**
      * @var string|null Сортировка
@@ -58,11 +53,8 @@ class QuestionSearchForm
     public static function getAvailableOrderBy(): array
     {
         return [
-            'q.id_DESC' => 'ID, DESC',
-            'q.id_ASC' => 'ID, ASC',
-
-            'q.totalAnswers_DESC' => 'Количество ответов, DESC',
-            'q.totalAnswers_ASC' => 'Количество ответов, ASC',
+            'a.id_DESC' => 'ID, DESC',
+            'a.id_ASC' => 'ID, ASC',
         ];
     }
 }

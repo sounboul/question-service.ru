@@ -10,23 +10,29 @@ use Doctrine\ORM\Mapping as ORM;
 trait TimestampableEntity
 {
     /**
-     * @var DateTime|null Created At
+     * @var DateTime|null Дата и время создания сущности
      *
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(
+     *     type="datetime",
+     *     nullable=true
+     * )
      */
-    protected $createdAt;
+    protected ?DateTime $createdAt = null;
 
     /**
-     * @var DateTime|null Updated At
+     * @var DateTime|null Дата и время последнего обновления сущности
      *
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(
+     *     type="datetime",
+     *     nullable=true
+     * )
      */
-    protected $updatedAt;
+    protected ?DateTime $updatedAt = null;
 
     /**
      * @return DateTime|null Получить дату и время создания сущности
      */
-    public function getCreatedAt()
+    public function getCreatedAt(): ?DateTime
     {
         return $this->createdAt;
     }
@@ -34,10 +40,10 @@ trait TimestampableEntity
     /**
      * Установить дату и время создания сущности
      *
-     * @param DateTime|null $createdAt
+     * @param DateTime $createdAt
      * @return self
      */
-    public function setCreatedAt(?DateTime $createdAt) : self
+    public function setCreatedAt(DateTime $createdAt): self
     {
         $this->createdAt = $createdAt;
 
@@ -45,22 +51,20 @@ trait TimestampableEntity
     }
 
     /**
-     * Получить дату и время изменения сущности
-     *
-     * @return DateTime|null
+     * @return DateTime|null Получить дата и время последнего обновления сущности
      */
-    public function getUpdatedAt()
+    public function getUpdatedAt(): ?DateTime
     {
         return $this->updatedAt;
     }
 
     /**
-     * Установить дату и время изменения сущности
+     * Установить дату и время последнего обновления сущности
      *
-     * @param DateTime|null $updatedAt
+     * @param DateTime $updatedAt
      * @return self
      */
-    public function setUpdatedAt(?DateTime $updatedAt) : self
+    public function setUpdatedAt(DateTime $updatedAt) : self
     {
         $this->updatedAt = $updatedAt;
 
