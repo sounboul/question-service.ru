@@ -129,12 +129,11 @@ class QuestionService
     /**
      * Обновление вопроса
      *
-     * @param int $id Идентификатор вопроса
      * @param QuestionUpdateForm $form
      * @return Question Обновленный вопрос
-     * @throws \App\Exception\AppException
+     * @throws AppException
      */
-    public function update(int $id, QuestionUpdateForm $form): Question
+    public function update(QuestionUpdateForm $form): Question
     {
         if (count($this->validator->validate($form)) > 0) {
             throw new ServiceException("Ошибка валидации формы");
@@ -144,7 +143,7 @@ class QuestionService
             $form->slug = SlugHelper::generate($form->title);
         }
 
-        $question = $this->getById($id);
+        $question = $this->getById($form->id);
         $question->setCategory($this->categoryService->getById($form->categoryId));
         $question->setTitle($form->title);
         $question->setText((string) $form->text);

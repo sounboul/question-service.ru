@@ -141,6 +141,7 @@ class CategoryController extends AppController
         }
 
         $formData = new CategoryUpdateForm();
+        $formData->id = $id;
         $formData->title = $category->getTitle();
         $formData->slug = $category->getSlug();
 
@@ -148,7 +149,7 @@ class CategoryController extends AppController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $category = $this->categoryService->update($id, $form->getData());
+                $category = $this->categoryService->update($form->getData());
 
                 $this->addFlash('success', 'Категория успешно обновлена.');
 

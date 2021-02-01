@@ -163,7 +163,7 @@ class QuestionController extends AppController
                 }
                 $formData->createdByIp = $request->getClientIp();
 
-                $answer = $this->answerService->create($createForm->getData());
+                $this->answerService->create($createForm->getData());
 
                 $this->addFlash('success', 'Ответ успешно добавлен');
 
@@ -220,6 +220,7 @@ class QuestionController extends AppController
         }
 
         $formData = new QuestionUpdateForm();
+        $formData->id = $id;
         $formData->categoryId = $question->getCategory()->getId();
         $formData->title = $question->getTitle();
         $formData->text = $question->getText();
@@ -229,7 +230,7 @@ class QuestionController extends AppController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $question = $this->questionService->update($id, $form->getData());
+                $question = $this->questionService->update($form->getData());
 
                 $this->addFlash('success', 'Вопрос успешно обновлён!');
 

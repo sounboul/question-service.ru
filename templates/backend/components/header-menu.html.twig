@@ -1,0 +1,46 @@
+{# Главное меню в шапке сайта #}
+{% set currentRoute = app.request.get('_route') %}
+{% set isGuest = not is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+{% set isAdmin = is_granted('ROLE_ADMIN') %}
+{% set menuItems = [
+    {
+        'label': 'Главная',
+        'route': 'frontend_homepage',
+        'visible': true,
+        'active': currentRoute == 'frontend_homepage',
+    }, {
+        'label': 'Вход',
+        'route': 'frontend_login',
+        'visible': isGuest,
+        'active': currentRoute == 'frontend_login',
+    }, {
+        'label': 'Регистрация',
+        'route': 'frontend_registration',
+        'visible': isGuest,
+        'active': currentRoute == 'frontend_registration',
+    }, {
+        'label': 'Личный кабинет',
+        'route': 'frontend_profile_index',
+        'visible': not isGuest,
+        'active': 'frontend_profile_' in currentRoute
+    }, {
+        'label': 'Панель управления',
+        'route': 'backend_index',
+        'visible': isAdmin,
+        'active': 'backend_' in currentRoute
+    }, {
+        'label': 'Выход',
+        'route': 'frontend_logout',
+        'visible': not isGuest,
+        'active': false
+    }
+] %}
+<ul class="navbar-nav mr-auto">
+    {% for menuItem in menuItems %}
+        {% if menuItem.visible %}
+            <li class="nav-item {% if menuItem.active %}active{% endif %}">
+                <a class="nav-link" href="{{ url(menuItem.route) }}">{{ menuItem.label }}</a>
+            </li>
+        {% endif %}
+    {% endfor %}
+</ul>

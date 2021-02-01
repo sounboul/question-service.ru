@@ -123,18 +123,17 @@ class AnswerService
     /**
      * Обновление ответа
      *
-     * @param int $id Идентификатор ответа
      * @param AnswerUpdateForm $form
      * @return Answer Обновлённый ответ
      * @throws AppException
      */
-    public function update(int $id, AnswerUpdateForm $form): Answer
+    public function update(AnswerUpdateForm $form): Answer
     {
         if (count($this->validator->validate($form)) > 0) {
             throw new ServiceException("Ошибка валидации формы");
         }
 
-        $question = $this->getById($id);
+        $question = $this->getById($form->id);
         $question->setText($form->text);
 
         return $this->save($question);

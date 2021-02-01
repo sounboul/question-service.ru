@@ -54,7 +54,7 @@ class AnswerRepository extends ServiceEntityRepository
      * Листинг ответов с фильтрацией
      *
      * @param AnswerSearchForm $form Форма поиска
-     * @return QueryBuilder Список вопросов
+     * @return QueryBuilder Список ответов
      * @throws AppException
      */
     public function listingFilter(AnswerSearchForm $form): QueryBuilder

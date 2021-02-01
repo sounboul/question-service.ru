@@ -12,6 +12,7 @@ class CategoryCreateForm
      * @var string Название категории
      *
      * @Assert\NotBlank()
+     * @Assert\Type("string")
      * @Assert\Length(
      *     min=3,
      *     max=100
@@ -22,6 +23,7 @@ class CategoryCreateForm
     /**
      * @var string|null Slug категории
      *
+     * @Assert\Type("string")
      * @Assert\Length(
      *     min=3,
      *     max=100

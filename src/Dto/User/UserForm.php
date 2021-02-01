@@ -13,6 +13,7 @@ class UserForm
      * @var string E-mail
      *
      * @Assert\NotBlank()
+     * @Assert\Type("string")
      * @Assert\Length(
      *     min=3,
      *     max=100
@@ -25,6 +26,7 @@ class UserForm
      * @var string Имя пользователя
      *
      * @Assert\NotBlank()
+     * @Assert\Type("string")
      * @Assert\Length(
      *     min=3,
      *     max=100
@@ -43,16 +45,17 @@ class UserForm
      *     maxHeight=3000
      * )
      */
-    public ?UploadedFile $photo;
+    public ?UploadedFile $photo = null;
 
     /**
      * @var string|null О себе
      *
+     * @Assert\Type("string")
      * @Assert\Length(
      *     max=3000
      * )
      */
-    public ?string $about;
+    public ?string $about = null;
 
     /**
      * @var array Роли
@@ -62,5 +65,5 @@ class UserForm
      *     callback={"App\Entity\User\User", "getRolesList"}
      * )
      */
-    public array $roles;
+    public array $roles = [];
 }

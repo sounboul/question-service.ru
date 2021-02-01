@@ -11,7 +11,7 @@ class AnswerSearchForm
     /**
      * @var int|null Идентификатор ответа
      */
-    public ?int $id;
+    public ?int $id = null;
 
     /**
      * @var string|null Статус ответа
@@ -20,32 +20,32 @@ class AnswerSearchForm
      *     callback={"App\Entity\Question\Answer", "getStatusList"}
      * )
      */
-    public ?string $status;
+    public ?string $status = null;
 
     /**
      * @var string|null Поиск по тексту
      */
-    public ?string $text;
+    public ?string $text = null;
 
     /**
      * @var int|null Вопрос
      */
-    public ?int $questionId;
+    public ?int $questionId = null;
 
     /**
      * @var int|null Автор
      */
-    public ?int $userId;
+    public ?int $userId = null;
 
     /**
      * @var string|null IP автора
      */
-    public ?string $createdByIp;
+    public ?string $createdByIp = null;
 
     /**
      * @var string|null Сортировка
      */
-    public ?string $orderBy;
+    public ?string $orderBy = null;
 
     /**
      * @return array Доступные варианты сортировки

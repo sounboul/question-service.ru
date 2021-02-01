@@ -109,13 +109,14 @@ class AnswerController extends AppController
         }
 
         $formData = new AnswerUpdateForm();
+        $formData->id = $id;
         $formData->text = $answer->getText();
 
         $form = $this->createForm(AnswerUpdateFormType::class, $formData);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $this->answerService->update($answer->getId(), $form->getData());
+                $this->answerService->update($form->getData());
 
                 $this->addFlash('success', 'Ответ успешно обновлён');
 

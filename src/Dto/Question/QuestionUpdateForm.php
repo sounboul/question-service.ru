@@ -9,7 +9,17 @@ use Symfony\Component\Validator\Constraints as Assert;
 class QuestionUpdateForm
 {
     /**
+     * @var int Идентификатор вопроса
+     *
+     * @Assert\NotBlank()
+     * @Assert\Type("integer")
+     */
+    public int $id;
+
+    /**
      * @var int Категория
+     *
+     * @Assert\Type("integer")
      */
     public int $categoryId;
 
@@ -17,6 +27,7 @@ class QuestionUpdateForm
      * @var string Название вопроса
      *
      * @Assert\NotBlank()
+     * @Assert\Type("string")
      * @Assert\Length(
      *     min=3,
      *     max=200
@@ -27,6 +38,7 @@ class QuestionUpdateForm
     /**
      * @var string|null Текст вопроса
      *
+     * @Assert\Type("string")
      * @Assert\Length(
      *     max=2000
      * )
@@ -36,6 +48,7 @@ class QuestionUpdateForm
     /**
      * @var string|null Slug вопроса
      *
+     * @Assert\Type("string")
      * @Assert\Length(
      *     min=3,
      *     max=100

@@ -12,6 +12,7 @@ class RegistrationForm
      * @var string E-mail
      *
      * @Assert\NotBlank()
+     * @Assert\Type("string")
      * @Assert\Length(
      *     min=3,
      *     max=100
@@ -24,6 +25,7 @@ class RegistrationForm
      * @var string Пароль
      *
      * @Assert\NotBlank()
+     * @Assert\Type("string")
      * @Assert\Length(
      *     min=8,
      *     max=100

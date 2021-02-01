@@ -10,11 +10,15 @@ class QuestionCreateForm
 {
     /**
      * @var int|null User
+     *
+     * @Assert\Type("integer")
      */
     public ?int $userId;
 
     /**
      * @var int Категория
+     *
+     * @Assert\Type("integer")
      */
     public int $categoryId;
 
@@ -22,6 +26,7 @@ class QuestionCreateForm
      * @var string Текст вопроса
      *
      * @Assert\NotBlank()
+     * @Assert\Type("string")
      * @Assert\Length(
      *     min=3,
      *     max=200
@@ -32,6 +37,7 @@ class QuestionCreateForm
     /**
      * @var string|null Текст вопроса
      *
+     * @Assert\Type("string")
      * @Assert\Length(
      *     max=2000
      * )
@@ -41,6 +47,7 @@ class QuestionCreateForm
     /**
      * @var string|null Slug вопроса
      *
+     * @Assert\Type("string")
      * @Assert\Length(
      *     min=3,
      *     max=100
@@ -53,6 +60,11 @@ class QuestionCreateForm
 
     /**
      * @var string|null IP
+     *
+     * @Assert\Type("string")
+     * @Assert\Length(
+     *     max=46
+     * )
      */
     public ?string $createdByIp;
 }

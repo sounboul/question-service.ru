@@ -130,12 +130,11 @@ final class CategoryService
     /**
      * Редактирование категории
      *
-     * @param int $id Идентификатор категории
      * @param CategoryUpdateForm $form
      * @return Category Сохраненная категория
      * @throws EntityValidationException|ServiceException
      */
-    public function update(int $id, CategoryUpdateForm $form): Category
+    public function update(CategoryUpdateForm $form): Category
     {
         if (count($this->validator->validate($form)) > 0) {
             throw new ServiceException("Ошибка валидации формы");
@@ -145,7 +144,7 @@ final class CategoryService
             $form->slug = SlugHelper::generate($form->title);
         }
 
-        $category = $this->getById($id);
+        $category = $this->getById($form->id);
         if ($category->getSlug() !== $form->slug) {
             if (!empty($this->categoryRepository->findOneBySlug($form->slug))) {
                 throw new ServiceException("Slug '$form->slug' уже используется другой категорией");

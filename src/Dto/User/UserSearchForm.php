@@ -11,12 +11,12 @@ class UserSearchForm
     /**
      * @var int|null Идентификатор
      */
-    public ?int $id;
+    public ?int $id = null;
 
     /**
      * @var string|null Имя пользователя
      */
-    public ?string $username;
+    public ?string $username = null;
 
     /**
      * @var string|null Статус
@@ -25,12 +25,12 @@ class UserSearchForm
      *     callback={"App\Entity\User\User", "getStatusList"}
      * )
      */
-    public ?string $status;
+    public ?string $status = null;
 
     /**
      * @var string|null E-mail
      */
-    public ?string $email;
+    public ?string $email = null;
 
     /**
      * @var bool|null E-mail подтвержден
@@ -49,7 +49,7 @@ class UserSearchForm
      *     callback={"App\Entity\User\User", "getRolesList"}
      * )
      */
-    public ?string $role;
+    public ?string $role = null;
 
     /**
      * @var bool|null С фотографией
@@ -59,7 +59,7 @@ class UserSearchForm
     /**
      * @var string|null Сортировка
      */
-    public ?string $orderBy;
+    public ?string $orderBy = null;
 
     /**
      * @return array Доступные варианты сортировки

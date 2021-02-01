@@ -11,7 +11,7 @@ class CategorySearchForm
     /**
      * @var int|null Идентификатор категории
      */
-    public ?int $id;
+    public ?int $id = null;
 
     /**
      * @var string|null Статус категории
@@ -20,17 +20,17 @@ class CategorySearchForm
      *     callback={"App\Entity\Question\Category", "getStatusList"}
      * )
      */
-    public ?string $status;
+    public ?string $status = null;
 
     /**
      * @var string|null Название категории
      */
-    public ?string $title;
+    public ?string $title = null;
 
     /**
      * @var string|null Сортировка
      */
-    public ?string $orderBy;
+    public ?string $orderBy = null;
 
     /**
      * @return array Доступные варианты сортировки

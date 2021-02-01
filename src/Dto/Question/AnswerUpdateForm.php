@@ -9,9 +9,18 @@ use Symfony\Component\Validator\Constraints as Assert;
 class AnswerUpdateForm
 {
     /**
+     * @var int Идентификатор ответа
+     *
+     * @Assert\NotBlank()
+     * @Assert\Type("integer")
+     */
+    public int $id;
+
+    /**
      * @var string Текст ответа
      *
      * @Assert\NotBlank()
+     * @Assert\Type("string")
      * @Assert\Length(
      *     min=10,
      *     max=2000

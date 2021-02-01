@@ -10,11 +10,15 @@ class AnswerCreateForm
 {
     /**
      * @var int|null User
+     *
+     * @Assert\Type("integer")
      */
     public ?int $userId;
 
     /**
      * @var int Вопрос
+     *
+     * @Assert\Type("integer")
      */
     public int $questionId;
 
@@ -22,6 +26,7 @@ class AnswerCreateForm
      * @var string Текст ответа
      *
      * @Assert\NotBlank()
+     * @Assert\Type("string")
      * @Assert\Length(
      *     min=10,
      *     max=2000
@@ -31,6 +36,11 @@ class AnswerCreateForm
 
     /**
      * @var string|null IP
+     *
+     * @Assert\Type("string")
+     * @Assert\Length(
+     *     max=46
+     * )
      */
     public ?string $createdByIp;
 }

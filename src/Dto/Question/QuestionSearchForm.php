@@ -11,7 +11,7 @@ class QuestionSearchForm
     /**
      * @var int|null Идентификатор вопроса
      */
-    public ?int $id;
+    public ?int $id = null;
 
     /**
      * @var string|null Статус вопроса
@@ -20,27 +20,27 @@ class QuestionSearchForm
      *     callback={"App\Entity\Question\Question", "getStatusList"}
      * )
      */
-    public ?string $status;
+    public ?string $status = null;
 
     /**
      * @var string|null Поиск по тексту
      */
-    public ?string $text;
+    public ?string $text = null;
 
     /**
      * @var int|null Категория
      */
-    public ?int $categoryId;
+    public ?int $categoryId = null;
 
     /**
-     * @var int Автор
+     * @var int|null Автор
      */
-    public ?int $userId;
+    public ?int $userId = null;
 
     /**
      * @var string|null IP автора
      */
-    public ?string $createdByIp;
+    public ?string $createdByIp = null;
 
     /**
      * @var bool|null Вопросы без ответа
@@ -50,7 +50,7 @@ class QuestionSearchForm
     /**
      * @var string|null Сортировка
      */
-    public ?string $orderBy;
+    public ?string $orderBy = null;
 
     /**
      * @return array Доступные варианты сортировки

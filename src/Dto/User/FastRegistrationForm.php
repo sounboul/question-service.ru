@@ -12,6 +12,7 @@ class FastRegistrationForm
      * @var string E-mail
      *
      * @Assert\NotBlank()
+     * @Assert\Type("string")
      * @Assert\Length(
      *     min=3,
      *     max=100
