@@ -1,0 +1,17 @@
+{# Layout с левым сайдбаром #}
+{% extends 'frontend/layouts/main.html.twig' %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-lg-4 col-md-12 sm-margin-50px-bottom">
+            <div class="side-bar padding-30px-left md-no-padding-left">
+                {% block sidebar %}{% endblock %}
+            </div>
+        </div>
+
+        <div class="col-lg-8 col-md-12">
+            {% block flashmessages %}{% endblock %}
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+{% endblock %}

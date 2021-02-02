@@ -59,13 +59,13 @@ final class UserProfileController extends AppController
             try {
                 $this->userService->updateProfile($form->getData());
 
-                $this->addFlash('success', 'Профиль был успешно сохранен!');
+                $this->addFlash('success', 'Профиль обновлён!');
 
                 return $this->redirectToRoute('frontend_profile_index');
             } catch (AppException $e) {
                 $this->addFlash('error', $e->getMessage());
             } catch (\Exception $e) {
-                $this->addFlash('error', "Произошла ошибка при сохранении профиля. Попробуйте позже.");
+                $this->addFlash('error', "Произошла ошибка. Попробуйте позже.");
             }
         }
 
@@ -95,13 +95,13 @@ final class UserProfileController extends AppController
             try {
                 $this->userService->changePassword($form->getData());
 
-                $this->addFlash('success', 'Пароль был успешно изменен!');
+                $this->addFlash('success', 'Пароль изменен!');
 
                 return $this->redirectToRoute('frontend_profile_change_password');
             } catch (AppException $e) {
                 $this->addFlash('error', $e->getMessage());
             } catch (\Exception $e) {
-                $this->addFlash('error', "Произошла ошибка при изменении пароля. Попробуйте позже.");
+                $this->addFlash('error', "Произошла ошибка. Попробуйте позже.");
             }
         }
 

@@ -1,0 +1,44 @@
+{
+  "entrypoints": {
+    "js/jquery": {
+      "js": [
+        "/assets/build/runtime.41e81ebd.js",
+        "/assets/build/js/jquery.9821a92c.js"
+      ]
+    },
+    "js/bootstrap": {
+      "js": [
+        "/assets/build/runtime.41e81ebd.js",
+        "/assets/build/js/bootstrap.2d26a38c.js"
+      ]
+    },
+    "js/nav-menu": {
+      "js": [
+        "/assets/build/runtime.41e81ebd.js",
+        "/assets/build/js/nav-menu.de0b5dd8.js"
+      ]
+    },
+    "js/main": {
+      "js": [
+        "/assets/build/runtime.41e81ebd.js",
+        "/assets/build/js/main.99682a2f.js"
+      ]
+    },
+    "css/plugins": {
+      "js": [
+        "/assets/build/runtime.41e81ebd.js"
+      ],
+      "css": [
+        "/assets/build/css/plugins.86d328fa.css"
+      ]
+    },
+    "css/styles": {
+      "js": [
+        "/assets/build/runtime.41e81ebd.js"
+      ],
+      "css": [
+        "/assets/build/css/styles.b19d2a6d.css"
+      ]
+    }
+  }
+}

@@ -22,6 +22,6 @@ framework:
         base_path: 'path%'
         packages:
             frontend:
-                json_manifest_path: "%kernel.project_dir%/public/assets/frontend/manifest.json"
+                json_manifest_path: "%kernel.project_dir%/public/assets/build/manifest.json"
             backend:
-                json_manifest_path: "%kernel.project_dir%/public/assets/backend/manifest.json"
+                json_manifest_path: "%kernel.project_dir%/public/assets-backend/manifest.json"

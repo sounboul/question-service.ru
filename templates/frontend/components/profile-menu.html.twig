@@ -1,4 +1,4 @@
-{# Главное меню в шапке сайта #}
+{# Меню личного кабинета #}
 {% set currentRoute = app.request.get('_route') %}
 {% set menuItems = [
     {
@@ -15,15 +15,21 @@
         'visible': true,
     }
 ] %}
-<div class="list-group">
-    {% for menuItem in menuItems %}
-        {% if menuItem.visible %}
-            <a
-                    href="{{ url(menuItem.route) }}"
-                    class="list-group-item list-group-item-action {% if menuItem.route == currentRoute %}active{% endif %}"
-            >
-                {{ menuItem.label|raw }}
-            </a>
-        {% endif %}
-    {% endfor %}
+<div class="widget padding-30px-all md-padding-20px-all shadow-theme">
+    <ul class="widget-list no-margin-bottom list-style-5">
+        {% for menuItem in menuItems %}
+            {% if menuItem.visible %}
+                <li
+                    class="{% if menuItem.route == currentRoute %}active{% endif %}"
+                >
+                    <a
+                       style="{% if menuItem.route == currentRoute %}color:#2196f3;{% endif %}"
+                       href="{{ url(menuItem.route) }}"
+                    >
+                        {{ menuItem.label }}
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
 </div>

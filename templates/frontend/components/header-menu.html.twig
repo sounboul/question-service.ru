@@ -35,11 +35,11 @@
         'active': false
     }
 ] %}
-<ul class="navbar-nav mr-auto">
+<ul class="navbar-nav ml-auto" id="nav" style="display: none;">
     {% for menuItem in menuItems %}
         {% if menuItem.visible %}
-            <li class="nav-item {% if menuItem.active %}active{% endif %}">
-                <a class="nav-link" href="{{ url(menuItem.route) }}">{{ menuItem.label }}</a>
+            <li class="{% if menuItem.active %}active{% endif %}">
+                <a href="{{ url(menuItem.route) }}">{{ menuItem.label }}</a>
             </li>
         {% endif %}
     {% endfor %}

@@ -2,15 +2,13 @@
 {% extends 'frontend/layouts/main.html.twig' %}
 
 {% block body %}
-    <div class="container">
-        <div class="row justify-content-center align-items-center auth-wrapper">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        {% include 'frontend/components/flash-messages.html.twig' %}
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    {% include 'frontend/components/flash-messages.html.twig' %}
 
-                        {% block authbox %}{% endblock %}
-                    </div>
+                    {% block authbox %}{% endblock %}
                 </div>
             </div>
         </div>

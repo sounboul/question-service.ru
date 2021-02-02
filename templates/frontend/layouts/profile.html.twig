@@ -1,37 +1,18 @@
 {# Layout для задач функционала личного кабинета пользователя #}
-{% extends 'frontend/layouts/main.html.twig' %}
+{% extends 'frontend/layouts/main-sidebar-left.html.twig' %}
 
-{% block body %}
-    <div class="container" style="margin-top: 30px;">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="card">
-                    {% if app.user.photo %}
-                        <img class="card-img-top" src="{{ uploadUrl }}{{ app.user.photo.thumbnailPath }}" alt="Изображение профиля">
-                    {% else %}
-                        <img class="card-img-top" src="/images/user/nophoto-400x400.png" alt="Изображение профиля">
-                    {% endif %}
+{% block flashmessages %}
+    {% include 'frontend/components/flash-messages.html.twig' %}
+{% endblock %}
 
-                    <div class="card-body">
-                        {% block sidebar %}
-                            {% include 'frontend/components/profile-menu.html.twig' %}
-                        {% endblock %}
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-9">
-                <div class="card-header">
-                    {% block header %}{% endblock %}
-                </div>
-
-                <div class="card">
-                    <div class="card-body">
-                        {% include 'frontend/components/flash-messages.html.twig' %}
-                        {% block content %}{% endblock %}
-                    </div>
-                </div>
-            </div>
-        </div>
+{% block sidebar %}
+    <div class="widget" style="margin-bottom: 15px;">
+        {% if app.user.photo %}
+            <img class="card-img-top" src="{{ uploadUrl }}{{ app.user.photo.thumbnailPath }}" alt="Изображение профиля">
+        {% else %}
+            <img class="card-img-top" src="/images/user/nophoto-400x400.png" alt="Изображение профиля">
+        {% endif %}
     </div>
+
+    {% include 'frontend/components/profile-menu.html.twig' %}
 {% endblock %}

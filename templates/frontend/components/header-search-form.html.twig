@@ -1,5 +1,14 @@
 {# Форма поиска в шапке сайта #}
-<form class="form-inline my-2 my-lg-0" role="search">
-    <input class="form-control mr-sm-2" type="text" placeholder="Поиск" aria-label="Поиск">
-    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Поиск</button>
-</form>
+<div class="top-search bg-theme">
+    <div class="container">
+        <form class="search-form" action="search.html" method="GET" accept-charset="utf-8">
+            <div class="input-group">
+                                <span class="input-group-addon cursor-pointer">
+                                    <button class="search-form_submit fas fa-search font-size18 text-white" type="submit"></button>
+                                </span>
+                <input type="text" class="search-form_input form-control" name="s" autocomplete="off" placeholder="Type & hit enter...">
+                <span class="input-group-addon close-search"><i class="fas fa-times font-size18 margin-10px-top"></i></span>
+            </div>
+        </form>
+    </div>
+</div>

@@ -7,14 +7,17 @@
     {{ form_start(registrationForm) }}
     {{ form_row(registrationForm.email) }}
     {{ form_row(registrationForm.password) }}
-    {{ form_row(registrationForm.agreeTerms) }}
+    {{ form_row(registrationForm.agreeTerms, {'label': 'Я ознакомился с [link]правилами сервиса[/link] и принимаю их!'})|replace({
+        '[link]': '<a href="' ~ path('frontend_rules') ~ '" target="_blank" class="link">',
+        '[/link]': '</a>'
+    })|raw }}
 
     <button class="btn btn-lg btn-primary" type="submit">Регистрация</button>
 
     <div class="mt-4 text-center">
-        Вы уже зарегистрированы? <a href="{{ url('frontend_login') }}">Войти</a>
+        Вы уже зарегистрированы? <a href="{{ url('frontend_login') }}" class="link">Войти</a>
         <br>
-        Забыли пароль? <a href="{{ url('frontend_forgot_password_request') }}">Восстановить пароль</a>
+        Забыли пароль? <a href="{{ url('frontend_forgot_password_request') }}" class="link">Восстановить пароль</a>
     </div>
 
     {{ form_end(registrationForm) }}

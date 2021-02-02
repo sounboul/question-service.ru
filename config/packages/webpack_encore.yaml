@@ -20,7 +20,7 @@ webpack_encore:
 
     # If you have multiple builds:
     builds:
-        frontend: '%kernel.project_dir%/public/assets'
+        frontend: '%kernel.project_dir%/public/assets/build'
         backend: '%kernel.project_dir%/public/assets-backend'
 
     # Cache the entrypoints.json (rebuild Symfony's cache when entrypoints.json changes)
