@@ -1,0 +1,16 @@
+{# Виджет списка категорий в sidebar #}
+<div class="widget padding-30px-all md-padding-20px-all shadow-theme">
+    <div class="widget-title">
+        <h3>Категории</h3>
+    </div>
+
+    <ul class="widget-list no-margin-bottom list-style-5 categories-list">
+        {% if categories|length > 0 %}
+            {% for category in categories %}
+                <li>
+                    <a href="{{ category.href }}">{{ category.title }}</a>
+                </li>
+            {% endfor %}
+        {% endif %}
+    </ul>
+</div>

@@ -300,8 +300,22 @@
       
     });
 
-    // === when window loading === //
-    //$window.on("load", function() {
-    //    $window.stellar();
-    //});
+    // === РАБОТА С ЛИСТИНГАМИ ===
+    $('.container').on('click', 'a.load-listing', function(e){
+        e.preventDefault();
+
+        var listGrid = $(e.target).parents('.list-grid');
+        listGrid.find('.load-listing-button').remove();
+
+        $.get(e.target.href, function(data) {
+            listGrid.append(data);
+        });
+    });
+
+    // Подсветить выбранную категорию
+    $('.categories-list [href]').each(function() {
+        if ($(this).attr('href') == env.request_pathInfo) {
+            $(this).addClass('active');
+        }
+    });
 })(jQuery);

@@ -79,7 +79,7 @@ class QuestionSearch
             ];
         }
 
-        $params = empty($condition['query']['bool']) ? null : $condition['query']['bool'];
+        $params = empty($condition['query']['bool']) ? null : $condition;
         $query = new Query($params);
         $query->setFrom($form->pageSize * ($form->page - 1));
         $query->setSize($form->pageSize);

@@ -1,0 +1,33 @@
+{# Карточки вопросов #}
+{% if items|length > 0 %}
+    {% for item in items %}
+        <div class="card margin-40px-bottom">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <a href="{{ item.href }}" class="text-extra-dark-gray">{{ item.title }}</a>
+                </h5>
+
+                {% if item.text %}
+                    <p class="card-text">
+                        {{ item.text|nl2br }}
+                    </p>
+                {% endif %}
+
+                <p class="card-text">
+                    {% if item.category %}
+                        Категория: <b>{{ item.category.title }}</b><br>
+                    {% endif %}
+
+                    Автор: <b>{% if item.user %}{{ item.user.username }}{% else %}Гость{% endif %}</b><br>
+                    Создан: <b>{{ item.createdAt|date('d.m.Y в\ H:i') }}</b>
+                </p>
+            </div>
+        </div>
+    {% endfor %}
+
+    {% if nextPage %}
+        <div class="load-listing-button text-center">
+            <a href="{{ nextPage }}" class="load-listing btn btn-primary">Показать еще</a>
+        </div>
+    {% endif %}
+{% endif %}

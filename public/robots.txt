@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /search
+Disallow: /user
+Disallow: /_fragment
+
+Host: https://question-service.ru
+Sitemap: https://question-service.ru/sitemap/sitemap.xml

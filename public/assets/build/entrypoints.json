@@ -27,7 +27,7 @@
     "js/main": {
       "js": [
         "/assets/build/runtime.41e81ebd.js",
-        "/assets/build/js/main.dfe6f7ed.js"
+        "/assets/build/js/main.ffe02d6e.js"
       ]
     },
     "css/plugins": {
@@ -43,7 +43,7 @@
         "/assets/build/runtime.41e81ebd.js"
       ],
       "css": [
-        "/assets/build/css/styles.b19d2a6d.css"
+        "/assets/build/css/styles.ea8c49b3.css"
       ]
     }
   }

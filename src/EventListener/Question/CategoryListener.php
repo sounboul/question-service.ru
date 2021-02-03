@@ -64,6 +64,6 @@ class CategoryListener
      */
     private function generateHrefCategory(string $slug): string
     {
-        return $this->urlGenerator->generate('frontend_question_index_category', ['category_slug' => $slug]);
+        return $this->urlGenerator->generate('frontend_question_category', ['category_slug' => $slug]);
     }
 }

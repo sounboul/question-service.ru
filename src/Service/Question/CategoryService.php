@@ -82,13 +82,21 @@ final class CategoryService
     }
 
     /**
+     * @return array<Category> Список активных категорий
+     */
+    public function getActiveCategories(): array
+    {
+        return $this->categoryRepository->getActiveCategories();
+    }
+
+    /**
      * @return array Список категория для dropDown списка
      */
     public function getListForDropdown(): array
     {
         $items = [];
 
-        $categories = $this->categoryRepository->getActiveCategories();
+        $categories = $this->getActiveCategories();
         if (!empty($categories)) {
             foreach ($categories as $category) {
                 $items[$category->getId()] = $category->getTitle();

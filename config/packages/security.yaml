@@ -26,7 +26,7 @@ security:
             login_throttling: ~
             logout:
                 path: frontend_logout
-                target: frontend_homepage
+                target: frontend_question_index
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication

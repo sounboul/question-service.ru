@@ -2,6 +2,7 @@
 namespace App\Controller\Frontend;
 
 use App\Dto\QuestionElastic\SimpleSearchForm;
+use App\Entity\Question\Category;
 use App\Service\Question\CategoryService;
 use App\Service\Question\QuestionSearch;
 use App\Service\Question\QuestionService;
@@ -56,7 +57,7 @@ final class QuestionController extends AppController
      * Листинг вопросов с фильтрацией по категориям
      *
      * @Route("/", defaults={"category_slug" : ""}, methods="GET", name="index")
-     * @Route("/c/{category_slug}/", methods="GET", name="category")
+     * @Route("/category/{category_slug}/", methods="GET", name="category")
      *
      * @param Request $request
      * @param string $category_slug Slug категории
@@ -115,7 +116,7 @@ final class QuestionController extends AppController
                 return $this->render('question/index.html.twig', $data);
             }
         } else {
-            return $this->render('components/questions-listing.html.twig', $data);
+            return $this->render('components/questions-cards.html.twig', $data);
         }
     }
 
@@ -134,5 +135,26 @@ final class QuestionController extends AppController
     public function view(Request $request, int $id, string $slug, int $page): Response
     {
         // @TODO
+    }
+
+    /**
+     * Виджет списка категория в sidebar
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function categoriesWidget(Request $request): Response
+    {
+        $categories = array_map(function (Category $category) {
+            return [
+                'title' => $category->getTitle(),
+                'href' => $category->getHref(),
+            ];
+        }, $this->categoryService->getActiveCategories());
+
+        $response = $this->render('widgets/categories.html.twig', compact('categories'));
+        $response->setMaxAge(3600);
+
+        return $response;
     }
 }

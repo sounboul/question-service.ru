@@ -5,57 +5,28 @@
     <div class="row">
         <div class="col-lg-8 col-md-12 sm-margin-50px-bottom">
             {% block flashmessages %}{% endblock %}
+
+            <div class="input-group mb-3" style="margin-bottom: 15px;">
+                <input type="search" class="form-control" id="search" placeholder="Поиск по вопросам">
+                <select name="categoryId" class="form-control">
+                    <option value="">-- Все категории --</option>
+                    <option value="1">Математика</option>
+                    <option value="2">Русский язык</option>
+                    <option value="3">Литература</option>
+                </select>
+
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit">Найти</button>
+                </div>
+            </div>
+
             {% block content %}{% endblock %}
         </div>
 
         <div class="col-lg-4 col-md-12">
-            <div class="side-bar padding-30px-left md-no-padding-left">
+            <div class="side-bar">
                 {% block sidebar %}
-                    <div class="widget padding-30px-all md-padding-20px-all shadow-theme">
-                        <div class="widget-title">
-                            <h3>Категории</h3>
-                        </div>
-
-                        <ul class="widget-list no-margin-bottom list-style-5">
-                            <li>
-                                <a href="#">Entertainment</a>
-                            </li>
-                            <li>
-                                <a href="#">Business</a>
-                            </li>
-                            <li>
-                                <a href="#">Adventure</a>
-                            </li>
-                            <li>
-                                <a href="#">Decorating</a>
-                            </li>
-                            <li>
-                                <a href="#">Travelling</a>
-                            </li>
-                            <li>
-                                <a href="#">Shopping</a>
-                            </li>
-
-                            <li>
-                                <a href="#">Entertainment</a>
-                            </li>
-                            <li>
-                                <a href="#">Business</a>
-                            </li>
-                            <li>
-                                <a href="#">Adventure</a>
-                            </li>
-                            <li>
-                                <a href="#">Decorating</a>
-                            </li>
-                            <li>
-                                <a href="#">Travelling</a>
-                            </li>
-                            <li>
-                                <a href="#">Shopping</a>
-                            </li>
-                        </ul>
-                    </div>
+                    {{ render_esi(controller('App\\Controller\\Frontend\\QuestionController::categoriesWidget')) }}
                 {% endblock %}
             </div>
         </div>

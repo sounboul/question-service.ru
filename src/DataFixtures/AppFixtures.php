@@ -159,7 +159,7 @@ class AppFixtures extends BaseFixture
             $formData = new QuestionCreateForm();
             $formData->userId = $this->users[array_rand($this->users)];
             $formData->categoryId = $this->categories[array_rand($this->categories)];
-            $formData->title = $this->faker->text(100);
+            $formData->title = $this->faker->text(100).'?';
             $formData->text = $i % 2 == 0 ? $this->faker->paragraph() : '';
             $formData->createdByIp = $this->faker->ipv4;
             $questionId = $this->questionService->create($formData)->getId();
