@@ -2,6 +2,7 @@
 namespace App\Form\User;
 
 use App\Dto\User\UserResetPasswordRequestForm;
+use App\Form\ReCaptchaType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -20,6 +21,10 @@ class UserResetPasswordRequestFormType extends AbstractType
         $builder
             ->add('email', EmailType::class, [
                 'label' => 'E-mail',
+            ])
+            ->add('recaptcha', ReCaptchaType::class, [
+                'mapped' => false,
+                'type' => 'checkbox',
             ])
         ;
     }

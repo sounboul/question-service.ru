@@ -9,6 +9,7 @@ Encore
     .addEntry('js/jquery', './assets/assets/js/jquery.min.js')
     .addEntry('js/bootstrap', './assets/assets/js/bootstrap.min.js')
     .addEntry('js/nav-menu', './assets/assets/js/nav-menu.js')
+    .addEntry('js/recaptcha', './assets/assets/js/recaptcha.js')
     .addEntry('js/main', './assets/assets/js/main.js')
     .addStyleEntry('css/plugins', './assets/assets/css/plugins.css')
     .addStyleEntry('css/styles', './assets/assets/css/styles.scss')

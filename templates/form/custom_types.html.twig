@@ -1,0 +1,7 @@
+{# Google Recaptcha Field #}
+{% block re_captcha_row %}
+    <{{ element|default('div') }}{% with {attr: row_attr|merge({class: (row_attr.class|default('') ~ ' form-group')|trim})} %}{{ block('attributes') }}{% endwith %}>
+    {{- form_label(form) -}}
+    <div id="{{ id }}" data-toggle="recaptcha" data-type="{{ type }}"></div>
+    </{{ element|default('div') }}>
+{% endblock %}

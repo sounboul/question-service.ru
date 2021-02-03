@@ -1,10 +1,8 @@
 <?php
 namespace App\Controller\Frontend;
 
-use App\Dto\User\UserChangePasswordForm;
 use App\Dto\User\UserResetPasswordForm;
 use App\Exception\AppException;
-use App\Form\User\UserChangePasswordFormType;
 use App\Form\User\UserRegistrationFormType;
 use App\Form\User\UserResetPasswordFormType;
 use App\Form\User\UserResetPasswordRequestFormType;

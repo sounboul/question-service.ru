@@ -301,15 +301,7 @@
     });
 
     // === when window loading === //
-    $window.on("load", function() {
-
-        /*------------------------------------
-            11. Stellar
-        --------------------------------------*/
-
-        // stellar
-        $window.stellar();
-
-    });
-
+    //$window.on("load", function() {
+    //    $window.stellar();
+    //});
 })(jQuery);
