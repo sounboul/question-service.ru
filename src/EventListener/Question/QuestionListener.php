@@ -2,9 +2,13 @@
 namespace App\EventListener\Question;
 
 use App\Entity\Question\Question;
+use App\Elasticsearch\Model\Question as ElasticQuestion;
 use App\Service\Question\CategoryService;
 use App\Service\Question\QuestionService;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
+use JoliCode\Elastically\Messenger\IndexationRequest;
+use JoliCode\Elastically\Messenger\IndexationRequestHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
@@ -28,21 +32,29 @@ class QuestionListener
     private UrlGeneratorInterface $urlGenerator;
 
     /**
+     * @var MessageBusInterface Bus
+     */
+    private MessageBusInterface $bus;
+
+    /**
      * Конструктор
      *
      * @param CategoryService $categoryService Category Service
      * @param QuestionService $questionService Question Service
      * @param UrlGeneratorInterface $urlGenerator Url Generator
+     * @param MessageBusInterface $bus Bus
      */
     public function __construct(
         CategoryService $categoryService,
         QuestionService $questionService,
-        UrlGeneratorInterface $urlGenerator
+        UrlGeneratorInterface $urlGenerator,
+        MessageBusInterface $bus
     )
     {
         $this->categoryService = $categoryService;
         $this->questionService = $questionService;
         $this->urlGenerator = $urlGenerator;
+        $this->bus = $bus;
     }
 
     /**
@@ -64,6 +76,9 @@ class QuestionListener
 
         // необходимо пересчитать количество вопросов в категории
         $this->recountQuestionsInCategory($question->getCategory()->getId());
+
+        // обновить поисковой индекс
+        $this->searchIndexUpdate($question);
     }
 
     /**
@@ -92,6 +107,9 @@ class QuestionListener
         // необходимо пересчитать количество вопросов в категории
         $this->recountQuestionsInCategory($question->getCategory()->getId());
         // @TODO если категория изменена, то пересчитать нужно в обоих
+
+        // обновить поисковой индекс
+        $this->searchIndexUpdate($question);
     }
 
     /**
@@ -115,5 +133,22 @@ class QuestionListener
     private function generateHrefQuestion(int $id, string $slug): string
     {
         return $this->urlGenerator->generate('frontend_question_view', ['id' => $id, 'slug' => $slug]);
+    }
+
+    /**
+     * Обновить поисковой индекс вопросов
+     *
+     * @param Question $question
+     * @return void
+     */
+    private function searchIndexUpdate(Question $question): void
+    {
+        if ($question->isActive()) {
+            $request = new IndexationRequest(ElasticQuestion::class, $question->getId());
+        } else {
+            $request = new IndexationRequest(ElasticQuestion::class, $question->getId(), IndexationRequestHandler::OP_DELETE);
+        }
+
+        $this->bus->dispatch($request);
     }
 }

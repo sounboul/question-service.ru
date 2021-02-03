@@ -1,0 +1,30 @@
+{# Листинг вопросов #}
+{% if items|length > 0 %}
+    <div class="questions">
+        {% for item in items %}
+            <div class="margin-40px-bottom">
+                <div class="padding-50px-lr xs-no-padding-lr">
+                    <span class="text-extra-dark-gray font-size14">
+                        <span class="font-weight-600">От: </span>
+                        <span class="border-bottom">
+                            {% if item.user %}{{ item.user.username }}{% else %}Гость{% endif %}
+                        </span>
+
+                        <span class="font-weight-600">, в </span>
+                        <span class="border-bottom">{{ item.createdAt|date }}</span>
+                    </span>
+
+                    <h5 class="margin-15px-top font-weight-600">
+                        <a href="{{ item.href }}" class="text-extra-dark-gray">{{ item.title }}</a>
+                    </h5>
+
+                    <p>
+                        {{ item.text|nl2br }}
+                    </p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>Нет вопросов по вашему поиску. Попробуйте изменить запрос.</p>
+{% endif %}

@@ -7,6 +7,7 @@
 jpegoptim/optipng
 supervisor
 PostgreSQL 11 и выше
+ElasticSearch 7.x
 npm 7.4 и выше
 yarn 1.22 и выше
 php 7.4 и выше

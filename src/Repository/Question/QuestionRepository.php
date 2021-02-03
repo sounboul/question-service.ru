@@ -5,6 +5,7 @@ use App\Dto\Question\QuestionSearchForm;
 use App\Entity\Question\Question;
 use App\Exception\AppException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Internal\Hydration\IterableResult;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -122,5 +123,35 @@ class QuestionRepository extends ServiceEntityRepository
         }
 
         return $query;
+    }
+
+    /**
+     * @return int Количество вопросов для индексации поисковым движком ElasticSearch
+     */
+    public function countListingForElastic(): int
+    {
+        $query = $this->createQueryBuilder('q')
+            ->select('count(q.id)');
+
+        // только активные вопросы
+        $query->andWhere('q.status = :status')
+            ->setParameter('status', Question::STATUS_ACTIVE);
+
+        return $query->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * @return iterable Листинг вопросов для индексации поисковым движком ElasticSearch
+     */
+    public function listingForElastic(): iterable
+    {
+        $query = $this->createQueryBuilder('q');
+
+        // только активные вопросы
+        $query->andWhere('q.status = :status')
+            ->setParameter('status', Question::STATUS_ACTIVE);
+
+        return $query->getQuery()->toIterable();
     }
 }

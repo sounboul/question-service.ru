@@ -10,19 +10,9 @@ use Symfony\Component\HttpFoundation\Response;
 final class SiteController extends AppController
 {
     /**
-     * Главная страница приложения
-     *
-     * @Route("/", name="homepage")
-     */
-    public function index(): Response
-    {
-        return $this->render('site/index.html.twig');
-    }
-
-    /**
      * Статическая страница: О проекте
      *
-     * @Route("/about/", name="about")
+     * @Route("/about/", name="about", methods="GET")
      */
     public function about(): Response
     {
@@ -32,7 +22,7 @@ final class SiteController extends AppController
     /**
      * Статическая страница: Контакты
      *
-     * @Route("/contacts/", name="contacts")
+     * @Route("/contacts/", name="contacts", methods="GET")
      */
     public function contacts(): Response
     {
@@ -42,7 +32,7 @@ final class SiteController extends AppController
     /**
      * Статическая страница: Правила
      *
-     * @Route("/rules/", name="rules")
+     * @Route("/rules/", name="rules", methods="GET")
      */
     public function rules(): Response
     {
@@ -52,7 +42,7 @@ final class SiteController extends AppController
     /**
      * Статическая страница: Реклама
      *
-     * @Route("/advert/", name="advert")
+     * @Route("/advert/", name="advert", methods="GET")
      */
     public function advert(): Response
     {

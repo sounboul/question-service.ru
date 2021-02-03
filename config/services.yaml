@@ -71,3 +71,22 @@ services:
     Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler:
         arguments:
             - '%env(DATABASE_URL)%'
+
+    # Elastic Search (https://jolicode.com/blog/elasticsearch-the-right-way-in-symfony)
+    JoliCode\Elastically\Transport\HttpClientTransport: ~
+    JoliCode\Elastically\Messenger\IndexationRequestHandler: ~
+    JoliCode\Elastically\Client:
+        arguments:
+            $config:
+                host: '%env(ELASTICSEARCH_HOST)%'
+                port: '%env(ELASTICSEARCH_PORT)%'
+                transport: '@JoliCode\Elastically\Transport\HttpClientTransport'
+                elastically_mappings_directory: '%kernel.project_dir%/config/elasticsearch'
+                elastically_index_class_mapping:
+                    question: App\Elasticsearch\Model\Question
+                elastically_serializer: '@serializer'
+                elastically_bulk_size: 100
+            $logger: '@logger'
+
+    JoliCode\Elastically\Messenger\DocumentExchangerInterface:
+        alias: App\Elasticsearch\DocumentExchanger

@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Контроллер управления категориями вопросов
  *
- * @Route("/question-category", name="category_")
+ * @Route("/category", name="category_")
  */
 class CategoryController extends AppController
 {

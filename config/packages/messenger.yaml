@@ -7,9 +7,19 @@ framework:
             # https://symfony.com/doc/current/messenger.html#transport-configuration
             async: '%env(MESSENGER_TRANSPORT_DSN)%'
             failed: 'doctrine://default?queue_name=failed'
+            queuing: 'in-memory://'
             # sync: 'sync://'
 
         routing:
             # Route your messages to the transports
             'App\Message\EmailNotification': async
             'App\Message\UserWasChanged': async
+            'JoliCode\Elastically\Messenger\MultipleIndexationRequest': async
+            'JoliCode\Elastically\Messenger\IndexationRequest': queuing
+services:
+    JoliCode\Elastically\Messenger\IndexationRequestSpoolSubscriber:
+        arguments:
+            - '@messenger.transport.queuing' # should be the name of the memory transport
+            - '@messenger.default_bus'
+        tags:
+            - { name: kernel.event_subscriber }

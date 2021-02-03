@@ -1,0 +1,50 @@
+settings:
+  number_of_replicas: 0
+  number_of_shards: 1
+  refresh_interval: 60s
+
+mappings:
+  dynamic: false
+  properties:
+    id:
+      type: integer
+
+    user:
+      type: object
+      properties:
+        id:
+          type: integer
+
+        username:
+          type: text
+          index: false
+
+    category:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: text
+          index: false
+        href:
+          type: text
+          index: false
+
+    title:
+      type: text
+      analyzer: russian
+
+    text:
+      type: text
+      analyzer: russian
+
+    href:
+      type: text
+      index: false
+
+    totalAnswers:
+      type: integer
+
+    createdAt:
+      type: date

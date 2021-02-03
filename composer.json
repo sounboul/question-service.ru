@@ -17,6 +17,7 @@
         "doctrine/orm": "^2.8",
         "google/recaptcha": "^1.2",
         "imagine/imagine": "^1.2",
+        "jolicode/elastically": "^1.1",
         "phpdocumentor/reflection-docblock": "^5.2",
         "scienta/doctrine-json-functions": "~4.3",
         "sensio/framework-extra-bundle": "^5.1",
