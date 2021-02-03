@@ -20,6 +20,7 @@ php-pdo
 php-pgsql
 php-sodium
 php-xml
+php-sysvsem
 ```
 
 # Установка и настройка

@@ -23,6 +23,7 @@ security:
             custom_authenticator: App\Security\LoginFormAuthenticator
             remember_me:
                 secret: '%kernel.secret%'
+            login_throttling: ~
             logout:
                 path: frontend_logout
                 target: frontend_homepage
