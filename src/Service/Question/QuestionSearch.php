@@ -1,7 +1,7 @@
 <?php
 namespace App\Service\Question;
 
-use App\Dto\QuestionElastic\SimpleSearchForm;
+use App\Dto\QuestionSearch\SimpleSearchForm;
 use App\Elasticsearch\Model\Question;
 use App\Exception\ServiceException;
 use Elastica\Query;

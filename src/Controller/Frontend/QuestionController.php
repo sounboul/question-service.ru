@@ -3,7 +3,7 @@ namespace App\Controller\Frontend;
 
 use App\Dto\Question\AnswerSearchForm;
 use App\Dto\Question\QuestionCreateForm;
-use App\Dto\QuestionElastic\SimpleSearchForm;
+use App\Dto\QuestionSearch\SimpleSearchForm;
 use App\Entity\Question\Category;
 use App\Exception\AppException;
 use App\Form\Question\AnswerCreateFormType;

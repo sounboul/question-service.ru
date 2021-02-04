@@ -1,5 +1,5 @@
 <?php
-namespace App\Dto\QuestionElastic;
+namespace App\Dto\QuestionSearch;
 
 /**
  * Простая форма для листинга вопросов
