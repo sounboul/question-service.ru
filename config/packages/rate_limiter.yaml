@@ -5,3 +5,8 @@ framework:
       policy: 'fixed_window'
       limit: 100
       interval: '15 minutes'
+    # Добавление ответа к вопросу (не более 100 за 10 минут)
+    question_answer_add:
+      policy: 'fixed_window'
+      limit: 100
+      interval: '10 minutes'

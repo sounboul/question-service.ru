@@ -220,6 +220,7 @@ final class QuestionController extends AppController
      * @Route("/q/{id<[1-9]\d*>}_{slug}/{page<[1-9]\d*>}/", name="view_paginated")
      *
      * @param Request $request
+     * @param RateLimiterFactory $questionAnswerAddLimiter
      * @param int $id Идентификатор вопроса
      * @param string $slug Slug вопроса
      * @param int $page Номер страницы
@@ -228,6 +229,7 @@ final class QuestionController extends AppController
      */
     public function view(
         Request $request,
+        RateLimiterFactory $questionAnswerAddLimiter,
         int $id,
         string $slug,
         int $page
@@ -273,6 +275,12 @@ final class QuestionController extends AppController
         $createForm = $this->createForm(AnswerCreateFormType::class, $formData, ['recaptcha' => true]);
         $createForm->handleRequest($request);
         if ($createForm->isSubmitted() && $createForm->isValid()) {
+            // Rate Limiter (на основе IP адреса)
+            $limiter = $questionAnswerAddLimiter->create($request->getClientIp());
+            if (false === $limiter->consume()->isAccepted()) {
+                throw new TooManyRequestsHttpException();
+            }
+
             try {
                 $answer = $this->answerService->create($createForm->getData());
                 return $this->redirect($question->getHref().'#answer-'.$answer->getId());
