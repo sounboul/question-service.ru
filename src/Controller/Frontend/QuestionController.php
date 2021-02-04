@@ -1,12 +1,13 @@
 <?php
 namespace App\Controller\Frontend;
 
-use App\Dto\Question\AnswerCreateForm;
 use App\Dto\Question\AnswerSearchForm;
+use App\Dto\Question\QuestionCreateForm;
 use App\Dto\QuestionElastic\SimpleSearchForm;
 use App\Entity\Question\Category;
 use App\Exception\AppException;
 use App\Form\Question\AnswerCreateFormType;
+use App\Form\Question\QuestionCreateFormType;
 use App\Service\Question\AnswerService;
 use App\Service\Question\CategoryService;
 use App\Service\Question\QuestionSearch;
@@ -70,6 +71,55 @@ final class QuestionController extends AppController
     }
 
     /**
+     * Создание вопроса
+     *
+     * @Route("/q/create/", name="create")
+     * @param Request $request
+     * @param RateLimiterFactory $questionAddLimiter
+     * @return Response
+     */
+    public function create(
+        Request $request,
+        RateLimiterFactory $questionAddLimiter
+    ): Response
+    {
+        $form = $this->createForm(QuestionCreateFormType::class, null, [
+            'categoryService' => $this->categoryService,
+            'recaptcha' => true,
+        ]);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Rate Limiter (на основе IP адреса)
+            $limiter = $questionAddLimiter->create($request->getClientIp());
+            if (false === $limiter->consume()->isAccepted()) {
+                throw new TooManyRequestsHttpException();
+            }
+
+            try {
+                /* @var QuestionCreateForm $formData */
+                $formData = $form->getData();
+                if (!empty($this->getUser())) {
+                    $formData->userId = $this->getUser()->getId();
+                }
+                $formData->createdByIp = $request->getClientIp();
+
+                $question = $this->questionService->create($formData);
+
+                return $this->redirectToRoute('frontend_question_view', [
+                        'id' => $question->getId(),
+                        'slug' => $question->getSlug(),
+                    ]);
+            } catch (AppException $e) {
+                return $this->renderError(true, $e);
+            }
+        }
+
+        return $this->render('question/create.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
      * Листинг вопросов с фильтрацией по категориям
      *
      * @Route("/", defaults={"category_slug" : ""}, methods="GET", name="index")
@@ -78,7 +128,6 @@ final class QuestionController extends AppController
      * @param Request $request
      * @param string $category_slug Slug категории
      * @return Response
-     * @throws ServiceException
      */
     public function index(
         Request $request,
@@ -255,7 +304,7 @@ final class QuestionController extends AppController
         // редирект на правильную страницу
         $page = max(1, $page);
         $pageSize = 20;
-        $maxPages = (int) ceil($question->getTotalAnswers() / $pageSize);
+        $maxPages = max(1, (int) ceil($question->getTotalAnswers() / $pageSize));
         if ($page > $maxPages) {
             return $this->redirectToRoute('frontend_question_view_paginated', [
                 'id' => $id,
@@ -265,14 +314,7 @@ final class QuestionController extends AppController
         }
 
         // добавление нового ответа к вопросу
-        $formData = new AnswerCreateForm();
-        $formData->questionId = $id;
-        if (!empty($this->getUser())) {
-            $formData->userId = $this->getUser()->getId();
-        }
-        $formData->createdByIp = $request->getClientIp();
-
-        $createForm = $this->createForm(AnswerCreateFormType::class, $formData, ['recaptcha' => true]);
+        $createForm = $this->createForm(AnswerCreateFormType::class, null, ['recaptcha' => true]);
         $createForm->handleRequest($request);
         if ($createForm->isSubmitted() && $createForm->isValid()) {
             // Rate Limiter (на основе IP адреса)
@@ -282,7 +324,14 @@ final class QuestionController extends AppController
             }
 
             try {
-                $answer = $this->answerService->create($createForm->getData());
+                $formData = $createForm->getData();
+                $formData->questionId = $id;
+                if (!empty($this->getUser())) {
+                    $formData->userId = $this->getUser()->getId();
+                }
+                $formData->createdByIp = $request->getClientIp();
+
+                $answer = $this->answerService->create($formData);
                 return $this->redirect($question->getHref().'#answer-'.$answer->getId());
             } catch (AppException $e) {
                 return $this->renderError(true, $e);

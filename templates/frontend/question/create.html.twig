@@ -1,0 +1,22 @@
+{% extends 'frontend/layouts/main-sidebar-right.html.twig' %}
+
+{% block title %}Задать вопрос - Вопросы и ответы{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-body">
+            <h1 class="card-title">Задать вопрос</h1>
+
+            <div class="question-create">
+                {{ form_start(form) }}
+                {{ form_row(form.categoryId) }}
+                {{ form_row(form.title) }}
+                {{ form_row(form.text) }}
+                {{ form_row(form.recaptcha) }}
+
+                <button class="btn btn-primary">Задать вопрос</button>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -10,3 +10,8 @@ framework:
       policy: 'fixed_window'
       limit: 100
       interval: '10 minutes'
+    # Создание вопроса
+    question_add:
+      policy: 'fixed_window'
+      limit: 50
+      interval: '10 minutes'

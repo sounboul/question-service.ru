@@ -42,7 +42,7 @@ class QuestionCreateForm
      *     max=2000
      * )
      */
-    public ?string $text;
+    public ?string $text = null;
 
     /**
      * @var string|null Slug вопроса
