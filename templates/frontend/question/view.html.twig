@@ -1,0 +1,78 @@
+{% extends 'frontend/layouts/main-sidebar-right.html.twig' %}
+
+{% block title %}{{ question.title }}{% endblock %}
+
+{% block content %}
+    {# Просмотр вопроса #}
+    <div class="card">
+        <div class="card-body">
+            <h1 class="card-title">{{ question.title }}</h1>
+
+            <p class="card-text">
+                {{ question.text|nl2br }}
+            </p>
+
+            <p class="card-text">
+                {% if question.category %}
+                    Категория: <b>{{ question.category.title }}</b><br>
+                {% endif %}
+
+                Автор: <b>{% if question.user %}{{ question.user.username }}{% else %}Гость{% endif %}</b><br>
+                Создан: <b>{{ question.createdAt|date('d.m.Y в\ H:i') }}</b>
+            </p>
+        </div>
+    </div>
+
+    {# Листинг ответов к вопросу #}
+    {% set items = answers.results %}
+    <div class="blogs margin-40px-top">
+        <div class="comments-area">
+            <div class="margin-50px-bottom sm-margin-30px-bottom">
+                <h3 class="font-size28 sm-font-size26 xs-font-size24">Ответы ({{ answers.numResults }})</h3>
+            </div>
+
+            {% if items|length > 0 %}
+                {% for item in items %}
+                    <div class="comment-box" id="answer-{{ item.id }}">
+                        <div class="author-thumb">
+                            <img src="/assets/images/no-photo-comments.png" alt="" class="rounded-circle width-85 xs-width-100" />
+                        </div>
+
+                        <div class="comment-info">
+                            <h6>
+                                {% if item.user %}{{ item.user.username }}{% else %}Гость{% endif %}
+                            </h6>
+
+                            <p>{{ item.text|nl2br }}</p>
+
+                            Создан: <b>{{ item.createdAt|date('d.m.Y в\ H:i') }}</b>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                {% include "frontend/components/paginator.html.twig" with {
+                    'paginator': answers,
+                    'route': 'frontend_question_view',
+                    'filters': filters
+                } only %}
+            {% else %}
+                <p>Ваш ответ будет первым!</p>
+            {% endif %}
+
+            <!--  start form-->
+            <div class="comment-form">
+                <h3 class="font-size28 xs-font-size22">Ответить</h3>
+
+                {{ form_start(createForm) }}
+                {{ form_row(createForm.text) }}
+                {{ form_row(createForm.recaptcha) }}
+
+                <button class="btn btn-primary">Ответить</button>
+                {{ form_end(createForm) }}
+            </div>
+            <!--  end form-->
+        </div>
+    </div>
+
+    {# Форма добавления ответа #}
+{% endblock %}

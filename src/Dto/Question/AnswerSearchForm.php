@@ -45,7 +45,7 @@ class AnswerSearchForm
     /**
      * @var string|null Сортировка
      */
-    public ?string $orderBy = null;
+    public ?string $orderBy = 'a.id_DESC';
 
     /**
      * @return array Доступные варианты сортировки

@@ -2,6 +2,7 @@
 namespace App\Form\Question;
 
 use App\Dto\Question\AnswerCreateForm;
+use App\Form\ReCaptchaType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -25,6 +26,14 @@ class AnswerCreateFormType extends AbstractType
                 ],
             ])
         ;
+
+        // Recaptcha опциональна для формы
+        if ($options['recaptcha']) {
+            $builder->add('recaptcha', ReCaptchaType::class, [
+                'mapped' => false,
+                'type' => 'checkbox',
+            ]);
+        }
     }
 
     /**
@@ -34,6 +43,9 @@ class AnswerCreateFormType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => AnswerCreateForm::class,
+            'recaptcha' => false,
         ]);
+
+        $resolver->setAllowedValues('recaptcha', [true, false]);
     }
 }

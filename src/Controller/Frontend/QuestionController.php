@@ -1,8 +1,13 @@
 <?php
 namespace App\Controller\Frontend;
 
+use App\Dto\Question\AnswerCreateForm;
+use App\Dto\Question\AnswerSearchForm;
 use App\Dto\QuestionElastic\SimpleSearchForm;
 use App\Entity\Question\Category;
+use App\Exception\AppException;
+use App\Form\Question\AnswerCreateFormType;
+use App\Service\Question\AnswerService;
 use App\Service\Question\CategoryService;
 use App\Service\Question\QuestionSearch;
 use App\Service\Question\QuestionService;
@@ -34,6 +39,11 @@ final class QuestionController extends AppController
     private QuestionService $questionService;
 
     /**
+     * @var AnswerService Answer Service
+     */
+    private AnswerService $answerService;
+
+    /**
      * @var QuestionSearch Question Search
      */
     private QuestionSearch $questionSearch;
@@ -43,16 +53,19 @@ final class QuestionController extends AppController
      *
      * @param CategoryService $categoryService
      * @param QuestionService $questionService
+     * @param AnswerService $answerService
      * @param QuestionSearch $questionSearch
      */
     public function __construct(
         CategoryService $categoryService,
         QuestionService $questionService,
+        AnswerService $answerService,
         QuestionSearch $questionSearch
     )
     {
         $this->categoryService = $categoryService;
         $this->questionService = $questionService;
+        $this->answerService = $answerService;
         $this->questionSearch = $questionSearch;
     }
 
@@ -203,18 +216,85 @@ final class QuestionController extends AppController
     /**
      * Просмотр одного вопроса
      *
-     * @Route("/q/{id<[1-9]\d*>}_{slug}/", defaults={"page": "1"}, methods="GET", name="view")
-     * @Route("/q/{id<[1-9]\d*>}_{slug}/{page<[1-9]\d*>}/", methods="GET", name="view_paginated")
+     * @Route("/q/{id<[1-9]\d*>}_{slug}/", defaults={"page": "1"}, name="view")
+     * @Route("/q/{id<[1-9]\d*>}_{slug}/{page<[1-9]\d*>}/", name="view_paginated")
      *
      * @param Request $request
      * @param int $id Идентификатор вопроса
      * @param string $slug Slug вопроса
      * @param int $page Номер страницы
      * @return Response
+     * @throws ServiceException
      */
-    public function view(Request $request, int $id, string $slug, int $page): Response
+    public function view(
+        Request $request,
+        int $id,
+        string $slug,
+        int $page
+    ): Response
     {
-        // @TODO
+        // поиск вопроса
+        try {
+            $question = $this->questionService->getById($id);
+            if ($question->isDeleted()) {
+                throw new HttpException(410, "Вопрос был удалён");
+            }
+
+            // редирект на правильный URL
+            $questionHref = $page > 1 ? $question->getHref().$page.'/' : $question->getHref();
+            $currentHref = str_replace('?'.$request->getQueryString(), '', $request->getRequestUri());
+            if ($questionHref != $currentHref) {
+                return $this->redirect($questionHref);
+            }
+        } catch (ServiceException $e) {
+            throw new NotFoundHttpException("Вопрос не найден");
+        }
+
+        // редирект на правильную страницу
+        $page = max(1, $page);
+        $pageSize = 20;
+        $maxPages = (int) ceil($question->getTotalAnswers() / $pageSize);
+        if ($page > $maxPages) {
+            return $this->redirectToRoute('frontend_question_view_paginated', [
+                'id' => $id,
+                'slug' => $slug,
+                'page' => $maxPages,
+            ]);
+        }
+
+        // добавление нового ответа к вопросу
+        $formData = new AnswerCreateForm();
+        $formData->questionId = $id;
+        if (!empty($this->getUser())) {
+            $formData->userId = $this->getUser()->getId();
+        }
+        $formData->createdByIp = $request->getClientIp();
+
+        $createForm = $this->createForm(AnswerCreateFormType::class, $formData, ['recaptcha' => true]);
+        $createForm->handleRequest($request);
+        if ($createForm->isSubmitted() && $createForm->isValid()) {
+            try {
+                $answer = $this->answerService->create($createForm->getData());
+                return $this->redirect($question->getHref().'#answer-'.$answer->getId());
+            } catch (AppException $e) {
+                return $this->renderError(true, $e);
+            }
+        }
+
+        // листинг ответов к вопросу
+        $formData = new AnswerSearchForm();
+        $formData->questionId = $question->getId();
+        $answers = $this->answerService->listing($formData, $page, $pageSize);
+
+        return $this->render('question/view.html.twig', [
+            'createForm' => $createForm->createView(),
+            'question' => $question,
+            'answers' => $answers,
+            'filters' => [
+                'id' => $id,
+                'slug' => $slug,
+            ],
+        ]);
     }
 
     /**

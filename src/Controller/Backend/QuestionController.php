@@ -187,7 +187,7 @@ class QuestionController extends AppController
             $formData = $form->getData();
             $formData->questionId = $id;
 
-            $answers = $this->answerService->listing($formData, $page, 10);
+            $answers = $this->answerService->listing($formData, $page);
         } catch (AppException $e) {
             $this->addFlash('error', $e->getMessage());
             $answers = null;

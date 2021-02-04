@@ -63,8 +63,8 @@ class QuestionRepository extends ServiceEntityRepository
         $query = $this->createQueryBuilder('q');
 
         // joins
-        $query->innerJoin('q.user', 'u');
-        $query->innerJoin('q.category', 'c');
+        $query->leftJoin('q.user', 'u');
+        $query->leftJoin('q.category', 'c');
 
         // filters
         if (!empty($form->id)) {

@@ -62,8 +62,8 @@ class AnswerRepository extends ServiceEntityRepository
         $query = $this->createQueryBuilder('a');
 
         // joins
-        $query->innerJoin('a.user', 'u');
-        $query->innerJoin('a.question', 'q');
+        $query->leftJoin('a.user', 'u');
+        $query->leftJoin('a.question', 'q');
 
         // filters
         if (!empty($form->id)) {

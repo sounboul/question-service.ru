@@ -69,7 +69,13 @@
                             </div>
 
                             <div class="col-md-3">
-                                <b>Автор:</b> <a href="{{ path('backend_user_view', {'id': item.user.id}) }}" target="_blank">{{ item.user.username }}</a>
+                                Автор:
+
+                                {% if item.user %}
+                                    <a href="{{ path('backend_user_view', {'id': item.user.id}) }}" target="_blank">{{ item.user.username }}</a>
+                                {% else %}
+                                    Гость
+                                {% endif %}
                             </div>
 
                             <div class="col-md-3">
