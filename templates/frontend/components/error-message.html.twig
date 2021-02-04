@@ -1,0 +1,10 @@
+{% set code = e.code == 0 ? 'сайта' : e.code %}
+<div class="card card-error">
+    <div class="card-body">
+        <h2>Ошибка {{ code }}</h2>
+
+        <p style="font-weight: bold;">
+            {{ e.message }}
+        </p>
+    </div>
+</div>

@@ -1,0 +1,10 @@
+{# Виджет категорий: представление для формы поиска #}
+<select id="categories-search-form" name="categoryId" class="form-control">
+    <option value="0">-- Все категории --</option>
+
+    {% if categories|length > 0 %}
+        {% for category in categories %}
+            <option value="{{ category.id }}">{{ category.title }}</option>
+        {% endfor %}
+    {% endif %}
+</select>

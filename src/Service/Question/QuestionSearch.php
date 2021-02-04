@@ -71,7 +71,7 @@ class QuestionSearch
             $condition['query']['bool']['minimum_should_match'] = 1;
             $condition['query']['bool']['should'] = [
                 'multi_match' => [
-                    'query' => $form->query,
+                    'query' => $this->prepareMatchString($form->query),
                     'fields' => ['title^5', 'text'],
                     'operator' => 'and',
                     'minimum_should_match' => '70%',
@@ -90,5 +90,24 @@ class QuestionSearch
         }
 
         return $this->client->getIndex(Question::$indexName)->search($query);
+    }
+
+    /**
+     * @param string $query Исходный поисковой запрос
+     * @return string Подготовленый поисковой запрос
+     * @throws ServiceException
+     */
+    private function prepareMatchString(string $query): string
+    {
+        $query = trim(strip_tags($query));
+
+        // вырезает из запроса непечатные символы
+        $query = preg_replace("/[\\x00-\\x09\\x0B-\\x1F]/", "", $query);
+
+        if (mb_strlen($query) < 3 || mb_strlen($query) > 150) {
+            throw new ServiceException("Поисковой запрос должен содержать от 3 до 150 символов");
+        }
+
+        return $query;
     }
 }

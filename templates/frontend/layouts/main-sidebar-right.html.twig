@@ -5,28 +5,14 @@
     <div class="row">
         <div class="col-lg-8 col-md-12 sm-margin-50px-bottom">
             {% block flashmessages %}{% endblock %}
-
-            <div class="input-group mb-3" style="margin-bottom: 15px;">
-                <input type="search" class="form-control" id="search" placeholder="Поиск по вопросам">
-                <select name="categoryId" class="form-control">
-                    <option value="">-- Все категории --</option>
-                    <option value="1">Математика</option>
-                    <option value="2">Русский язык</option>
-                    <option value="3">Литература</option>
-                </select>
-
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="submit">Найти</button>
-                </div>
-            </div>
-
+            {% include 'frontend/components/search-form.html.twig' %}
             {% block content %}{% endblock %}
         </div>
 
         <div class="col-lg-4 col-md-12">
             <div class="side-bar">
                 {% block sidebar %}
-                    {{ render_esi(controller('App\\Controller\\Frontend\\QuestionController::categoriesWidget')) }}
+                    {{ render_esi(controller('App\\Controller\\Frontend\\QuestionController::categoriesWidget', {'view': 'categories-sidebar'})) }}
                 {% endblock %}
             </div>
         </div>

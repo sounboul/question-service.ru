@@ -19,6 +19,16 @@ abstract class AppController extends AbstractController
     }
 
     /**
+     * @param bool $layout Включить layout в ответ?
+     * @param \Exception $e Exception
+     * @return Response Рендеринг страницы с ошибкой
+     */
+    protected function renderError(bool $layout, \Exception $e): Response
+    {
+        return $this->render(($layout ? 'site' : 'components').'/error-message.html.twig', compact('e'));
+    }
+
+    /**
      * Редирект в то место, где можно показать Flash сообщения.
      * Для авторизованных пользователей это будет личный кабинет.
      * Для анонимных пользователей это будет форма авторизации.

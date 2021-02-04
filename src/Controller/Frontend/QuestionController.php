@@ -6,10 +6,13 @@ use App\Entity\Question\Category;
 use App\Service\Question\CategoryService;
 use App\Service\Question\QuestionSearch;
 use App\Service\Question\QuestionService;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use App\Exception\ServiceException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -88,35 +91,112 @@ final class QuestionController extends AppController
             $form->categoryId = $category->getId();
         }
 
-        $search = $this->questionSearch->simple($form);
-        $data = [
-            'page' => $form->page,
-            'category' => $category,
+        try {
+            $search = $this->questionSearch->simple($form);
+            $data = [
+                'page' => $form->page,
+                'category' => $category,
 
-            'total' => $search->getTotalHits(),
-            'items' => $search->getResults(),
+                'total' => $search->getTotalHits(),
+                'items' => $search->getResults(),
 
-            'nextPage' => null,
-        ];
+                'nextPage' => null,
+            ];
 
-        if ($data['total'] > $form->page * $form->pageSize) {
-            $data['nextPage'] = $this->generateUrl(
-                !empty($category_slug) ? 'frontend_question_category' : 'frontend_question_index',
-                [
-                    'page' => $form->page + 1,
-                    'category_slug' => $category_slug,
-                ],
-            );
+            if ($data['total'] > $form->page * $form->pageSize) {
+                $data['nextPage'] = $this->generateUrl(
+                    !empty($category_slug) ? 'frontend_question_category' : 'frontend_question_index',
+                    [
+                        'page' => $form->page + 1,
+                        'category_slug' => $category_slug,
+                    ],
+                );
+            }
+
+            if ($form->page == 1) {
+                if (!empty($category)) {
+                    return $this->render('question/category.html.twig', $data);
+                } else {
+                    return $this->render('question/index.html.twig', $data);
+                }
+            } else {
+                return $this->render('components/questions-cards.html.twig', $data);
+            }
+        } catch (ServiceException $e) {
+            return $this->renderError($form->page == 1, $e);
+        }
+    }
+
+    /**
+     * Поиск вопросов с фильтрацией по категориям
+     *
+     * @Route("/search/", methods="GET", name="search")
+     *
+     * @param RateLimiterFactory $questionSearchLimiter
+     * @param Request $request
+     * @return Response
+     */
+    public function search(
+        RateLimiterFactory $questionSearchLimiter,
+        Request $request
+    ): Response
+    {
+        // Rate Limiter (на основе IP адреса)
+        $limiter = $questionSearchLimiter->create($request->getClientIp());
+        if (false === $limiter->consume()->isAccepted()) {
+            throw new TooManyRequestsHttpException();
         }
 
-        if ($form->page == 1) {
-            if (!empty($category)) {
-                return $this->render('question/category.html.twig', $data);
-            } else {
-                return $this->render('question/index.html.twig', $data);
+        // Обработка поисковой формы
+        $form = new SimpleSearchForm();
+        $form->page = $request->get('page', 1);
+        $form->query = $request->get('query');
+        $form->categoryId = (int) $request->get('categoryId');
+
+        try {
+            $form->query = trim(strip_tags($form->query));
+            if (empty($form->query)) {
+                throw new ServiceException("Задан пустой поисковой запрос");
             }
-        } else {
-            return $this->render('components/questions-cards.html.twig', $data);
+
+            if (!empty($form->categoryId)) {
+                $category = $this->categoryService->getById($form->categoryId);
+                if (!$category->isActive()) {
+                    throw new ServiceException("Неверно указана категория");
+                }
+            }
+
+            $search = $this->questionSearch->simple($form);
+            $data = [
+                'page' => $form->page,
+
+                'query' => $form->query,
+                'category' => $category ?? null,
+
+                'total' => $search->getTotalHits(),
+                'items' => $search->getResults(),
+
+                'nextPage' => null,
+            ];
+
+            if ($data['total'] > $form->page * $form->pageSize) {
+                $data['nextPage'] = $this->generateUrl(
+                    'frontend_question_search',
+                    [
+                        'page' => $form->page + 1,
+                        'query' => $form->query,
+                        'categoryId' => $form->categoryId,
+                    ],
+                );
+            }
+
+            if ($form->page == 1) {
+                return $this->render('question/search.html.twig', $data);
+            } else {
+                return $this->render('components/questions-cards.html.twig', $data);
+            }
+        } catch (ServiceException $e) {
+            return $this->renderError($form->page == 1, $e);
         }
     }
 
@@ -138,21 +218,26 @@ final class QuestionController extends AppController
     }
 
     /**
-     * Виджет списка категория в sidebar
+     * Виджет списка категорий с различными представлениями
      *
-     * @param Request $request
+     * @param string $view Представление виджета
      * @return Response
      */
-    public function categoriesWidget(Request $request): Response
+    public function categoriesWidget(string $view): Response
     {
+        if (!in_array($view, ['categories-sidebar', 'categories-search-form'])) {
+            throw new BadRequestException("Некорректный шаблон виджета '{$view}'");
+        }
+
         $categories = array_map(function (Category $category) {
             return [
+                'id' => $category->getId(),
                 'title' => $category->getTitle(),
                 'href' => $category->getHref(),
             ];
         }, $this->categoryService->getActiveCategories());
 
-        $response = $this->render('widgets/categories.html.twig', compact('categories'));
+        $response = $this->render('widgets/'.$view.'.html.twig', compact('categories'));
         $response->setMaxAge(3600);
 
         return $response;

@@ -1,0 +1,7 @@
+{% extends 'frontend/layouts/main-sidebar-right.html.twig' %}
+
+{% block title %}Поиск по '{{ query }}' - Вопросы и ответы{% endblock %}
+
+{% block content %}
+    {% include "frontend/components/questions-listing.html.twig" %}
+{% endblock %}

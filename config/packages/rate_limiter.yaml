@@ -1,0 +1,7 @@
+framework:
+  rate_limiter:
+    # Поиск вопросов (не более 100 запросов за 15 минут)
+    question_search:
+      policy: 'fixed_window'
+      limit: 100
+      interval: '15 minutes'

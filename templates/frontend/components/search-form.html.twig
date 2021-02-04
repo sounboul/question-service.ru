@@ -1,0 +1,15 @@
+{% set query = '/search/' in app.request.pathInfo ? app.request.get('query') : '' %}
+
+<div class="search-form" style="margin-bottom: 15px;">
+    <form method="get" action="/search/">
+        <div class="input-group mb-3">
+            <input type="search" class="form-control" id="search" name="query" value="{{ query }}" placeholder="Поиск по вопросам">
+
+            {{ render_esi(controller('App\\Controller\\Frontend\\QuestionController::categoriesWidget', {'view': 'categories-search-form'})) }}
+
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="submit">Найти</button>
+            </div>
+        </div>
+    </form>
+</div>
