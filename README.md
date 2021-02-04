@@ -42,6 +42,7 @@ pg_restore -h 127.0.0.1 -U db_username -F p -d db_name ./docs/postgresql/dump.sq
 
 ```text
 composer install --no-dev --optimize-autoloader
+composer dump-autoload --optimize --no-dev --classmap-authoritative
 npm install
 yarn install
 ```
