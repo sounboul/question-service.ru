@@ -3,6 +3,7 @@ namespace App\Form\Question;
 
 use App\Dto\Question\CategoryUpdateForm;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -24,6 +25,13 @@ class CategoryUpdateFormType extends AbstractType
             ->add('slug', TextType::class, [
                 'label' => 'Slug',
                 'required' => false,
+            ])
+            ->add('description', TextareaType::class, [
+                'label' => 'Описание',
+                'required' => false,
+                'attr' => [
+                    'rows' => 10,
+                ],
             ])
         ;
     }

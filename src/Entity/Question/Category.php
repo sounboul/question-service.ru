@@ -92,6 +92,14 @@ class Category
 
     /**
      * @ORM\Column(
+     *     type="text",
+     *     nullable=true
+     * )
+     */
+    private ?string $description = null;
+
+    /**
+     * @ORM\Column(
      *     type="integer",
      *     nullable=false
      * )
@@ -212,6 +220,27 @@ class Category
     public function setHref(string $href): self
     {
         $this->href = $href;
+
+        return $this;
+    }
+
+    /**
+     * @return string Описание категории
+     */
+    public function getDescription(): string
+    {
+        return (string) $this->description;
+    }
+
+    /**
+     * Установить описание категории
+     *
+     * @param string|null $description
+     * @return self
+     */
+    public function setDescription(?string $description): self
+    {
+        $this->description = trim(strip_tags($description));
 
         return $this;
     }

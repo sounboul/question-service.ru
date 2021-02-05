@@ -144,6 +144,7 @@ class CategoryController extends AppController
         $formData->id = $id;
         $formData->title = $category->getTitle();
         $formData->slug = $category->getSlug();
+        $formData->description = $category->getDescription();
 
         $form = $this->createForm(CategoryUpdateFormType::class, $formData);
         $form->handleRequest($request);

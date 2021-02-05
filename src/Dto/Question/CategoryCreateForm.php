@@ -33,4 +33,14 @@ class CategoryCreateForm
      * )
      */
     public ?string $slug;
+
+    /**
+     * @var string|null Описание категории
+     *
+     * @Assert\Type("string")
+     * @Assert\Length(
+     *     max=3000
+     * )
+     */
+    public ?string $description;
 }

@@ -131,6 +131,7 @@ final class CategoryService
         $category->setStatus(Category::STATUS_ACTIVE);
         $category->setTitle($form->title);
         $category->setSlug($form->slug);
+        $category->setDescription($form->description);
 
         return $this->save($category);
     }
@@ -161,6 +162,7 @@ final class CategoryService
 
         $category->setTitle($form->title);
         $category->setSlug($form->slug);
+        $category->setDescription($form->description);
 
         return $this->save($category);
     }

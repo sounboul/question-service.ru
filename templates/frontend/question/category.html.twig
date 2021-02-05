@@ -3,5 +3,17 @@
 {% block title %}{{ category.title }} - Вопросы и ответы{% endblock %}
 
 {% block content %}
+    <h1>{{ category.title }}</h1>
+
     {% include "frontend/components/questions-listing.html.twig" %}
+
+    {% if category.description %}
+        <div class="card" style="margin-top: 20px;">
+            <div class="card-body">
+                <p class="card-text">
+                    {{ category.description }}
+                </p>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}
