@@ -15,11 +15,11 @@ find $BACKUP_PATH\/htdocs/ -mtime +30 -print -mindepth 1 -delete >/dev/null 2>&1
 find $BACKUP_PATH\/uploads/ -mtime +15 -print -mindepth 1 -delete >/dev/null 2>&1
 
 echo '[BACKUP HTDOCS]'
-cd /var/www/fastuser/data/www/question-service.ru/
+cd /var/www/fastuser/data/www/question-service.ru/app/
 tar cpzf $BACKUP_HTDOCS_DIR\-htdocs.tgz --exclude=./var --exclude=./uploads -- . >/dev/null 2>&1
 
 echo '[BACKUP MEDIA]'
-cd /var/www/fastuser/data/www/question-service.ru/public/uploads
+cd /var/www/fastuser/data/www/question-service.ru/app/public/uploads
 tar cpzf $BACKUP_UPLOADS_DIR\-.tgz -- . >/dev/null 2>&1
 
 echo '[BACKUP DATABASE]'

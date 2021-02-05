@@ -6,6 +6,8 @@ PROJECT="/var/www/fastuser/data/www/question-service.ru/"
 cd $PROJECT;
 git pull --ff-only
 
+cd $PROJECT/app;
+
 # database migration
 bin/console doctrine:migrations:migrate
 
