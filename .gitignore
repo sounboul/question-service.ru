@@ -1,0 +1,5 @@
+/.httpauth
+/.env
+/uploads
+/database
+/elasticsearch

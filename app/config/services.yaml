@@ -39,12 +39,14 @@ services:
 
     # Менеджер загрузки файлов
     App\Service\FileManager\FileManagerService:
+        lazy: true
         arguments:
             $targetPath: "%app.uploadPath%"
             $folderPath: "/files"
 
     # Менеджер загрузки изображений
     App\Service\FileManager\ImageManagerService:
+        lazy: true
         arguments:
             $targetPath: "%app.uploadPath%"
             $folderPath: "/images"

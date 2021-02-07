@@ -1,8 +1,8 @@
-/.httpauth
 /public/uploads/
 
 ###> symfony/framework-bundle ###
 /.env.local
+/.env_local
 /.env.local.php
 /.env.*.local
 /config/secrets/prod/prod.decrypt.private.php

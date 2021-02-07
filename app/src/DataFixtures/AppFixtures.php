@@ -161,7 +161,7 @@ class AppFixtures extends BaseFixture
             $formData->userId = $this->users[array_rand($this->users)];
             $formData->categoryId = $this->categories[array_rand($this->categories)];
             $formData->title = rtrim($this->faker->text(100), '.').'?';
-            $formData->text = $i % 2 == 0 ? $this->faker->realText(mt_rand(200, 1000)) : '';
+            $formData->text = $i % 2 == 0 ? $this->getRandomText(mt_rand(200, 1000)) : '';
             $formData->createdByIp = $this->faker->ipv4;
             $questionId = $this->questionService->create($formData)->getId();
 
@@ -171,10 +171,23 @@ class AppFixtures extends BaseFixture
                 $answer = new AnswerCreateForm();
                 $answer->questionId = $questionId;
                 $answer->userId = $this->users[array_rand($this->users)];
-                $answer->text = $this->faker->realText(mt_rand(100, 600));
+                $answer->text = $this->getRandomText(mt_rand(300, 800));
                 $answer->createdByIp = $this->faker->ipv4;
                 $this->answerService->create($answer);
             }
         }
+    }
+
+    /**
+     * @param int $length
+     * @return string Случайный текст
+     */
+    private function getRandomText(int $length = 500): string
+    {
+        do {
+            $text = $this->faker->realText(5000);
+        } while(mb_strlen($text) < $length);
+
+        return mb_substr($text, 0, $length);
     }
 }
