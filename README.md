@@ -2,11 +2,13 @@
 
 Простой сервис вопросов-ответов. Разрабатывается в целях изучения фреймворка Symfony.
 
+Demo: `https://question-service.ru/`
+
 ## Используемые технологии в проекте
 
 * Язык разработки: `PHP 7.4`
 * Веб сервер: `nginx + php-fpm`
-* Кэширующий прокси: `Varnish 6`
+* Кэширующий прокси: `Varnish 6.5`
 * Фреймворк: `Symfony 5.2`
 * База данных: `PostgreSQL 11`
 * Под кэширование: `Redis 5`
@@ -15,6 +17,12 @@
 * Управление процессами воркеров: `supervisor`
 * Оптимизация загружаемых изображений: `jpegoptim + optipng`
 * Сборка ресурсов фронта: `yarn`
+
+Процесс обработки клиентского запроса:
+
+`Front Proxy (nginx)` -> `Cache Proxy (varnish)` -> `Back Proxy (nginx)` -> `PHP-FPM`
+
+`Front Proxy` не входит в состав docker-compose образа, но пример простой конфигурации представлен в файле `docker/nginx/nginx-proxy.conf`.
 
 ## Установка через docker
 
@@ -42,7 +50,7 @@ cp app/.env app/.env.local
 docker-compose up --build
 ```
 
-* Собрать вендеры:
+* Собрать вендоры:
 ```bash
 sh scripts/vendors.sh
 ```

@@ -1,49 +1,17 @@
 {
   "entrypoints": {
-    "js/jquery": {
+    "js/app": {
       "js": [
         "/assets/build/runtime.41e81ebd.js",
-        "/assets/build/js/jquery.9821a92c.js"
+        "/assets/build/js/app.aa97849d.js"
       ]
     },
-    "js/bootstrap": {
-      "js": [
-        "/assets/build/runtime.41e81ebd.js",
-        "/assets/build/js/bootstrap.2d26a38c.js"
-      ]
-    },
-    "js/nav-menu": {
-      "js": [
-        "/assets/build/runtime.41e81ebd.js",
-        "/assets/build/js/nav-menu.de0b5dd8.js"
-      ]
-    },
-    "js/recaptcha": {
-      "js": [
-        "/assets/build/runtime.41e81ebd.js",
-        "/assets/build/js/recaptcha.a0ff73bd.js"
-      ]
-    },
-    "js/main": {
-      "js": [
-        "/assets/build/runtime.41e81ebd.js",
-        "/assets/build/js/main.cecd6766.js"
-      ]
-    },
-    "css/plugins": {
+    "css/app": {
       "js": [
         "/assets/build/runtime.41e81ebd.js"
       ],
       "css": [
-        "/assets/build/css/plugins.86d328fa.css"
-      ]
-    },
-    "css/styles": {
-      "js": [
-        "/assets/build/runtime.41e81ebd.js"
-      ],
-      "css": [
-        "/assets/build/css/styles.1cd66194.css"
+        "/assets/build/css/app.a5055175.css"
       ]
     }
   }

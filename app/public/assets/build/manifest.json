@@ -1,11 +1,6 @@
 {
-  "assets/build/css/plugins.css": "/assets/build/css/plugins.86d328fa.css",
-  "assets/build/css/styles.css": "/assets/build/css/styles.1cd66194.css",
-  "assets/build/js/bootstrap.js": "/assets/build/js/bootstrap.2d26a38c.js",
-  "assets/build/js/jquery.js": "/assets/build/js/jquery.9821a92c.js",
-  "assets/build/js/main.js": "/assets/build/js/main.cecd6766.js",
-  "assets/build/js/nav-menu.js": "/assets/build/js/nav-menu.de0b5dd8.js",
-  "assets/build/js/recaptcha.js": "/assets/build/js/recaptcha.a0ff73bd.js",
+  "assets/build/css/app.css": "/assets/build/css/app.a5055175.css",
+  "assets/build/js/app.js": "/assets/build/js/app.aa97849d.js",
   "assets/build/runtime.js": "/assets/build/runtime.41e81ebd.js",
   "assets/build/fonts/fa-brands-400.woff2": "/assets/build/fonts/fa-brands-400.31015e86.woff2",
   "assets/build/fonts/fa-brands-400.ttf": "/assets/build/fonts/fa-brands-400.5818bbd0.ttf",

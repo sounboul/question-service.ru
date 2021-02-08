@@ -13,8 +13,11 @@
     <link rel="shortcut icon" href="/assets/images/favicon.png" />
 
     {% block stylesheets %}
-        {{ encore_entry_link_tags('css/plugins', null, 'frontend') }}
-        {{ encore_entry_link_tags('css/styles', null, 'frontend') }}
+        <link rel="preload" href="{{ asset('assets/build/fonts/fa-regular-400.woff2', 'frontend') }}" as="font" type="font/woff2" crossorigin>
+        <link rel="preload" href="{{ asset('assets/build/fonts/fa-solid-900.woff2', 'frontend') }}" as="font" type="font/woff2" crossorigin>
+        <link rel="preload" href="{{ asset('assets/build/fonts/fa-brands-400.woff2', 'frontend') }}" as="font" type="font/woff2" crossorigin>
+
+        {{ encore_entry_link_tags('css/app', null, 'frontend') }}
     {% endblock %}
 </head>
 <body>
@@ -138,12 +141,7 @@
 </div>
 
 {% block javascripts %}
-    {{ encore_entry_script_tags('js/jquery', null, 'frontend') }}
-    {{ encore_entry_script_tags('js/bootstrap', null, 'frontend') }}
-    {{ encore_entry_script_tags('js/nav-menu', null, 'frontend') }}
-    {{ encore_entry_script_tags('js/recaptcha', null, 'frontend') }}
-    {{ encore_entry_script_tags('js/main', null, 'frontend') }}
-
+    {{ encore_entry_script_tags('js/app', null, 'frontend') }}
     <script type="text/javascript" src="https://www.google.com/recaptcha/api.js?onload=onGoogleReCaptchaApiLoad&render=explicit&hl=ru" async defer></script>
 {% endblock %}
 </body>
