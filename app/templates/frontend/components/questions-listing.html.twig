@@ -1,14 +1,18 @@
 {# Листинг вопросов #}
-{% if items|length > 0 %}
-    <div class="cards list-grid">
-        {% include "frontend/components/questions-cards.html.twig" %}
-    </div>
-{% else %}
-    <div class="cards">
-        <div class="card-body">
-            <p class="card-text">
-                <b>Нет результатов по вашему запросу.</b>
-            </p>
+{% if page == 1 %}
+    {% if items|length > 0 %}
+        <div class="cards list-grid">
+            {% include "frontend/components/questions-cards.html.twig" %}
         </div>
-    </div>
+    {% else %}
+        <div class="cards">
+            <div class="card-body">
+                <p class="card-text">
+                    <b>Нет результатов по вашему запросу.</b>
+                </p>
+            </div>
+        </div>
+    {% endif %}
+{% else %}
+    {% include "frontend/components/questions-cards.html.twig" %}
 {% endif %}

@@ -1,0 +1,5 @@
+{{ render_esi(controller('App\\Controller\\Frontend\\QuestionController::questionsListingWidget', {
+    'view': 'questions-listing-index',
+    'categoryId': category ? category.id : 0,
+    'page': page
+})) }}

@@ -1,0 +1,9 @@
+{% set nextPage = null %}
+{% if total > page * pageSize %}
+    {% set nextPage = path(category ? 'frontend_question_category' : 'frontend_question_index', {
+        'page': page+1,
+        'category_slug': category ? category.slug : ''
+    }) %}
+{% endif %}
+
+{% include "frontend/components/questions-listing.html.twig" %}

@@ -5,7 +5,7 @@
 {% block content %}
     <h1>{{ category.title }}</h1>
 
-    {% include "frontend/components/questions-listing.html.twig" %}
+    {% include 'frontend/question/_index_listing.html.twig' %}
 
     {% if category.description %}
         <div class="card" style="margin-top: 20px;">

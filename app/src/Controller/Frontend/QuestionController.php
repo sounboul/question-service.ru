@@ -86,6 +86,7 @@ final class QuestionController extends AppController
         $form = $this->createForm(QuestionCreateFormType::class, null, [
             'categoryService' => $this->categoryService,
             'recaptcha' => true,
+            'csrf_protection' => false // для кэширования
         ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -147,45 +148,19 @@ final class QuestionController extends AppController
             $category = null;
         }
 
-        $form = new SimpleSearchForm();
-        $form->page = $request->get('page', 1);
-        if (!empty($category)) {
-            $form->categoryId = $category->getId();
-        }
+        $data = [
+            'category' => $category,
+            'page' => max($request->get('page', 1), 1),
+        ];
 
-        try {
-            $search = $this->questionSearch->simple($form);
-            $data = [
-                'page' => $form->page,
-                'category' => $category,
-
-                'total' => $search->getTotalHits(),
-                'items' => $search->getResults(),
-
-                'nextPage' => null,
-            ];
-
-            if ($data['total'] > $form->page * $form->pageSize) {
-                $data['nextPage'] = $this->generateUrl(
-                    !empty($category_slug) ? 'frontend_question_category' : 'frontend_question_index',
-                    [
-                        'page' => $form->page + 1,
-                        'category_slug' => $category_slug,
-                    ],
-                );
-            }
-
-            if ($form->page == 1) {
-                if (!empty($category)) {
-                    return $this->render('question/category.html.twig', $data);
-                } else {
-                    return $this->render('question/index.html.twig', $data);
-                }
+        if ($data['page'] > 1) {
+            return $this->cachedByTag($this->render('question/_index_listing.html.twig', $data), 'questions:listing');
+        } else {
+            if (!empty($category)) {
+                return $this->cachedByTag($this->render('question/category.html.twig', $data), 'categories:'.$category->getId());
             } else {
-                return $this->render('components/questions-cards.html.twig', $data);
+                return $this->cachedByTag($this->render('question/index.html.twig', $data), 'questions:listing');
             }
-        } catch (ServiceException $e) {
-            return $this->renderError($form->page == 1, $e);
         }
     }
 
@@ -255,7 +230,7 @@ final class QuestionController extends AppController
             if ($form->page == 1) {
                 return $this->render('question/search.html.twig', $data);
             } else {
-                return $this->render('components/questions-cards.html.twig', $data);
+                return $this->render('components/questions-listing.html.twig', $data);
             }
         } catch (ServiceException $e) {
             return $this->renderError($form->page == 1, $e);
@@ -314,7 +289,10 @@ final class QuestionController extends AppController
         }
 
         // добавление нового ответа к вопросу
-        $createForm = $this->createForm(AnswerCreateFormType::class, null, ['recaptcha' => true]);
+        $createForm = $this->createForm(AnswerCreateFormType::class, null, [
+            'recaptcha' => true,
+            'csrf_protection' => false, // для кэширования
+        ]);
         $createForm->handleRequest($request);
         if ($createForm->isSubmitted() && $createForm->isValid()) {
             // Rate Limiter (на основе IP адреса)
@@ -343,7 +321,7 @@ final class QuestionController extends AppController
         $formData->questionId = $question->getId();
         $answers = $this->answerService->listing($formData, $page, $pageSize);
 
-        return $this->render('question/view.html.twig', [
+        $response = $this->render('question/view.html.twig', [
             'createForm' => $createForm->createView(),
             'question' => $question,
             'answers' => $answers,
@@ -352,6 +330,8 @@ final class QuestionController extends AppController
                 'slug' => $slug,
             ],
         ]);
+
+        return $this->cachedByTag($response, 'questions:'.$id);
     }
 
     /**
@@ -375,8 +355,59 @@ final class QuestionController extends AppController
         }, $this->categoryService->getActiveCategories());
 
         $response = $this->render('widgets/'.$view.'.html.twig', compact('categories'));
-        $response->setMaxAge(3600);
+        return $this->cachedByTag($response, 'categories:listing');
+    }
 
-        return $response;
+    /**
+     * Виджет листинга вопросов с различными представлениями
+     *
+     * @param string $view Представление виджета
+     * @param int $categoryId Идентификатор категории
+     * @param int $page Номер страницы
+     * @return Response
+     */
+    public function questionsListingWidget(
+        string $view,
+        int $categoryId,
+        int $page
+    )
+    {
+        if (!in_array($view, ['questions-listing-index'])) {
+            throw new BadRequestException("Некорректный шаблон виджета '{$view}'");
+        }
+
+        if (!empty($categoryId)) {
+            try {
+                $category = $this->categoryService->getById($categoryId);
+                if ($category->isDeleted()) {
+                    throw new HttpException(410, "Категория была удалена");
+                }
+            } catch (ServiceException $e) {
+                throw new NotFoundHttpException("Категория не найдена");
+            }
+        } else {
+            $category = null;
+        }
+
+        $form = new SimpleSearchForm();
+        $form->page = $page;
+        if (!empty($category)) {
+            $form->categoryId = $category->getId();
+        }
+
+        try {
+            $search = $this->questionSearch->simple($form);
+            $data = [
+                'page' => $form->page,
+                'pageSize' => $form->pageSize,
+                'category' => $category,
+                'total' => $search->getTotalHits(),
+                'items' => $search->getResults(),
+            ];
+
+            return $this->cachedByTag($this->render('widgets/'.$view.'.html.twig', $data), 'questions:listing');
+        } catch (ServiceException $e) {
+            return $this->renderError($form->page == 1, $e);
+        }
     }
 }

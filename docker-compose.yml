@@ -38,7 +38,7 @@ services:
       - database
     volumes:
       - ./app/:/var/www/
-      - ./docker/php-fpm/99-perfomance.ini:/usr/local/etc/php/conf.d/99-perfomance.ini
+      - ./docker/php-fpm/zz-perfomance.ini:/usr/local/etc/php/conf.d/zz-perfomance.ini
 
   ###########
   #  NGINX  #

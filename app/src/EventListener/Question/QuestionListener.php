@@ -3,6 +3,7 @@ namespace App\EventListener\Question;
 
 use App\Entity\Question\Question;
 use App\Elasticsearch\Model\Question as ElasticQuestion;
+use App\Service\PurgeVarnishCache;
 use App\Service\Question\CategoryService;
 use App\Service\Question\QuestionService;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
@@ -32,6 +33,11 @@ class QuestionListener
     private UrlGeneratorInterface $urlGenerator;
 
     /**
+     * @var PurgeVarnishCache Purse Varnish Cache
+     */
+    private PurgeVarnishCache $purgeVarnishCache;
+
+    /**
      * @var MessageBusInterface Bus
      */
     private MessageBusInterface $bus;
@@ -42,18 +48,21 @@ class QuestionListener
      * @param CategoryService $categoryService Category Service
      * @param QuestionService $questionService Question Service
      * @param UrlGeneratorInterface $urlGenerator Url Generator
+     * @param PurgeVarnishCache $purgeVarnishCache Purse Varnish Cache
      * @param MessageBusInterface $bus Bus
      */
     public function __construct(
         CategoryService $categoryService,
         QuestionService $questionService,
         UrlGeneratorInterface $urlGenerator,
+        PurgeVarnishCache $purgeVarnishCache,
         MessageBusInterface $bus
     )
     {
         $this->categoryService = $categoryService;
         $this->questionService = $questionService;
         $this->urlGenerator = $urlGenerator;
+        $this->purgeVarnishCache = $purgeVarnishCache;
         $this->bus = $bus;
     }
 
@@ -79,6 +88,9 @@ class QuestionListener
 
         // обновить поисковой индекс
         $this->searchIndexUpdate($question);
+
+        // Инвалидация кэша
+        $this->invalidateVarnishCache($question);
     }
 
     /**
@@ -110,6 +122,9 @@ class QuestionListener
 
         // обновить поисковой индекс
         $this->searchIndexUpdate($question);
+
+        // Инвалидация кэша
+        $this->invalidateVarnishCache($question);
     }
 
     /**
@@ -150,5 +165,16 @@ class QuestionListener
         }
 
         $this->bus->dispatch($request);
+    }
+
+    /**
+     * Инвалидация Varnish кэша
+     *
+     * @param Question $question
+     * @return void
+     */
+    private function invalidateVarnishCache(Question $question)
+    {
+        $this->purgeVarnishCache->invalidateTags(['questions' => [$question->getId(), 'listing']]);
     }
 }

@@ -1,6 +1,7 @@
 <?php
 namespace App\Controller\Frontend;
 
+use Symfony\Component\HttpKernel\EventListener\AbstractSessionListener;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -35,12 +36,36 @@ abstract class AppController extends AbstractController
      *
      * @return Response
      */
-    protected function redirectToAuthbox() : Response
+    protected function redirectToAuthbox(): Response
     {
         if ($this->getUser()) {
             return $this->redirectToRoute('frontend_profile_index');
         } else {
             return $this->redirectToRoute('frontend_login');
         }
+    }
+
+    /**
+     * Отправка запросов на кэширование страницы по тегам
+     *
+     * @param Response $response Объект ответа
+     * @param string $tagName Тег кэша
+     * @param int $cacheTime Время жизни кэша в секундах
+     * @return Response $response Объект ответа
+     */
+    protected function cachedByTag(
+        Response $response,
+        string $tagName,
+        int $cacheTime = 3600
+    ): Response
+    {
+        if (count(explode(':', $tagName)) != 2) {
+            throw new \InvalidArgumentException("Некорректный формат ключа кеша. Допускается: namespace:value");
+        }
+
+        $response->setSharedMaxAge($cacheTime);
+        $response->headers->set(AbstractSessionListener::NO_AUTO_CACHE_CONTROL_HEADER, 'true');
+        $response->headers->set('X-Cache-Tags', $tagName);
+        return $response;
     }
 }

@@ -7,12 +7,44 @@ backend default {
     .port = "80";
 }
 
+# Кому разрешено отправлять BAN запросы
+acl purge {
+    "127.0.0.1";
+    "php-fpm";
+}
+
 # Happens before we check if we have this in cache already.
 # Typically you clean up the request here, removing cookies you don't need, rewriting the request, etc.
 sub vcl_recv {
+    # Инвалидация кэша
+    if (req.method == "BAN") {
+        if (!client.ip ~ purge) {
+            return (synth(405, "Not allowed."));
+        }
+
+        # по тегам
+        if (req.http.X-Cache-Tags) {
+            ban("obj.http.X-Cache-Tags ~ " + req.http.X-Cache-Tags);
+        } else {
+            return (synth(403, "X-Cache-Tags header missing."));
+        }
+
+        return (synth(200, "Ban added."));
+    }
+
     # Статические файлы будут обработа отдельно
     if (req.url ~ "/assets") {
         return (hash);
+    }
+
+    # Исключение из кэша страниц админки, профиля, системы авторизации, поиска
+    if (req.url ~ "^/backend/" || req.url ~ "^/profile/" || req.url ~ "^/user/" || req.url ~ "^/search/") {
+        return (pass);
+    }
+
+    # Фрагменты будут включены игнорируя все куки
+    if (req.url ~ "^/_fragment") {
+        unset req.http.Cookie;
     }
 
     # Для корректной генерации URL
@@ -43,7 +75,7 @@ sub vcl_recv {
 # Happens after we have read the response headers from the backend. # Here you clean the response headers, removing silly Set-Cookie
 # headers and other mistakes your backend does.
 sub vcl_backend_response {
-    # Если это статически е файлы, то указываем большой срок кэша и отдаем
+    # Если это статические файлы, то указываем большой срок кэша и отдаем
     if (bereq.url ~ "/assets") {
         unset beresp.http.set-cookie;
         set beresp.http.cache-control = "public, max-age=31536000";
@@ -51,22 +83,15 @@ sub vcl_backend_response {
         return (deliver);
     }
 
-    # Все страницы без кук автоматически кэшируются на минуту
-    if (beresp.status == 200) {
-        unset beresp.http.Cache-Control;
-        set beresp.http.Cache-Control = "public; max-age=60";
-        set beresp.ttl = 60s;
-    }
-
-    set beresp.http.Served-By = beresp.backend.name;
-    set beresp.http.V-Cache-TTL = beresp.ttl;
-    set beresp.http.V-Cache-Grace = beresp.grace;
-
     // Проверить подтверждение ESI и удалить заголовок Surrogate-Control
     if (beresp.http.Surrogate-Control ~ "ESI/1.0") {
         unset beresp.http.Surrogate-Control;
         set beresp.do_esi = true;
     }
+
+    # Set ban-lurker friendly custom headers.
+    set beresp.http.X-Url = bereq.url;
+    set beresp.http.X-Host = bereq.http.host;
 }
 
 # Happens when we have all the pieces we need, and are about to send
@@ -74,8 +99,18 @@ sub vcl_backend_response {
 sub vcl_deliver {
     # Информация о кэше в ответе пользователю
     if (obj.hits > 0) {
-        set resp.http.V-Cache = "HIT";
+        set resp.http.X-Varnish-Cache = "HIT";
     } else {
-        set resp.http.V-Cache = "MISS";
+        set resp.http.X-Varnish-Cache = "MISS";
+    }
+
+    # Remove ban-lurker friendly custom headers when delivering to client.
+    unset resp.http.X-Url;
+    unset resp.http.X-Host;
+    unset resp.http.X-Cache-Tags;
+
+    # Запрещаем кеширование на клиенте для динамических ресурсов.
+    if (resp.http.Content-Type ~ "text/html") {
+      set resp.http.Cache-Control = "private, no-cache";
     }
 }

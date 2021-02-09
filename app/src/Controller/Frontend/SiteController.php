@@ -16,7 +16,8 @@ final class SiteController extends AppController
      */
     public function about(): Response
     {
-        return $this->render('site/about.html.twig');
+        $response = $this->render('site/about.html.twig');
+        return $this->cachedByTag($response, 'page:about');
     }
 
     /**
@@ -26,7 +27,8 @@ final class SiteController extends AppController
      */
     public function contacts(): Response
     {
-        return $this->render('site/contacts.html.twig');
+        $response = $this->render('site/contacts.html.twig');
+        return $this->cachedByTag($response, 'page:contacts');
     }
 
     /**
@@ -36,7 +38,8 @@ final class SiteController extends AppController
      */
     public function rules(): Response
     {
-        return $this->render('site/rules.html.twig');
+        $response = $this->render('site/rules.html.twig');
+        return $this->cachedByTag($response, 'page:rules');
     }
 
     /**
@@ -46,6 +49,7 @@ final class SiteController extends AppController
      */
     public function advert(): Response
     {
-        return $this->render('site/advert.html.twig');
+        $response = $this->render('site/advert.html.twig');
+        return $this->cachedByTag($response, 'page:advert');
     }
 }

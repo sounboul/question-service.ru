@@ -2,6 +2,7 @@
 namespace App\EventListener\Question;
 
 use App\Entity\Question\Category;
+use App\Service\PurgeVarnishCache;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use \Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -16,15 +17,23 @@ class CategoryListener
     private UrlGeneratorInterface $urlGenerator;
 
     /**
+     * @var PurgeVarnishCache Purse Varnish Cache
+     */
+    private PurgeVarnishCache $purgeVarnishCache;
+
+    /**
      * Конструктор
      *
      * @param UrlGeneratorInterface $urlGenerator Url Generator
+     * @param PurgeVarnishCache $purgeVarnishCache Purse Varnish Cache
      */
     public function __construct(
-        UrlGeneratorInterface $urlGenerator
+        UrlGeneratorInterface $urlGenerator,
+        PurgeVarnishCache $purgeVarnishCache
     )
     {
         $this->urlGenerator = $urlGenerator;
+        $this->purgeVarnishCache = $purgeVarnishCache;
     }
 
     /**
@@ -42,6 +51,9 @@ class CategoryListener
         $em = $eventArgs->getObjectManager();
         $em->persist($category);
         $em->flush();
+
+        // Инвалидация кэша
+        $this->invalidateVarnishCache($category);
     }
 
     /**
@@ -59,11 +71,34 @@ class CategoryListener
     }
 
     /**
+     * Событие, которое вызвано после обновления категории
+     *
+     * @param Category $category
+     * @param LifecycleEventArgs $eventArgs
+     */
+    public function postUpdate(Category $category, LifecycleEventArgs $eventArgs)
+    {
+        // Инвалидация кэша
+        $this->invalidateVarnishCache($category);
+    }
+
+    /**
      * @param string $slug Slug категории
      * @return string Ссылка на категорию
      */
     private function generateHrefCategory(string $slug): string
     {
         return $this->urlGenerator->generate('frontend_question_category', ['category_slug' => $slug]);
+    }
+
+    /**
+     * Инвалидация Varnish кэша
+     *
+     * @param Category $category
+     * @return void
+     */
+    private function invalidateVarnishCache(Category $category)
+    {
+        $this->purgeVarnishCache->invalidateTags(['categories' => [$category->getId(), 'listing']]);
     }
 }
