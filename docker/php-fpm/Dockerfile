@@ -10,8 +10,6 @@ RUN apk add --no-cache shadow
 RUN usermod -u ${USER_UID} www-data && groupmod -g ${USER_GID} www-data
 
 COPY www.conf /usr/local/etc/php-fpm.d/www.conf
-COPY wait-for-it.sh /usr/bin/wait-for-it
-RUN chmod +x /usr/bin/wait-for-it
 
 # Установка пакетов
 COPY --from=composer /usr/bin/composer /usr/bin/composer

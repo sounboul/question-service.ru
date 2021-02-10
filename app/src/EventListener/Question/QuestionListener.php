@@ -4,6 +4,7 @@ namespace App\EventListener\Question;
 use App\Entity\Question\Question;
 use App\Elasticsearch\Model\Question as ElasticQuestion;
 use App\Service\PurgeVarnishCache;
+use App\Exception\ServiceException;
 use App\Service\Question\CategoryService;
 use App\Service\Question\QuestionService;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
@@ -71,7 +72,7 @@ class QuestionListener
      *
      * @param Question $question
      * @param LifecycleEventArgs $eventArgs
-     * @throws \App\Exception\ServiceException
+     * @throws ServiceException
      */
     public function postPersist(Question $question, LifecycleEventArgs $eventArgs)
     {
@@ -112,7 +113,7 @@ class QuestionListener
      *
      * @param Question $question
      * @param LifecycleEventArgs $eventArgs
-     * @throws \App\Exception\ServiceException
+     * @throws ServiceException
      */
     public function postUpdate(Question $question, LifecycleEventArgs $eventArgs)
     {
@@ -132,7 +133,7 @@ class QuestionListener
      *
      * @param int $categoryId Идентификатор категории
      * @return void
-     * @throws \App\Exception\ServiceException
+     * @throws ServiceException
      */
     private function recountQuestionsInCategory(int $categoryId)
     {

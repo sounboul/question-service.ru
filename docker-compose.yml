@@ -36,6 +36,8 @@ services:
         - USER_GID
     depends_on:
       - database
+      - redis
+      - elasticsearch
     volumes:
       - ./app/:/var/www/
       - ./docker/php-fpm/zz-perfomance.ini:/usr/local/etc/php/conf.d/zz-perfomance.ini
